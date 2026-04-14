@@ -212,7 +212,7 @@ def run_stage_b(job: JobContext, system_info: dict, acq_log: dict) -> None:
     entries = normalizer.normalize_all()
     stats = normalizer.get_stats()
     _ok(f"  {stats['total_entries']} entradas normalizadas")
-    _ok(f"  Rango: {stats['time_range'].get('earliest', 'N/A')} → {stats['time_range'].get('latest', 'N/A')}")
+    _ok(f"  Rango: {stats['time_range'].get('earliest', 'N/A')} -> {stats['time_range'].get('latest', 'N/A')}")
 
     # Step 2 — Rule advisor: map detected services to rules, create stubs for unknowns
     _ok("Analizando cobertura de reglas por servicio detectado...")

@@ -27,6 +27,33 @@ from core.job import JobContext
 _PRIORITY = {"0": "emerg", "1": "alert", "2": "crit", "3": "error",
              "4": "warn", "5": "notice", "6": "info", "7": "debug"}
 
+# Linux audit log: type=SYSCALL msg=audit(1234567890.123:42): ...
+_RE_AUDIT = re.compile(
+    r"^type=(?P<atype>\w+)\s+msg=audit\((?P<epoch>\d+)(?:\.\d+)?:\d+\):\s*(?P<msg>.+)$"
+)
+
+# Audit event type → service label (most common types)
+_AUDIT_TYPE_SVC = {
+    "SYSCALL": "audit-syscall", "EXECVE": "audit-syscall",
+    "PATH": "audit-fs", "CWD": "audit-fs", "OPEN": "audit-fs",
+    "USER_LOGIN": "pam", "USER_AUTH": "pam", "USER_ACCT": "pam",
+    "USER_START": "pam", "USER_END": "pam", "CRED_ACQ": "pam",
+    "CRED_DISP": "pam", "CRED_REFR": "pam",
+    "USER_CMD": "sudo", "USER_ERR": "pam",
+    "ADD_USER": "useradd", "DEL_USER": "userdel",
+    "ADD_GROUP": "groupadd", "DEL_GROUP": "groupdel",
+    "GRP_MGMT": "groupmod", "ACCT_LOCK": "pam", "ACCT_UNLOCK": "pam",
+    "CRYPTO_KEY_USER": "sshd", "CRYPTO_SESSION": "sshd",
+    "USER_LOGOUT": "pam", "LOGIN": "pam",
+    "ANOM_PROMISCUOUS": "audit-net", "ANOM_LOGIN_FAILURES": "pam",
+    "AVC": "selinux", "SELINUX_ERR": "selinux",
+    "NETFILTER_PKT": "audit-net", "SOCKET_CONNECT": "audit-net",
+    "SOCKADDR": "audit-net",
+    "CONFIG_CHANGE": "audit-config", "DAEMON_START": "auditd",
+    "DAEMON_END": "auditd", "DAEMON_CONFIG": "auditd",
+    "KERNEL": "kernel", "KERN_MODULE": "kernel",
+}
+
 # RFC 3164 syslog regex
 _RE_SYSLOG = re.compile(
     r"^(?P<month>\w{3})\s+(?P<day>\d{1,2})\s+(?P<time>\d{2}:\d{2}:\d{2})\s+"
@@ -186,8 +213,17 @@ class LogNormalizer:
         if sample.strip().startswith("{") and "__REALTIME_TIMESTAMP" in sample:
             return self._parse_journalctl_json(content, str(path))
 
+        # Stage A pre-converted JSONL — our own schema (ts_epoch + source_file keys)
+        if sample.strip().startswith("{") and '"ts_epoch"' in sample and '"source_file"' in sample:
+            return self._parse_stage_a_jsonl(content, str(path))
+
+        # Linux audit log format: type=XXXX msg=audit(...)
+        first_line = sample.splitlines()[0] if sample.splitlines() else ""
+        if _RE_AUDIT.match(first_line):
+            return self._parse_audit_log(content, str(path))
+
         # Try syslog format
-        if _RE_SYSLOG.match(sample.splitlines()[0]) if sample.splitlines() else False:
+        if _RE_SYSLOG.match(first_line):
             return self._parse_syslog(content, str(path))
 
         # Generic fallback
@@ -391,6 +427,103 @@ class LogNormalizer:
                 raw=line[:1024],
             )
             entries.append(entry)
+
+        return entries
+
+    def _parse_stage_a_jsonl(self, content: str, source: str) -> list[dict]:
+        """Parse JSONL files pre-converted by Stage A's _convert_text_logs_to_json().
+
+        These files already carry our LogEntry schema (timestamp, ts_epoch,
+        hostname, service, pid, level, message, source_file, raw, extracted).
+        We deserialise each line and pass values directly through _make_entry
+        so stats are updated and the cache format stays consistent.
+        """
+        entries = []
+        for line in content.splitlines():
+            line = line.strip()
+            if not line or not line.startswith("{"):
+                continue
+            try:
+                obj = json.loads(line)
+            except (json.JSONDecodeError, ValueError):
+                self._stats["parse_errors"] += 1
+                continue
+
+            svc = str(obj.get("service", "unknown"))[:64]
+            lvl = str(obj.get("level", "info"))
+            entry = _make_entry(
+                timestamp=obj.get("timestamp"),
+                ts_epoch=float(obj.get("ts_epoch", 0)),
+                hostname=str(obj.get("hostname", "unknown"))[:128],
+                service=svc,
+                pid=str(obj.get("pid", ""))[:10],
+                level=lvl,
+                message=str(obj.get("message", ""))[:4096],
+                source_file=source,
+                raw=str(obj.get("raw", ""))[:1024],
+            )
+            entry["extracted"] = obj.get("extracted") or {}
+            entries.append(entry)
+            self._update_service_stats(svc, lvl)
+
+        return entries
+
+    def _parse_audit_log(self, content: str, source: str) -> list[dict]:
+        """Parse Linux audit log format: type=XXXX msg=audit(epoch.xxx:serial): body
+
+        Extracts event type, timestamp, pid, and body.  Maps event type to a
+        meaningful service label so IOC rules can filter on audit-syscall, pam,
+        sudo, selinux, etc. instead of generic 'unknown'.
+        """
+        entries = []
+        for line in content.splitlines():
+            line = line.rstrip("\r")
+            if not line:
+                continue
+            m = _RE_AUDIT.match(line)
+            if not m:
+                # Continuation lines (EXECVE args etc.) — attach to previous entry as raw
+                self._stats["parse_errors"] += 1
+                continue
+
+            atype = m.group("atype")
+            epoch_str = m.group("epoch")
+            msg_body = m.group("msg")[:4096]
+
+            try:
+                ts_epoch = float(epoch_str)
+                ts_iso = _epoch_to_iso(ts_epoch)
+            except ValueError:
+                ts_epoch = 0
+                ts_iso = None
+
+            svc = _AUDIT_TYPE_SVC.get(atype, "auditd")
+            level = "info"
+            # Flag anomaly / error types as higher severity
+            if atype.startswith("ANOM_") or atype.startswith("ERR") or "FAIL" in atype:
+                level = "warn"
+            if atype in ("AVC", "SELINUX_ERR", "KERN_MODULE"):
+                level = "warn"
+
+            # Extract pid from body if present
+            pid = ""
+            pid_m = re.search(r"\bpid=(\d+)", msg_body)
+            if pid_m:
+                pid = pid_m.group(1)
+
+            entry = _make_entry(
+                timestamp=ts_iso,
+                ts_epoch=ts_epoch,
+                hostname="unknown",
+                service=svc,
+                pid=pid,
+                level=level,
+                message=f"type={atype} {msg_body}",
+                source_file=source,
+                raw=line[:1024],
+            )
+            entries.append(entry)
+            self._update_service_stats(svc, level)
 
         return entries
 

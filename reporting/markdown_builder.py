@@ -14,6 +14,7 @@ The report follows a formal/pericial structure with:
   - Timeline excerpt
 """
 import json
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
@@ -32,11 +33,14 @@ class ReportBuilder:
             loader=FileSystemLoader(str(config.TEMPLATES_DIR)),
             undefined=StrictUndefined,
             autoescape=False,
+            trim_blocks=True,    # elimina el \n posterior a cada tag de bloque
+            lstrip_blocks=True,  # elimina espacios/tabs antes de tags de bloque
         )
         self._env.filters["fmt_bytes"] = _fmt_bytes
         self._env.filters["severity_badge"] = _severity_badge
         self._env.filters["short_hash"] = lambda h: h[:16] + "..." if h and len(h) > 16 else h
         self._env.filters["short_ts"] = _short_ts
+        self._env.filters["strip_log_prefix"] = lambda f: re.sub(r"^var_log_", "", str(f))
 
     def build(
         self,

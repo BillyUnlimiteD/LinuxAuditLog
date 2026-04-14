@@ -116,7 +116,7 @@ class IOCEngine:
             if not rule.get("enabled", True):
                 continue
             service_filter = rule.get("_service_filter", "*")
-            if service_filter != "*" and not any(service_filter in svc for svc in service_idx):
+            if service_filter != "*" and not any(service_filter in svc.lower() for svc in service_idx):
                 continue
             finding = self._evaluate_rule(rule, entries, service_idx)
             if finding:
@@ -134,7 +134,7 @@ class IOCEngine:
             return all_entries
         result: list = []
         for svc, svc_entries in service_idx.items():
-            if svc_filter in svc:
+            if svc_filter in svc.lower():
                 result.extend(svc_entries)
         return result
 

@@ -7,6 +7,7 @@ structured help request for any LLM (Claude, ChatGPT, Gemini, etc.).
 
 Output: ai_prompts_<job_id>.md  (and its PDF via PDFScriptGenerator)
 """
+import re
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
@@ -23,11 +24,14 @@ class PromptReportBuilder:
             loader=FileSystemLoader(str(config.TEMPLATES_DIR)),
             undefined=StrictUndefined,
             autoescape=False,
+            trim_blocks=True,
+            lstrip_blocks=True,
         )
         self._env.filters["fmt_bytes"] = lambda n: f"{n} B"
         self._env.filters["severity_badge"] = lambda s: s.upper()
         self._env.filters["short_hash"] = lambda h: (h[:16] + "...") if h and len(h) > 16 else h
         self._env.filters["short_ts"] = lambda ts: (str(ts)[:16].replace("T", " ") if ts and len(str(ts)) >= 16 else (ts or "N/A"))
+        self._env.filters["strip_log_prefix"] = lambda f: re.sub(r"^var_log_", "", str(f))
 
     def build(
         self,

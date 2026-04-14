@@ -23,9 +23,146 @@ import config
 from core.job import JobContext
 
 
-_MAX_COMMAND_OUTPUT = config.MAX_LOG_LINES_PER_SOURCE
-_TIMEOUT_DEFAULT = config.SSH_COMMAND_TIMEOUT
-_TIMEOUT_LARGE = config.SSH_LARGE_COMMAND_TIMEOUT
+# RFC 3164 syslog regex for parsing
+_RE_SYSLOG = re.compile(
+    r"^(?P<month>\w{3})\s+(?P<day>\d{1,2})\s+(?P<time>\d{2}:\d{2}:\d{2})\s+"
+    r"(?P<host>\S+)\s+(?P<svc>[^\[:\s]+)(?:\[(?P<pid>\d+)\])?\s*:\s*(?P<msg>.+)$"
+)
+
+# Generic timestamp regex for various log formats
+_RE_GENERIC_TS = re.compile(
+    r"^(?P<timestamp>\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}(?:\.\d+)?|\w{3}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2})\s+"
+    r"(?P<hostname>\S+)?\s*(?P<service>\S+)?(?:\[(?P<pid>\d+)\])?\s*:\s*(?P<message>.+)$"
+)
+
+
+def _parse_log_line_to_json(line: str, source_file: str, hostname: str = "unknown") -> dict:
+    """
+    Convert a single log line to structured JSON format.
+
+    Args:
+        line: Raw log line text
+        source_file: Path to the source file
+        hostname: Hostname to assign if not found in log
+
+    Returns:
+        Dict with structured log entry
+    """
+    line = line.strip()
+    if not line:
+        return None
+
+    # Try syslog format first
+    syslog_match = _RE_SYSLOG.match(line)
+    if syslog_match:
+        groups = syslog_match.groupdict()
+        # Convert syslog timestamp to ISO format (approximate for current year)
+        try:
+            month = groups['month']
+            day = int(groups['day'])
+            time_str = groups['time']
+            # Create approximate datetime (using current year)
+            current_year = datetime.now().year
+            dt_str = f"{current_year} {month} {day:02d} {time_str}"
+            dt = datetime.strptime(dt_str, "%Y %b %d %H:%M:%S")
+            timestamp = dt.isoformat()
+            ts_epoch = int(dt.timestamp())
+        except:
+            timestamp = None
+            ts_epoch = 0
+
+        return {
+            "timestamp": timestamp,
+            "ts_epoch": ts_epoch,
+            "hostname": groups.get('host', hostname),
+            "service": groups.get('svc', 'unknown'),
+            "pid": groups.get('pid', ''),
+            "level": "info",  # Default level
+            "message": groups.get('msg', line),
+            "source_file": source_file,
+            "raw": line,
+            "extracted": {}
+        }
+
+    # Try generic timestamp format
+    generic_match = _RE_GENERIC_TS.match(line)
+    if generic_match:
+        groups = generic_match.groupdict()
+        timestamp_str = groups.get('timestamp')
+
+        # Try to parse timestamp
+        timestamp = None
+        ts_epoch = 0
+        try:
+            # Handle different timestamp formats
+            if timestamp_str:
+                # ISO format
+                if '-' in timestamp_str and ':' in timestamp_str:
+                    dt = datetime.fromisoformat(timestamp_str.replace(' ', 'T'))
+                    timestamp = dt.isoformat()
+                    ts_epoch = int(dt.timestamp())
+                # Syslog format
+                elif len(timestamp_str.split()) == 3:
+                    month, day, time_str = timestamp_str.split()
+                    current_year = datetime.now().year
+                    dt_str = f"{current_year} {month} {int(day):02d} {time_str}"
+                    dt = datetime.strptime(dt_str, "%Y %b %d %H:%M:%S")
+                    timestamp = dt.isoformat()
+                    ts_epoch = int(dt.timestamp())
+        except:
+            pass
+
+        return {
+            "timestamp": timestamp,
+            "ts_epoch": ts_epoch,
+            "hostname": groups.get('hostname', hostname),
+            "service": groups.get('service', 'unknown'),
+            "pid": groups.get('pid', ''),
+            "level": "info",
+            "message": groups.get('message', line),
+            "source_file": source_file,
+            "raw": line,
+            "extracted": {}
+        }
+
+    # Fallback for unrecognized formats
+    return {
+        "timestamp": None,
+        "ts_epoch": 0,
+        "hostname": hostname,
+        "service": "unknown",
+        "pid": "",
+        "level": "info",
+        "message": line,
+        "source_file": source_file,
+        "raw": line,
+        "extracted": {}
+    }
+
+
+def _convert_text_logs_to_json(text_content: str, source_file: str, hostname: str = "unknown") -> str:
+    """
+    Convert text log content to JSON Lines format.
+
+    Args:
+        text_content: Raw text content of log file
+        source_file: Path to source file
+        hostname: Default hostname
+
+    Returns:
+        JSON Lines string with structured log entries
+    """
+    json_lines = []
+    for line in text_content.splitlines():
+        if line.strip():
+            entry = _parse_log_line_to_json(line, source_file, hostname)
+            if entry:
+                json_lines.append(json.dumps(entry, ensure_ascii=False))
+
+    return '\n'.join(json_lines)
+_TIMEOUT_DEFAULT     = config.SSH_COMMAND_TIMEOUT
+_TIMEOUT_LARGE       = config.SSH_LARGE_COMMAND_TIMEOUT
+_MAX_COMMAND_OUTPUT  = config.MAX_LOG_LINES_PER_SOURCE
 
 # Syslog files attempted on ALL systems.
 # On systemd hosts these complement journalctl (RHEL/CentOS keeps plain-text
@@ -300,6 +437,8 @@ class RemoteCollector:
         self._has_systemd = system_info.get("init_system") == "systemd"
         self._since = f"{config.DEFAULT_TIME_WINDOW_HOURS} hours ago"
         self._root_pass: str = root_pass
+        # Get hostname for log parsing
+        self._hostname = system_info.get("hostname", "unknown")
         # Persistent root shell — set by collect_all() when SSH_ROOT_PASS is configured.
         self._root_channel: Optional[_RootChannel] = None
         # Tracks every remote path already downloaded so multiple collection
@@ -424,6 +563,9 @@ class RemoteCollector:
         await self._collect_web_logs()
         await self._collect_service_logs()
         await self._collect_kernel_logs()
+        # Rotated copies of the key syslog files (CentOS: secure-YYYYMMDD,
+        # Debian: auth.log.1, auth.log.2.gz, etc.)  Required for >72h coverage.
+        await self._collect_rotated_logs()
         # Broad sweep — discovers every *.log across all standard log trees
         # (/var/log, /var/opt, /opt, /srv, /var/www) not already collected.
         await self._collect_log_sweep()
@@ -515,7 +657,11 @@ class RemoteCollector:
             return
         self._seen_log_paths.add(remote_path)
 
-        base_cmd = f"tail -n {_MAX_COMMAND_OUTPUT} {remote_path} 2>/dev/null"
+        # gzip-compressed rotated files must be decompressed before tailing.
+        if remote_path.endswith(".gz"):
+            base_cmd = f"zcat {remote_path} 2>/dev/null | tail -n {_MAX_COMMAND_OUTPUT}"
+        else:
+            base_cmd = f"tail -n {_MAX_COMMAND_OUTPUT} {remote_path} 2>/dev/null"
 
         if self._root_channel is not None:
             # Root channel active: _run already executes as root.
@@ -533,7 +679,7 @@ class RemoteCollector:
 
         if out.strip():
             filename = remote_path.lstrip("/").replace("/", "_")
-            self._write_log(filename, out, phase=phase)
+            self._write_log(filename, out, phase=phase, convert_to_json=True)
         else:
             # Only log as a limitation when the file exists AND has content
             # (test -s = exists with size > 0).  Empty files (0 bytes) are
@@ -569,6 +715,36 @@ class RemoteCollector:
         except Exception:
             return []
 
+    async def _collect_rotated_logs(self) -> None:
+        """Collect rotated copies of the key syslog files for extended time coverage.
+
+        Linux log rotation produces versioned copies alongside the active file:
+          CentOS/RHEL  — /var/log/secure-20260407, secure-20260407.gz
+          Debian/Ubuntu — /var/log/auth.log.1, auth.log.2.gz, auth.log.3.gz
+
+        For each base path in _FALLBACK_LOG_FILES, we list date-suffixed and
+        numbered variants on the remote host, validate each path, then delegate
+        to _download_varlog_file (which handles deduplication and .gz via zcat).
+        """
+        for base_path in _FALLBACK_LOG_FILES:
+            # One ls command tries both rotation conventions in a single round-trip.
+            # head -60 caps at 60 rotated files per base log (≈ 2 months weekly).
+            list_cmd = (
+                f"ls -t {base_path}-* {base_path}.[0-9]* {base_path}.[0-9]*.gz"
+                f" 2>/dev/null | head -60"
+            )
+            if self._root_channel is not None:
+                raw = await self._run(list_cmd, phase=4, timeout=15)
+            else:
+                raw = await self._run(
+                    f"sudo -n {list_cmd} || {list_cmd}",
+                    phase=4, timeout=15,
+                )
+            for line in raw.splitlines():
+                path = line.strip()
+                if path and _is_safe_log_path(path):
+                    await self._download_varlog_file(path, phase=4)
+
     async def _collect_log_sweep(self) -> None:
         """Discover and download every *.log file across all standard log directories.
 
@@ -589,7 +765,15 @@ class RemoteCollector:
         """
         search_dirs = "/var/log /var/opt /opt /srv /var/www"
         # -size +0c skips empty files (0 bytes) — nothing to collect from them.
-        find_cmd = f"find {search_dirs} -name '*.log' -type f -size +0c 2>/dev/null"
+        # Patterns:
+        #   *.log          — standard log files
+        #   *.log.[0-9]*   — Debian numbered rotation (auth.log.1, auth.log.2.gz)
+        #   *.log.gz       — compressed rotation without number
+        find_cmd = (
+            f"find {search_dirs} -type f -size +0c \\( "
+            f"-name '*.log' -o -name '*.log.[0-9]*' -o -name '*.log.gz' "
+            f"\\) 2>/dev/null"
+        )
 
         if self._root_channel is not None:
             raw = await self._run(find_cmd, phase=4, timeout=120)
@@ -617,7 +801,7 @@ class RemoteCollector:
         """dmesg — kernel ring buffer (recent, no time filter)."""
         out = await self._run("dmesg --since=\"72 hours ago\" 2>/dev/null || dmesg 2>/dev/null | tail -n 1000", phase=4, timeout=30)
         if out.strip():
-            self._write_log("dmesg.txt", out, phase=4)
+            self._write_log("dmesg.txt", out, phase=4, convert_to_json=True)
 
     # ------------------------------------------------------------------
     # Internal helpers
@@ -740,9 +924,26 @@ class RemoteCollector:
             fh.write(content)
         self._register(filename, phase)
 
-    def _write_log(self, filename: str, content: str, phase: int) -> None:
+    def _write_log(self, filename: str, content: str, phase: int, convert_to_json: bool = False) -> None:
         if not content.strip():
             return
+
+        # Convert to JSON if requested and content looks like text logs
+        if convert_to_json and not filename.endswith('.json.gz'):
+            # Check if this looks like a log file (has multiple lines or timestamps)
+            lines = content.splitlines()
+            if len(lines) > 1 or re.search(r'\d{4}-\d{2}-\d{2}|\w{3}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}', content):
+                source_file = str(self.job.log_file(filename))
+                content = _convert_text_logs_to_json(content, source_file, self._hostname)
+                # Change extension to indicate JSON format
+                if filename.endswith('.gz'):
+                    filename = filename.replace('.gz', '.jsonl.gz')
+                else:
+                    new_name = filename.replace('.log', '.jsonl').replace('.txt', '.jsonl')
+                    # For extensionless files (e.g. var_log_secure, var_log_cron)
+                    # the replacements above are no-ops — append .jsonl explicitly.
+                    filename = new_name if new_name != filename else filename + '.jsonl'
+
         path = self.job.log_file(filename)
         if config.COMPRESS_LOGS and not filename.endswith(".gz"):
             path = self.job.log_file(filename + ".gz")
