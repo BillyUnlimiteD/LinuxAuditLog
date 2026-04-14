@@ -1,4 +1,4 @@
-# LinuxAuditLog v1.3.0
+# LinuxAuditLog v1.4.0
 
 **Agente forense de adquisición remota y análisis de seguridad Linux**
 
@@ -115,6 +115,9 @@ Al finalizar, el directorio de trabajo se encuentra en `jobs/<YYYYMMDD_HHMMSS_ho
 │       (SSH_ROOT_PASS), todos los comandos como root     │
 │     - Barrido recursivo: /var/log /var/opt /opt         │
 │       /srv /var/www — sin limite de archivos            │
+│     - Recoleccion de logs rotados (secure-YYYYMMDD.gz,  │
+│       auth.log.2.gz, etc.) para cobertura extendida     │
+│     - Conversion a JSONL estructurado en origen         │
 │     - Fallback: sudo -n → sin privilegios               │
 │     - Limite: 50.000 lineas por fuente                  │
 │  5. Hash SHA-256 de todos los artefactos (MANIFEST)     │
@@ -127,13 +130,15 @@ Al finalizar, el directorio de trabajo se encuentra en `jobs/<YYYYMMDD_HHMMSS_ho
 │  ETAPA B — ANALISIS LOCAL (sin conexion)                │
 │                                                         │
 │  1. Normalizacion de logs → JSONL unificado             │
-│     (cache JSONL en re-ejecuciones sin cambios)         │
+│     - Parser JSONL de Stage A (formato estructurado)    │
+│     - Parser de audit log Linux (type=SYSCALL, AVC...)  │
+│     - cache JSONL en re-ejecuciones sin cambios         │
 │  2. Rule Advisor: cobertura de reglas por servicio      │
 │     (crea stubs para servicios desconocidos)            │
 │  3. Timeline unificado → CSV ordenado por tiempo        │
 │  4. Motor IOC: evalua 48 reglas YAML (pattern/          │
 │     threshold/sequence) con mapeo MITRE ATT&CK          │
-│     (indice de servicio + pre-filtro de anclas: ~83x)   │
+│     (indice de servicio case-insensitive: ~83x)         │
 │  5. Correlacion por IP, usuario y servicio (DuckDB)     │
 │  6. Generacion del informe forense en Markdown          │
 │  7. Generacion automatica del PDF del informe           │
@@ -451,6 +456,18 @@ rules/
 | SVC-YUM-001 | Package Manager Abuse (yum/dnf) | T1072 | high |
 | SVC-MEMCACHED-001 | Memcached Unauthorized Access / Exposure | T1046 | high |
 
+### Novedades de motor y pipeline (v1.4.0)
+
+Sin nuevas reglas YAML en esta version. Los cambios son de infraestructura:
+
+| Componente | Mejora |
+|---|---|
+| Stage A — Recoleccion | Logs rotados por logrotate (CentOS: `secure-YYYYMMDD.gz`, Debian: `auth.log.2.gz`) recolectados automaticamente para cobertura de hasta 60 dias |
+| Stage A — Conversion | Todos los archivos de texto plano se convierten a JSONL estructurado durante la adquisicion (timestamp, servicio, pid, mensaje) |
+| Stage B — Normalizer | Parser dedicado para formato JSONL de Stage A; parser de audit log Linux (`type=SYSCALL`, `USER_LOGIN`, `AVC`, etc.) con mapeo a servicios |
+| Stage B — IOC engine | Filtro de servicio ahora case-insensitive (solucionaba falsos negativos con `NetworkManager`, `CROND`) |
+| Reporting — PDF | Tablas corregidas: nombres de artefacto sin prefijo `var_log_`, timestamps en formato `YYYY-MM-DD HH:MM` en lugar de ISO completo |
+
 ---
 
 ## 10. Añadir reglas personalizadas
@@ -498,15 +515,17 @@ En la práctica el pre-filtro descarta ~99% de las entradas antes de que el rege
 
 En re-ejecuciones (Stage B sin cambios en los logs), el normalizador detecta que `all_entries.jsonl` es más reciente que todos los archivos de log en `logs_dir` y carga el JSONL cacheado directamente, sin descomprimir ni re-parsear los `.gz` originales.
 
-### Referencia de tiempos (109.216 entradas, 48 reglas)
+### Referencia de tiempos
 
-| Etapa | v1.0.0 | v1.1.0 |
-|---|---|---|
-| Normalizacion (primera vez) | ~0.8 s | ~0.8 s |
-| Normalizacion (cache hit) | ~0.8 s | ~0.7 s |
-| Motor IOC | ~180 s | ~2.2 s |
-| Total (primer analisis) | ~181 s | ~3 s |
-| Total (re-analisis con cache) | ~181 s | ~2.9 s |
+| Etapa | v1.0.0 (109K entradas) | v1.1.0 (109K entradas) | v1.4.0 (375K entradas) |
+|---|---|---|---|
+| Normalizacion (primera vez) | ~0.8 s | ~0.8 s | ~3 s |
+| Normalizacion (cache hit) | ~0.8 s | ~0.7 s | ~0.5 s |
+| Motor IOC | ~180 s | ~2.2 s | ~7 s |
+| Total (primer analisis) | ~181 s | ~3 s | ~10 s |
+| Total (re-analisis con cache) | ~181 s | ~2.9 s | ~7.5 s |
+
+> Los datos de v1.4.0 corresponden a una adquisicion real de 60 dias (1440h) sobre CentOS 7 con 54 artefactos y 375.928 entradas normalizadas.
 
 ---
 
@@ -583,7 +602,7 @@ Las variables pueden definirse en el archivo `.env` o como variables de entorno 
 | `SSH_PASS` | Si | — | Contrasena SSH |
 | `SSH_PORT` | No | `22` | Puerto SSH |
 | `SSH_ROOT_PASS` | No | — | Contrasena de root para canal raiz persistente (todos los comandos como root) |
-| `TIME_WINDOW_HOURS` | No | `72` | Ventana temporal de logs a exportar (horas) |
+| `TIME_WINDOW_HOURS` | No | `72` | Ventana temporal de logs a exportar (horas). Ej: 1440 = 60 dias |
 | `LOG_MAX_LINES` | No | `50000` | Maximo de lineas por fuente de log |
 | `MAX_LOG_FILES` | No | `0` | Maximo de archivos `*.log` en el barrido (0 = sin limite) |
 | `SSH_CONNECT_TIMEOUT` | No | `30` | Timeout de conexion SSH (segundos) |
@@ -708,6 +727,6 @@ Todas las dependencias son de codigo abierto (MIT, Apache 2.0 o BSD). No se requ
 
 ---
 
-*LinuxAuditLog v1.3.0 — Herramienta forense de adquisicion remota Linux*
+*LinuxAuditLog v1.4.0 — Herramienta forense de adquisicion remota Linux*
 
 *Desarrollado por Gonzalo Serrano en colaboracion con [Claude Code](https://claude.ai/code) (Anthropic).*
