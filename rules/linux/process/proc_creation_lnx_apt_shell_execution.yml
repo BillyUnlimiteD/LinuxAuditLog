@@ -1,0 +1,37 @@
+id: SIGMA-LIN-SHELL_INVOCATION_VIA
+title: Shell Invocation via Apt - Linux
+category: process
+subcategory: execution
+mitre_technique: T1083
+mitre_tactic: discovery
+severity: medium
+confidence: low
+enabled: true
+description: 'Detects the use of the "apt" and "apt-get" commands to execute a shell
+  or proxy commands.
+
+  Such behavior may be associated with privilege escalation, unauthorized command
+  execution, or to break out from restricted environments.
+
+  '
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /apt
+  - regex: /apt\-get
+  - regex: APT::Update::Pre\-Invoke::=
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_apt_shell_execution.yml.
+  References: https://gtfobins.github.io/gtfobins/apt/, https://gtfobins.github.io/gtfobins/apt-get/'
+references:
+- https://gtfobins.github.io/gtfobins/apt/
+- https://gtfobins.github.io/gtfobins/apt-get/
+tags:
+- attack.discovery
+- attack.t1083
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_apt_shell_execution.yml
+_sigma_status: test
+_sigma_author: Nasreddine Bencherchali (Nextron Systems)
+_sigma_date: 2022-12-28

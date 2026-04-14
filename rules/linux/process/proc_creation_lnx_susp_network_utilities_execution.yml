@@ -1,0 +1,41 @@
+id: SIGMA-LIN-LINUX_NETWORK_SERVIC
+title: Linux Network Service Scanning Tools Execution
+category: process
+subcategory: execution
+mitre_technique: T1046
+mitre_tactic: discovery
+severity: low
+confidence: low
+enabled: true
+description: Detects execution of network scanning and reconnaisance tools. These
+  tools can be used for the enumeration of local or remote network services for example.
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /ncat
+  - regex: /netcat
+  - regex: /socat
+  - regex: /autorecon
+  - regex: /hping
+  - regex: /hping2
+  - regex: /hping3
+  - regex: /naabu
+  - regex: /nmap
+  - regex: /nping
+false_positives:
+- Legitimate administration activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_susp_network_utilities_execution.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1046/T1046.md,
+  https://github.com/projectdiscovery/naabu, https://github.com/Tib3rius/AutoRecon'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1046/T1046.md
+- https://github.com/projectdiscovery/naabu
+- https://github.com/Tib3rius/AutoRecon
+tags:
+- attack.discovery
+- attack.t1046
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_susp_network_utilities_execution.yml
+_sigma_status: test
+_sigma_author: Alejandro Ortuno, oscd.community, Georg Lauenstein (sure[secure])
+_sigma_date: 2020-10-21

@@ -1,0 +1,31 @@
+id: SIGMA-LIN-DD_FILE_OVERWRITE
+title: DD File Overwrite
+category: process
+subcategory: detection
+mitre_technique: T1485
+mitre_tactic: impact
+severity: low
+confidence: low
+enabled: true
+description: Detects potential overwriting and deletion of a file using DD.
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /bin/dd
+  - regex: /usr/bin/dd
+  - regex: if=/dev/zero
+  - regex: if=/dev/null
+false_positives:
+- Any user deleting files that way.
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_dd_file_overwrite.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1485/T1485.md#atomic-test-2---macoslinux---overwrite-file-with-dd'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1485/T1485.md#atomic-test-2---macoslinux---overwrite-file-with-dd
+tags:
+- attack.impact
+- attack.t1485
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_dd_file_overwrite.yml
+_sigma_status: test
+_sigma_author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research), MSTIC
+_sigma_date: 2021-10-15

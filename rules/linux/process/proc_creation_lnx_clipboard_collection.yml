@@ -1,0 +1,37 @@
+id: SIGMA-LIN-CLIPBOARD_COLLECTION
+title: Clipboard Collection with Xclip Tool
+category: process
+subcategory: detection
+mitre_technique: T1115
+mitre_tactic: collection
+severity: low
+confidence: low
+enabled: true
+description: 'Detects attempts to collect data stored in the clipboard from users
+  with the usage of xclip tool. Xclip has to be installed.
+
+  Highly recommended using rule on servers, due to high usage of clipboard utilities
+  on user workstations.
+
+  '
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: xclip
+  - regex: \-sel
+  - regex: clip
+false_positives:
+- Legitimate usage of xclip tools.
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_clipboard_collection.yml.
+  References: https://www.packetlabs.net/posts/clipboard-data-security/'
+references:
+- https://www.packetlabs.net/posts/clipboard-data-security/
+tags:
+- attack.collection
+- attack.t1115
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_clipboard_collection.yml
+_sigma_status: test
+_sigma_author: Pawel Mazur, Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research),
+  MSTIC
+_sigma_date: 2021-10-15

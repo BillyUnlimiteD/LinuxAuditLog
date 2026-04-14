@@ -1,0 +1,31 @@
+id: SIGMA-WEB-POTENTIAL_BASE___ENC
+title: Potential Base64 Encoded User-Agent
+category: web
+subcategory: detection
+mitre_technique: T1071.001
+mitre_tactic: ''
+severity: medium
+confidence: low
+enabled: false
+description: Detects User Agent strings that end with an equal sign, which can be
+  a sign of base64 encoding.
+service: '*'
+detection:
+  type: pattern
+  patterns:
+  - regex: PLACEHOLDER — review and add patterns manually
+    _note: 'Auto-imported from Sigma: rules/web/proxy_generic/proxy_ua_susp_base64.yml'
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/web/proxy_generic/proxy_ua_susp_base64.yml.
+  References: https://blogs.jpcert.or.jp/en/2022/07/yamabot.html, https://deviceatlas.com/blog/list-of-user-agent-strings#desktop'
+references:
+- https://blogs.jpcert.or.jp/en/2022/07/yamabot.html
+- https://deviceatlas.com/blog/list-of-user-agent-strings#desktop
+tags:
+- attack.command-and-control
+- attack.t1071.001
+_sigma_source: rules/web/proxy_generic/proxy_ua_susp_base64.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems), Brian Ingram (update)
+_sigma_date: 2022-07-08

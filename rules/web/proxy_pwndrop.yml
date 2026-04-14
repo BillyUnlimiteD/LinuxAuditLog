@@ -1,0 +1,31 @@
+id: SIGMA-WEB-PWNDRP_ACCESS
+title: PwnDrp Access
+category: web
+subcategory: detection
+mitre_technique: T1071.001
+mitre_tactic: ''
+severity: critical
+confidence: low
+enabled: true
+description: Detects downloads from PwnDrp web servers developed for red team testing
+  and most likely also used for criminal activity
+service: '*'
+detection:
+  type: pattern
+  patterns:
+  - regex: /pwndrop/
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/web/proxy_generic/proxy_pwndrop.yml.
+  References: https://breakdev.org/pwndrop/'
+references:
+- https://breakdev.org/pwndrop/
+tags:
+- attack.command-and-control
+- attack.t1071.001
+- attack.t1102.001
+- attack.t1102.003
+_sigma_source: rules/web/proxy_generic/proxy_pwndrop.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems)
+_sigma_date: 2020-04-15

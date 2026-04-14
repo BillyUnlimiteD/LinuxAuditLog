@@ -1,0 +1,37 @@
+id: SIGMA-LIN-ESXI_SYSLOG_CONFIGUR
+title: ESXi Syslog Configuration Change Via ESXCLI
+category: process
+subcategory: detection
+mitre_technique: T1562.001
+mitre_tactic: execution
+severity: medium
+confidence: low
+enabled: true
+description: Detects changes to the ESXi syslog configuration via "esxcli"
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /esxcli
+  - regex: system
+  - regex: syslog
+  - regex: config
+  - regex: \ set
+false_positives:
+- Legitimate administrative activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_esxcli_syslog_config_change.yml.
+  References: https://support.solarwinds.com/SuccessCenter/s/article/Configure-ESXi-Syslog-to-LEM?language=en_US,
+  https://developer.broadcom.com/xapis/esxcli-command-reference/7.0.0/namespace/esxcli_system.html'
+references:
+- https://support.solarwinds.com/SuccessCenter/s/article/Configure-ESXi-Syslog-to-LEM?language=en_US
+- https://developer.broadcom.com/xapis/esxcli-command-reference/7.0.0/namespace/esxcli_system.html
+tags:
+- attack.defense-evasion
+- attack.execution
+- attack.t1562.001
+- attack.t1562.003
+- attack.t1059.012
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_esxcli_syslog_config_change.yml
+_sigma_status: test
+_sigma_author: Cedric Maurugeon
+_sigma_date: 2023-09-04

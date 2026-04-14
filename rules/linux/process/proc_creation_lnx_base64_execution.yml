@@ -1,0 +1,30 @@
+id: SIGMA-LIN-LINUX_BASE___ENCODED
+title: Linux Base64 Encoded Pipe to Shell
+category: process
+subcategory: execution
+mitre_technique: T1140
+mitre_tactic: ''
+severity: medium
+confidence: low
+enabled: true
+description: Detects suspicious process command line that uses base64 encoded input
+  for execution with a shell
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: 'base64\ '
+false_positives:
+- Legitimate administration activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_base64_execution.yml.
+  References: https://github.com/arget13/DDexec, https://www.mandiant.com/resources/blog/barracuda-esg-exploited-globally'
+references:
+- https://github.com/arget13/DDexec
+- https://www.mandiant.com/resources/blog/barracuda-esg-exploited-globally
+tags:
+- attack.defense-evasion
+- attack.t1140
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_base64_execution.yml
+_sigma_status: test
+_sigma_author: pH-T (Nextron Systems)
+_sigma_date: 2022-07-26

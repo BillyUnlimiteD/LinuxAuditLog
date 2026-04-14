@@ -1,0 +1,42 @@
+id: SIGMA-LIN-OS_ARCHITECTURE_DISC
+title: OS Architecture Discovery Via Grep
+category: process
+subcategory: detection
+mitre_technique: T1082
+mitre_tactic: discovery
+severity: low
+confidence: low
+enabled: true
+description: 'Detects the use of grep to identify information about the operating
+  system architecture. Often combined beforehand with the execution of "uname" or
+  "cat /proc/cpuinfo"
+
+  '
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /grep
+  - regex: aarch64
+  - regex: i386
+  - regex: i686
+  - regex: mips
+  - regex: x86_64
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_grep_os_arch_discovery.yml.
+  References: https://blogs.jpcert.or.jp/en/2023/05/gobrat.html, https://jstnk9.github.io/jstnk9/research/GobRAT-Malware/,
+  https://www.virustotal.com/gui/file/60bcd645450e4c846238cf0e7226dc40c84c96eba99f6b2cffcd0ab4a391c8b3/detection,
+  https://www.virustotal.com/gui/file/3e44c807a25a56f4068b5b8186eee5002eed6f26d665a8b791c472ad154585d1/detection'
+references:
+- https://blogs.jpcert.or.jp/en/2023/05/gobrat.html
+- https://jstnk9.github.io/jstnk9/research/GobRAT-Malware/
+- https://www.virustotal.com/gui/file/60bcd645450e4c846238cf0e7226dc40c84c96eba99f6b2cffcd0ab4a391c8b3/detection
+- https://www.virustotal.com/gui/file/3e44c807a25a56f4068b5b8186eee5002eed6f26d665a8b791c472ad154585d1/detection
+tags:
+- attack.discovery
+- attack.t1082
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_grep_os_arch_discovery.yml
+_sigma_status: test
+_sigma_author: Joseliyo Sanchez, @Joseliyo_Jstnk
+_sigma_date: 2023-06-02

@@ -1,0 +1,48 @@
+id: LIN-PROC-005
+title: Docker Defense Evasion and Persistence
+category: defense_evasion
+subcategory: container_manipulation
+mitre_technique: T1610
+mitre_tactic: defense_evasion
+severity: high
+confidence: medium
+enabled: true
+description: >
+  Detects Docker usage patterns associated with defense evasion and persistence:
+  containers started with log driver 'none' (hides activity), containers
+  configured to restart always (persistence across reboots), daemon configuration
+  changes, and use of Docker to run tools that would otherwise be audited
+  (chroot-like isolation to evade auditd/SELinux). A container running with
+  --log-driver=none produces zero audit trail for its internal activity.
+service: "*"
+detection:
+  type: pattern
+  patterns:
+    - regex: "docker.*run.*--log-driver[= ]?none|docker.*run.*--log-opt[= ]?max-size=0"
+    - regex: "docker.*run.*--restart[= ]?(?:always|unless-stopped|on-failure)"
+    - regex: "docker.*run.*--security-opt[= ]?(?:no-new-privileges=false|seccomp=unconfined|apparmor=unconfined)"
+    - regex: "daemon\\.json.*(?:insecure-registries|live-restore|no-new-privileges.*false)"
+    - regex: "docker.*(?:network|volume)\\s+(?:create|connect).*(?P<name>\\S+)"
+    - regex: "docker.*commit.*(?P<container>\\S+).*(?P<image>\\S+)"
+    - regex: "docker.*(?:save|export|import|load).*(?P<target>\\S+\\.tar)"
+false_positives:
+  - Sysadmin committing containers for backup/migration purposes
+  - Monitoring services with '--restart always' (e.g., Prometheus, Grafana)
+  - Offline container image transfers in air-gapped environments
+recommendation: >
+  1. Audit daemon.json for insecure registry or no-new-privileges changes.
+  2. Review all containers with --log-driver=none: docker ps -a --filter 'label=log_driver=none'
+  3. Check for unexpected committed images that may contain attacker tools.
+  4. Review docker events log for container lifecycle anomalies:
+     docker events --since 24h
+  5. Enforce image signing and use only approved registries.
+references:
+  - "https://attack.mitre.org/techniques/T1610/"
+  - "https://attack.mitre.org/techniques/T1053/"
+  - "https://docs.docker.com/config/daemon/"
+tags:
+  - docker
+  - container
+  - defense_evasion
+  - persistence
+  - log_evasion

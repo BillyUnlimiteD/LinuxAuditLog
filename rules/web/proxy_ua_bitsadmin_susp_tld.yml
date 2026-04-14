@@ -1,0 +1,38 @@
+id: SIGMA-WEB-BITSADMIN_TO_UNCOMMO
+title: Bitsadmin to Uncommon TLD
+category: web
+subcategory: detection
+mitre_technique: T1071.001
+mitre_tactic: persistence
+severity: high
+confidence: low
+enabled: true
+description: Detects Bitsadmin connections to domains with uncommon TLDs
+service: '*'
+detection:
+  type: pattern
+  patterns:
+  - regex: Microsoft\ BITS/
+  - regex: \.com
+  - regex: \.net
+  - regex: \.org
+  - regex: \.scdn\.co
+  - regex: \.sfx\.ms
+false_positives:
+- Rare programs that use Bitsadmin and update from regional TLDs e.g. .uk or .ca
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/web/proxy_generic/proxy_ua_bitsadmin_susp_tld.yml.
+  References: https://twitter.com/jhencinski/status/1102695118455349248, https://isc.sans.edu/forums/diary/Investigating+Microsoft+BITS+Activity/23281/'
+references:
+- https://twitter.com/jhencinski/status/1102695118455349248
+- https://isc.sans.edu/forums/diary/Investigating+Microsoft+BITS+Activity/23281/
+tags:
+- attack.command-and-control
+- attack.t1071.001
+- attack.defense-evasion
+- attack.persistence
+- attack.t1197
+- attack.s0190
+_sigma_source: rules/web/proxy_generic/proxy_ua_bitsadmin_susp_tld.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems), Tim Shelton
+_sigma_date: 2019-03-07

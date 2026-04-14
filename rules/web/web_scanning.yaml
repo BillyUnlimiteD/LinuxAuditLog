@@ -1,0 +1,43 @@
+id: WEB-006
+title: Web Application Scanning Activity
+category: web
+subcategory: reconnaissance
+mitre_technique: T1595.003
+mitre_tactic: reconnaissance
+severity: medium
+confidence: medium
+enabled: true
+description: >
+  Detects automated web application scanning activity based on high request volumes,
+  known scanner user agents, and characteristic scanning patterns (sequential path
+  enumeration, common vulnerability probe paths). This typically precedes targeted
+  exploitation attempts.
+service: "*"
+detection:
+  type: threshold
+  patterns:
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST|HEAD) (?P<uri>/(?:admin|administrator|wp-admin|wp-login|phpmyadmin|pma|manager|console|actuator|config|backup|\\.git|\\.env|\\.htaccess|web\\.config|xmlrpc\\.php|api/v\\d)[^\"]*)\""
+    - regex: "(?P<src_ip>[\\d.]+).*(sqlmap|nikto|nmap|masscan|zgrab|burpsuite|dirbuster|gobuster|ffuf|wfuzz|nuclei|nessus|openvas|acunetix|wpscan|joomscan|whatweb|dirb)"
+    - regex: "(?P<src_ip>[\\d.]+).*\" 40[034] .*\" 40[034] .*\" 40[034]"
+  aggregation:
+    field: src_ip
+    count: 20
+    window_seconds: 60
+false_positives:
+  - Legitimate web crawlers (Googlebot, Bingbot) — check User-Agent
+  - Authorized penetration testing activity
+  - Uptime monitoring probes hitting multiple endpoints
+recommendation: >
+  1. Block the scanning source IP at the WAF or firewall.
+  2. Review whether any scan probes received successful (200/302) responses.
+  3. Check for follow-up exploitation attempts from the same IP.
+  4. Harden exposed admin paths or move them to non-standard URLs.
+  5. Implement rate limiting at the web server or load balancer level.
+references:
+  - "https://attack.mitre.org/techniques/T1595/003/"
+  - "https://attack.mitre.org/techniques/T1592/"
+tags:
+  - scanning
+  - reconnaissance
+  - web
+  - automated

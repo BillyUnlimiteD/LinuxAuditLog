@@ -1,0 +1,38 @@
+id: SIGMA-LIN-SUSPICIOUS_REVERSE_S
+title: Suspicious Reverse Shell Command Line
+category: authentication
+subcategory: execution
+mitre_technique: T1059.004
+mitre_tactic: execution
+severity: high
+confidence: low
+enabled: true
+description: Detects suspicious shell commands or program code that may be executed
+  or used in command line to establish a reverse shell
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: BEGIN\ \{s\ =\ "/inet/tcp/0/
+  - regex: bash\ \-i\ >\&\ /dev/tcp/
+  - regex: bash\ \-i\ >\&\ /dev/udp/
+  - regex: sh\ \-i\ >\$\ /dev/udp/
+  - regex: sh\ \-i\ >\$\ /dev/tcp/
+  - regex: \&\&\ while\ read\ line\ 0<\&5;\ do
+  - regex: /bin/bash\ \-c\ exec\ 5<>/dev/tcp/
+  - regex: /bin/bash\ \-c\ exec\ 5<>/dev/udp/
+  - regex: 'nc\ \-e\ /bin/sh\ '
+  - regex: /bin/sh\ \|\ nc
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/builtin/lnx_shell_susp_rev_shells.yml.
+  References: https://alamot.github.io/reverse_shells/'
+references:
+- https://alamot.github.io/reverse_shells/
+tags:
+- attack.execution
+- attack.t1059.004
+_sigma_source: rules/linux/builtin/lnx_shell_susp_rev_shells.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems)
+_sigma_date: 2019-04-02

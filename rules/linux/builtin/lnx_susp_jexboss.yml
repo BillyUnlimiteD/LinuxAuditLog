@@ -1,0 +1,29 @@
+id: SIGMA-LIN-JEXBOSS_COMMAND_SEQU
+title: JexBoss Command Sequence
+category: authentication
+subcategory: execution
+mitre_technique: T1059.004
+mitre_tactic: execution
+severity: high
+confidence: low
+enabled: true
+description: Detects suspicious command sequence that JexBoss
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: bash\ \-c\ /bin/bash
+  - regex: \&/dev/tcp/
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/builtin/lnx_susp_jexboss.yml.
+  References: https://www.us-cert.gov/ncas/analysis-reports/AR18-312A'
+references:
+- https://www.us-cert.gov/ncas/analysis-reports/AR18-312A
+tags:
+- attack.execution
+- attack.t1059.004
+_sigma_source: rules/linux/builtin/lnx_susp_jexboss.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems)
+_sigma_date: 2017-08-24

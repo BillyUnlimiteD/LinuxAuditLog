@@ -1,0 +1,43 @@
+id: LIN-AUTH-001
+title: SSH Brute Force Attack
+category: authentication
+subcategory: brute_force
+mitre_technique: T1110.001
+mitre_tactic: credential_access
+severity: high
+confidence: medium
+enabled: true
+description: >
+  Multiple failed SSH authentication attempts from the same source IP within a short
+  time window indicate a brute force or credential stuffing attack against the SSH service.
+  This is one of the most common initial access techniques observed in Linux servers.
+service: sshd
+detection:
+  type: threshold
+  patterns:
+    - regex: "Failed password for (?:invalid user )?(?P<user>\\S+) from (?P<src_ip>[\\d.]+) port (?P<port>\\d+)"
+    - regex: "Invalid user (?P<user>\\S+) from (?P<src_ip>[\\d.]+) port (?P<port>\\d+)"
+    - regex: "authentication failure.*rhost=(?P<src_ip>[\\d.]+).*user=(?P<user>\\S+)"
+    - regex: "Connection closed by authenticating user (?P<user>\\S+) (?P<src_ip>[\\d.]+)"
+  aggregation:
+    field: src_ip
+    count: 10
+    window_seconds: 300
+false_positives:
+  - Legitimate administrator connecting from dynamic IP with wrong credentials
+  - Automated deployment tools with temporarily misconfigured credentials
+  - Monitoring systems performing credential checks
+recommendation: >
+  1. Block the source IP at the firewall level immediately.
+  2. Enable and configure fail2ban or SSHGuard with aggressive thresholds.
+  3. Disable password-based SSH authentication; enforce key-based auth only.
+  4. Consider moving SSH to a non-standard port.
+  5. Implement IP allowlisting for SSH access.
+  6. Review whether the targeted usernames exist on the system.
+references:
+  - "https://attack.mitre.org/techniques/T1110/001/"
+  - "https://www.ssh.com/academy/ssh/fail2ban"
+tags:
+  - brute_force
+  - ssh
+  - authentication

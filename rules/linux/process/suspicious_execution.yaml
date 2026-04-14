@@ -1,0 +1,40 @@
+id: LIN-PROC-001
+title: Suspicious Process Execution
+category: process
+subcategory: execution
+mitre_technique: T1059.004
+mitre_tactic: execution
+severity: high
+confidence: medium
+enabled: true
+description: >
+  Detects execution of shells, interpreters, and remote access tools from unusual
+  locations (tmp, dev/shm, /var/tmp) or in unusual contexts. Also detects reverse
+  shell patterns and execution of suspicious binaries commonly used in post-exploitation.
+service: "*"
+detection:
+  type: pattern
+  patterns:
+    - regex: "(?:execve|exec).*(?P<cmd>/(?:tmp|var/tmp|dev/shm)/[^\"'\\s]+)"
+    - regex: "CMD.*(?P<cmd>(?:nc|ncat|netcat) .* (?:-e|-c))"
+    - regex: "CMD.*(?P<cmd>(?:bash|sh|dash|zsh) .*(?:-i|-s).*(?:/dev/tcp|/dev/udp))"
+    - regex: "(?P<cmd>python[23]?|perl|ruby|php) .*(?:-e|-r).*(?:import socket|exec|eval|system|os\\.)"
+    - regex: "CMD.*(?P<cmd>curl|wget).*(?:bash|sh|python|perl|ruby).*\\|"
+    - regex: "AVC.*denied.*\\{.*execute.*\\}.*name=\"(?P<file>[^\"]+/(?:tmp|shm)/[^\"]+)\""
+false_positives:
+  - Legitimate scripts in /tmp during system administration
+  - Some deployment tools use temporary paths
+  - Security scanner or penetration testing tools (authorized)
+recommendation: >
+  1. Identify the parent process and session that launched the suspicious command.
+  2. Check whether the binary in /tmp has been deleted (it may still be in /proc/<pid>/exe).
+  3. Capture memory dump if process is still running.
+  4. Review bash_history and auth logs for the same time window.
+  5. Check for persistence mechanisms (crontab, systemd units, .bashrc).
+references:
+  - "https://attack.mitre.org/techniques/T1059/004/"
+  - "https://attack.mitre.org/techniques/T1036/"
+tags:
+  - execution
+  - reverse_shell
+  - living_off_the_land

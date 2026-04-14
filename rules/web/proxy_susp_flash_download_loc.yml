@@ -1,0 +1,32 @@
+id: SIGMA-WEB-FLASH_PLAYER_UPDATE
+title: Flash Player Update from Suspicious Location
+category: web
+subcategory: detection
+mitre_technique: T1189
+mitre_tactic: execution
+severity: high
+confidence: low
+enabled: true
+description: Detects a flashplayer update from an unofficial location
+service: '*'
+detection:
+  type: pattern
+  patterns:
+  - regex: \.adobe\.com
+false_positives:
+- Unknown flash download locations
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/web/proxy_generic/proxy_susp_flash_download_loc.yml.
+  References: https://gist.github.com/roycewilliams/a723aaf8a6ac3ba4f817847610935cfb'
+references:
+- https://gist.github.com/roycewilliams/a723aaf8a6ac3ba4f817847610935cfb
+tags:
+- attack.initial-access
+- attack.t1189
+- attack.execution
+- attack.t1204.002
+- attack.defense-evasion
+- attack.t1036.005
+_sigma_source: rules/web/proxy_generic/proxy_susp_flash_download_loc.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems)
+_sigma_date: 2017-10-25

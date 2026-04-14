@@ -1,0 +1,30 @@
+id: SIGMA-LIN-LINUX_SHELL_PIPE_TO
+title: Linux Shell Pipe to Shell
+category: process
+subcategory: execution
+mitre_technique: T1140
+mitre_tactic: ''
+severity: medium
+confidence: low
+enabled: true
+description: Detects suspicious process command line that starts with a shell that
+  executes something and finally gets piped into another shell
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: 'sh\ \-c\ '
+  - regex: 'bash\ \-c\ '
+false_positives:
+- Legitimate software that uses these patterns
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_susp_pipe_shell.yml.
+  References: Internal Research'
+references:
+- Internal Research
+tags:
+- attack.defense-evasion
+- attack.t1140
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_susp_pipe_shell.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems)
+_sigma_date: 2022-03-14

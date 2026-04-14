@@ -1,0 +1,42 @@
+id: SIGMA-LIN-PYTHON_WEBSERVER_EXE
+title: Python WebServer Execution - Linux
+category: process
+subcategory: execution
+mitre_technique: T1048.003
+mitre_tactic: exfiltration
+severity: medium
+confidence: low
+enabled: true
+description: 'Detects the execution of Python web servers via command line interface
+  (CLI).
+
+  After gaining access to target systems, adversaries may use Python''s built-in HTTP
+  server modules to quickly establish a web server without requiring additional software.
+
+  This technique is commonly used in post-exploitation scenarios as it provides a
+  simple method for transferring files between the compromised host and attacker-controlled
+  systems.
+
+  '
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: http\.server
+  - regex: SimpleHTTPServer
+false_positives:
+- Testing or development activity
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_python_http_server_execution.yml.
+  References: https://www.atomicredteam.io/atomic-red-team/atomics/T1048.003#atomic-test-8---python3-httpserver,
+  https://docs.python.org/3/library/http.server.html, https://docs.python.org/2/library/simplehttpserver.html'
+references:
+- https://www.atomicredteam.io/atomic-red-team/atomics/T1048.003#atomic-test-8---python3-httpserver
+- https://docs.python.org/3/library/http.server.html
+- https://docs.python.org/2/library/simplehttpserver.html
+tags:
+- attack.exfiltration
+- attack.t1048.003
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_python_http_server_execution.yml
+_sigma_status: experimental
+_sigma_author: Mohamed LAKRI
+_sigma_date: 2025-10-17

@@ -1,0 +1,36 @@
+id: SIGMA-LIN-POTENTIAL_DISCOVERY
+title: Potential Discovery Activity Using Find - Linux
+category: process
+subcategory: detection
+mitre_technique: T1083
+mitre_tactic: discovery
+severity: medium
+confidence: low
+enabled: true
+description: Detects usage of "find" binary in a suspicious manner to perform discovery
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /find
+  - regex: \-perm\ \-4000
+  - regex: \-perm\ \-2000
+  - regex: \-perm\ 0777
+  - regex: \-perm\ \-222
+  - regex: \-perm\ \-o\ w
+  - regex: \-perm\ \-o\ x
+  - regex: \-perm\ \-u=s
+  - regex: \-perm\ \-g=s
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_susp_find_execution.yml.
+  References: https://github.com/SaiSathvik1/Linux-Privilege-Escalation-Notes'
+references:
+- https://github.com/SaiSathvik1/Linux-Privilege-Escalation-Notes
+tags:
+- attack.discovery
+- attack.t1083
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_susp_find_execution.yml
+_sigma_status: test
+_sigma_author: Nasreddine Bencherchali (Nextron Systems)
+_sigma_date: 2022-12-28

@@ -1,0 +1,42 @@
+id: LIN-AUTH-003
+title: Privilege Escalation Indicators
+category: authentication
+subcategory: privilege_escalation
+mitre_technique: T1548
+mitre_tactic: privilege_escalation
+severity: critical
+confidence: medium
+enabled: true
+description: >
+  Detects indicators of privilege escalation attempts including: su authentication
+  failures, SUID/SGID abuse patterns in logs, kernel exploit indicators in dmesg,
+  access to sensitive privilege-related files, and PAM-related escalation events.
+  Privilege escalation following initial access is a critical step in most attack chains.
+service: "*"
+detection:
+  type: pattern
+  patterns:
+    - regex: "su: FAILED SU (?P<user>\\S+) to (?P<target>\\S+) on"
+    - regex: "su\\[\\d+\\]: pam_unix.*authentication failure.*user=(?P<user>\\S+)"
+    - regex: "pam_unix.*su.*auth failure.*user=(?P<user>\\S+)"
+    - regex: "kernel: \\[.*\\].*(?P<msg>buffer overflow|stack smashing|segfault.*\\[uid=0\\]|RIP:.*exploit)"
+    - regex: "useradd.*(?P<user>\\S+)|usermod.*-G.*sudo.*(?P<target_user>\\S+)"
+    - regex: "gpasswd.*-a.*(?P<user>\\S+).*(?P<group>sudo|wheel|admin)"
+false_positives:
+  - Legitimate su usage by authorized administrators
+  - Application crashes that trigger segfault messages
+  - Authorized user management operations
+recommendation: >
+  1. Investigate the user sessions active at the time of the indicators.
+  2. Verify whether any new users were added to privileged groups.
+  3. Check /etc/passwd and /etc/group for unauthorized modifications.
+  4. Review recently modified SUID binaries: find / -perm -4000 -newer /tmp -type f 2>/dev/null
+  5. Check kernel dmesg for exploit-related messages.
+  6. Audit recent crontab and startup script changes.
+references:
+  - "https://attack.mitre.org/techniques/T1548/"
+  - "https://gtfobins.github.io/"
+tags:
+  - privilege_escalation
+  - su
+  - kernel

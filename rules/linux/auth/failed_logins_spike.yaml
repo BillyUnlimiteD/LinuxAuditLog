@@ -1,0 +1,38 @@
+id: LIN-AUTH-005
+title: Authentication Failure Spike
+category: authentication
+subcategory: brute_force
+mitre_technique: T1110
+mitre_tactic: credential_access
+severity: medium
+confidence: medium
+enabled: true
+description: >
+  Detects a spike in authentication failures across any PAM-authenticated service
+  (not just SSH). This covers failed logins via su, login, cron, and other PAM-aware
+  services. A broad spike may indicate credential stuffing or automated scanning.
+service: "*"
+detection:
+  type: threshold
+  patterns:
+    - regex: "pam_unix.*authentication failure.*(?:user=(?P<user>\\S+))?(?:.*rhost=(?P<src_ip>[\\d.]+))?"
+    - regex: "Failed password for (?P<user>\\S+)"
+    - regex: "FAILED LOGIN.*FOR (?P<user>\\S+)"
+  aggregation:
+    field: user
+    count: 5
+    window_seconds: 120
+false_positives:
+  - Cron jobs with expired credentials
+  - Misconfigured services attempting authentication
+recommendation: >
+  1. Identify the source of failures (service, user, IP).
+  2. Verify whether the user account is still valid and active.
+  3. Reset credentials if there is evidence of compromise.
+  4. Review PAM configuration for unnecessary authentication exposure.
+references:
+  - "https://attack.mitre.org/techniques/T1110/"
+tags:
+  - authentication
+  - pam
+  - brute_force

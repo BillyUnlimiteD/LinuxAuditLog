@@ -1,0 +1,39 @@
+id: SIGMA-LIN-POTENTIAL_SUSPICIOUS
+title: Potential Suspicious Change To Sensitive/Critical Files
+category: process
+subcategory: detection
+mitre_technique: T1565.001
+mitre_tactic: impact
+severity: medium
+confidence: low
+enabled: true
+description: Detects changes of sensitive and critical files. Monitors files that
+  you don't expect to change without planning on Linux system.
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /cat
+  - regex: /echo
+  - regex: /grep
+  - regex: /head
+  - regex: /more
+  - regex: /tail
+  - regex: /emacs
+  - regex: /nano
+  - regex: /sed
+  - regex: /vim
+false_positives:
+- Some false positives are to be expected on user or administrator machines. Apply
+  additional filters as needed.
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_susp_sensitive_file_access.yml.
+  References: https://learn.microsoft.com/en-us/azure/defender-for-cloud/file-integrity-monitoring-overview#which-files-should-i-monitor'
+references:
+- https://learn.microsoft.com/en-us/azure/defender-for-cloud/file-integrity-monitoring-overview#which-files-should-i-monitor
+tags:
+- attack.impact
+- attack.t1565.001
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_susp_sensitive_file_access.yml
+_sigma_status: test
+_sigma_author: '@d4ns4n_ (Wuerth-Phoenix)'
+_sigma_date: 2023-05-30

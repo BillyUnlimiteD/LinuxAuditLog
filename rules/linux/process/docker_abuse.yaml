@@ -1,0 +1,51 @@
+id: LIN-PROC-004
+title: Docker Container Abuse or Escape Attempt
+category: privilege_escalation
+subcategory: container_escape
+mitre_technique: T1611
+mitre_tactic: privilege_escalation
+severity: critical
+confidence: high
+enabled: true
+description: >
+  Detects Docker usage patterns associated with container escape, privilege
+  escalation, and lateral movement. Key vectors include: privileged containers
+  (full host capability set), host path mounts of sensitive directories
+  (/etc, /root, /var), Docker socket exposure (grants root-equivalent access),
+  and exec into running containers. An attacker with access to the Docker daemon
+  has effective root on the host regardless of user privileges.
+service: "*"
+detection:
+  type: pattern
+  patterns:
+    - regex: "docker.*run.*--privileged|docker.*run.*--cap-add[= ](?:SYS_ADMIN|ALL|NET_ADMIN)"
+    - regex: "docker.*run.*-v\\s+/(?:etc|root|proc|sys|var/run/docker\\.sock|run/docker\\.sock)[:/]"
+    - regex: "docker.*run.*--pid[= ]?host|docker.*run.*--net[= ]?host|docker.*run.*--userns[= ]?host"
+    - regex: "docker.*exec.*(?:-it|-ti|--interactive).*(?P<container>\\S+).*(?:bash|sh|ash|zsh|python|perl)"
+    - regex: "docker.*(?:pull|run).*(?P<image>\\S+/\\S+:\\S+)|docker.*run.*--rm.*(?P<image2>[a-z0-9]+/[a-z0-9]+)"
+    - regex: "dockerd.*--host[= ]?tcp|dockerd.*-H\\s+tcp|DOCKER_HOST=tcp"
+    - regex: "nsenter.*--target.*--mount|nsenter.*--pid.*--net"
+false_positives:
+  - Legitimate CI/CD pipelines using privileged build containers
+  - Docker-in-Docker (DinD) setups for automated testing
+  - DevOps tools requiring host network mode (e.g., monitoring agents)
+recommendation: >
+  1. Never run containers with --privileged unless absolutely required.
+  2. Replace docker socket mounts with rootless Docker or Podman.
+  3. Audit all running containers: docker ps -a --format 'table {{.ID}}\t{{.Image}}\t{{.Command}}'
+  4. Check for unauthorized images: docker images
+  5. Restrict Docker daemon access: only add users to 'docker' group with explicit approval.
+  6. Enable Docker Content Trust: export DOCKER_CONTENT_TRUST=1
+  7. Use seccomp/AppArmor profiles for production containers.
+  8. Consider Rootless Docker to eliminate the privilege escalation vector.
+references:
+  - "https://attack.mitre.org/techniques/T1611/"
+  - "https://attack.mitre.org/techniques/T1610/"
+  - "https://docs.docker.com/engine/security/"
+  - "https://book.hacktricks.xyz/linux-hardening/privilege-escalation/docker-security"
+tags:
+  - docker
+  - container
+  - privilege_escalation
+  - container_escape
+  - privileged

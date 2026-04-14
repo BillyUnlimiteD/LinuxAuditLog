@@ -1,0 +1,38 @@
+id: LIN-PROC-002
+title: Suspicious Cron Job Activity
+category: process
+subcategory: scheduled_task
+mitre_technique: T1053.003
+mitre_tactic: persistence
+severity: high
+confidence: medium
+enabled: true
+description: >
+  Detects suspicious cron job activity including: cron executing commands from
+  unusual paths, cron running network tools or interpreters, errors in cron
+  execution that may indicate tampered jobs, and cron activity from unexpected
+  user accounts. Cron is a common persistence mechanism after initial compromise.
+service: cron
+detection:
+  type: pattern
+  patterns:
+    - regex: "CRON.*CMD.*(?P<cmd>/(?:tmp|var/tmp|dev/shm)/[^)]+)"
+    - regex: "CRON.*CMD.*(?P<cmd>(?:nc|ncat|bash|sh|python|perl|curl|wget).*(?:-[eis]|\\|))"
+    - regex: "CRON.*(?P<user>\\S+).*error.*(?P<msg>permission denied|no such file|command not found)"
+    - regex: "crontab.*(?P<user>\\S+).*(?:edited|changed|modified|installed)"
+false_positives:
+  - Legitimate maintenance scripts run via cron
+  - Backup jobs using network tools
+  - Monitoring agents with cron-based collection
+recommendation: >
+  1. Review /etc/crontab, /etc/cron.d/, and per-user crontabs.
+  2. Verify the legitimacy of each cron command, especially those running from /tmp.
+  3. Check file ownership and permissions of scripts called by cron.
+  4. Remove unauthorized cron entries after documenting them as evidence.
+  5. Audit /var/spool/cron/ for all users.
+references:
+  - "https://attack.mitre.org/techniques/T1053/003/"
+tags:
+  - persistence
+  - cron
+  - scheduled_task

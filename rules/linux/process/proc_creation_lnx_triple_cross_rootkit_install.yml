@@ -1,0 +1,33 @@
+id: SIGMA-LIN-TRIPLE_CROSS_EBPF_RO
+title: Triple Cross eBPF Rootkit Install Commands
+category: process
+subcategory: execution
+mitre_technique: T1014
+mitre_tactic: ''
+severity: high
+confidence: low
+enabled: true
+description: Detects default install commands of the Triple Cross eBPF rootkit based
+  on the "deployer.sh" script
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /sudo
+  - regex: '\ tc\ '
+  - regex: '\ enp0s3\ '
+  - regex: '\ qdisc\ '
+  - regex: '\ filter\ '
+false_positives:
+- Unlikely
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_triple_cross_rootkit_install.yml.
+  References: https://github.com/h3xduck/TripleCross/blob/1f1c3e0958af8ad9f6ebe10ab442e75de33e91de/apps/deployer.sh'
+references:
+- https://github.com/h3xduck/TripleCross/blob/1f1c3e0958af8ad9f6ebe10ab442e75de33e91de/apps/deployer.sh
+tags:
+- attack.defense-evasion
+- attack.t1014
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_triple_cross_rootkit_install.yml
+_sigma_status: test
+_sigma_author: Nasreddine Bencherchali (Nextron Systems)
+_sigma_date: 2022-07-05

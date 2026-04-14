@@ -1,0 +1,47 @@
+id: SVC-HTTPD-001
+title: HTTPD (Red Hat/CentOS Apache) Anomalous Activity
+category: web
+subcategory: httpd
+mitre_technique: T1190
+mitre_tactic: initial_access
+severity: medium
+confidence: medium
+enabled: true
+description: >
+  Detects suspicious patterns specific to httpd deployments on Red Hat, CentOS,
+  Rocky Linux, and AlmaLinux systems. Covers httpd-specific paths (/var/log/httpd/),
+  SELinux denial patterns for httpd, suspicious httpd child process crashes,
+  PHP-FPM communication errors, and common CMS exploit patterns (WordPress, Joomla,
+  Drupal) often seen on httpd-based deployments.
+service: httpd
+detection:
+  type: pattern
+  patterns:
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>/(?:server-status|server-info|cgi-bin/)[^\"]*)\""
+    - regex: "\\[error\\].*(?P<msg>PHP Fatal error|PHP Parse error|Call to undefined function|Allowed memory size)"
+    - regex: "\\[warn\\].*(?P<msg>child process.*exited with status|server reached MaxRequestWorkers|worker threads remaining)"
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>[^\"]*(?:wp-login\\.php|xmlrpc\\.php|wp-admin/|administrator/|index\\.php\\?option=com_)[^\"]*)\""
+    - regex: "AVC.*denied.*\\{.*\\}.*comm=\"httpd\".*path=\"(?P<path>[^\"]+)\""
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>[^\"]*(?:\\.php\\?.*=(?:https?|ftp)://|\\bshell\\.php|\\bwebshell|\\beval\\.php|\\bcmd\\.php)[^\"]*)\""
+false_positives:
+  - Legitimate WordPress/Joomla/Drupal administration
+  - SELinux denials from legitimate httpd operations (may need policy adjustment)
+  - PHP errors from legitimate application bugs
+recommendation: >
+  1. Restrict access to /server-status and /server-info by source IP.
+  2. Review SELinux AVC denials — httpd should only access its designated directories.
+  3. Limit PHP execution via .htaccess to specific directories.
+  4. Monitor for PHP webshell patterns (eval, base64_decode, system, exec in POST).
+  5. Keep CMS plugins and themes updated.
+  6. Consider using php-fpm with separate pools per application for isolation.
+references:
+  - "https://attack.mitre.org/techniques/T1190/"
+  - "https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/deploying_web_servers_and_reverse_proxies/setting-up-and-configuring-apache-http-server_deploying-web-servers-and-reverse-proxies"
+  - "https://wiki.centos.org/HowTos/SELinux"
+tags:
+  - httpd
+  - rhel
+  - centos
+  - php
+  - selinux
+  - web

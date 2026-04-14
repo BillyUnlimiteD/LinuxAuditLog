@@ -1,0 +1,43 @@
+id: SIGMA-LIN-SHELL_INVOCATION_VIA
+title: Shell Invocation Via Ssh - Linux
+category: process
+subcategory: execution
+mitre_technique: T1059
+mitre_tactic: execution
+severity: high
+confidence: low
+enabled: true
+description: 'Detects the use of the "ssh" utility to execute a shell. Such behavior
+  may be associated with privilege escalation, unauthorized command execution, or
+  to break out from restricted environments.
+
+  '
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /ssh
+  - regex: ProxyCommand=;
+  - regex: permitlocalcommand=yes
+  - regex: localhost
+  - regex: /bin/bash
+  - regex: /bin/dash
+  - regex: /bin/fish
+  - regex: /bin/sh
+  - regex: /bin/zsh
+  - regex: sh\ 0<\&2\ 1>\&2
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_ssh_shell_execution.yml.
+  References: https://gtfobins.github.io/gtfobins/ssh/, https://www.elastic.co/guide/en/security/current/linux-restricted-shell-breakout-via-linux-binary-s.html'
+references:
+- https://gtfobins.github.io/gtfobins/ssh/
+- https://www.elastic.co/guide/en/security/current/linux-restricted-shell-breakout-via-linux-binary-s.html
+tags:
+- attack.execution
+- attack.t1059
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_ssh_shell_execution.yml
+_sigma_status: test
+_sigma_author: Li Ling, Andy Parkidomo, Robert Rakowski, Blake Hartstein (Bloomberg
+  L.P.)
+_sigma_date: 2024-08-29

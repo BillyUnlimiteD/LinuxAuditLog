@@ -1,0 +1,37 @@
+id: SIGMA-LIN-SYSTEM_AND_HARDWARE
+title: System and Hardware Information Discovery
+category: audit
+subcategory: detection
+mitre_technique: T1082
+mitre_tactic: discovery
+severity: info
+confidence: low
+enabled: true
+description: Detects system information discovery commands
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: PATH
+  - regex: /sys/class/dmi/id/bios_version
+  - regex: /sys/class/dmi/id/product_name
+  - regex: /sys/class/dmi/id/chassis_vendor
+  - regex: /proc/scsi/scsi
+  - regex: /proc/ide/hd0/model
+  - regex: /proc/version
+  - regex: /etc/.*version
+  - regex: /etc/.*release
+  - regex: /etc/issue
+false_positives:
+- Legitimate administration activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/path/lnx_auditd_system_info_discovery2.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1082/T1082.md#atomic-test-4---linux-vm-check-via-hardware'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1082/T1082.md#atomic-test-4---linux-vm-check-via-hardware
+tags:
+- attack.discovery
+- attack.t1082
+_sigma_source: rules/linux/auditd/path/lnx_auditd_system_info_discovery2.yml
+_sigma_status: stable
+_sigma_author: Ömer Günal, oscd.community
+_sigma_date: 2020-10-08

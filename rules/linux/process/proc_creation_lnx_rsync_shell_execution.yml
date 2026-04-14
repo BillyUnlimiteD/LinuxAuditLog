@@ -1,0 +1,42 @@
+id: SIGMA-LIN-SHELL_EXECUTION_VIA
+title: Shell Execution via Rsync - Linux
+category: process
+subcategory: execution
+mitre_technique: T1059
+mitre_tactic: execution
+severity: high
+confidence: low
+enabled: true
+description: 'Detects the use of the "rsync" utility to execute a shell. Such behavior
+  may be associated with privilege escalation, unauthorized command execution, or
+  to break out from restricted environments.
+
+  '
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /rsync
+  - regex: /rsyncd
+  - regex: '\ \-e\ '
+  - regex: '/ash\ '
+  - regex: '/bash\ '
+  - regex: '/dash\ '
+  - regex: '/csh\ '
+  - regex: '/sh\ '
+  - regex: '/zsh\ '
+  - regex: '/tcsh\ '
+false_positives:
+- Legitimate cases in which "rsync" is used to execute a shell
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_rsync_shell_execution.yml.
+  References: https://gtfobins.github.io/gtfobins/rsync/#shell'
+references:
+- https://gtfobins.github.io/gtfobins/rsync/#shell
+tags:
+- attack.execution
+- attack.t1059
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_rsync_shell_execution.yml
+_sigma_status: experimental
+_sigma_author: Li Ling, Andy Parkidomo, Robert Rakowski, Blake Hartstein (Bloomberg
+  L.P.), Florian Roth
+_sigma_date: 2024-09-02

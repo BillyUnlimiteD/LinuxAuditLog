@@ -1,0 +1,38 @@
+id: SIGMA-LIN-POTENTIAL_LINUX_AMAZ
+title: Potential Linux Amazon SSM Agent Hijacking
+category: process
+subcategory: detection
+mitre_technique: T1219.002
+mitre_tactic: persistence
+severity: medium
+confidence: low
+enabled: true
+description: Detects potential Amazon SSM agent hijack attempts as outlined in the
+  Mitiga research report.
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /amazon\-ssm\-agent
+  - regex: '\-register\ '
+  - regex: '\-code\ '
+  - regex: '\-id\ '
+  - regex: '\-region\ '
+false_positives:
+- Legitimate activity of system administrators
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_ssm_agent_abuse.yml.
+  References: https://www.mitiga.io/blog/mitiga-security-advisory-abusing-the-ssm-agent-as-a-remote-access-trojan,
+  https://www.bleepingcomputer.com/news/security/amazons-aws-ssm-agent-can-be-used-as-post-exploitation-rat-malware/,
+  https://www.helpnetsecurity.com/2023/08/02/aws-instances-attackers-access/'
+references:
+- https://www.mitiga.io/blog/mitiga-security-advisory-abusing-the-ssm-agent-as-a-remote-access-trojan
+- https://www.bleepingcomputer.com/news/security/amazons-aws-ssm-agent-can-be-used-as-post-exploitation-rat-malware/
+- https://www.helpnetsecurity.com/2023/08/02/aws-instances-attackers-access/
+tags:
+- attack.command-and-control
+- attack.persistence
+- attack.t1219.002
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_ssm_agent_abuse.yml
+_sigma_status: test
+_sigma_author: Muhammad Faisal
+_sigma_date: 2023-08-03

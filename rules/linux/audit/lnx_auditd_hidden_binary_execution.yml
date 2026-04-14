@@ -1,0 +1,35 @@
+id: SIGMA-LIN-USE_OF_HIDDEN_PATHS
+title: Use Of Hidden Paths Or Files
+category: audit
+subcategory: detection
+mitre_technique: T1574.001
+mitre_tactic: persistence
+severity: low
+confidence: low
+enabled: true
+description: Detects calls to hidden files or files located in hidden directories
+  in NIX systems.
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: PATH
+  - regex: /\.cache/
+  - regex: /\.config/
+  - regex: /\.pyenv/
+  - regex: /\.rustup/toolchains
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/path/lnx_auditd_hidden_binary_execution.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1564.001/T1564.001.md'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1564.001/T1564.001.md
+tags:
+- attack.privilege-escalation
+- attack.persistence
+- attack.defense-evasion
+- attack.t1574.001
+_sigma_source: rules/linux/auditd/path/lnx_auditd_hidden_binary_execution.yml
+_sigma_status: test
+_sigma_author: David Burkett, @signalblur
+_sigma_date: 2022-12-30

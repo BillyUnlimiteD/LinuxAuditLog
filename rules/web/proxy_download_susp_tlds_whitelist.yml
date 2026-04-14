@@ -1,0 +1,38 @@
+id: SIGMA-WEB-DOWNLOAD_FROM_SUSPIC
+title: Download From Suspicious TLD - Whitelist
+category: web
+subcategory: detection
+mitre_technique: T1566
+mitre_tactic: execution
+severity: low
+confidence: low
+enabled: true
+description: Detects executable downloads from suspicious remote systems
+service: '*'
+detection:
+  type: pattern
+  patterns:
+  - regex: docm
+  - regex: xlsm
+  - regex: pptm
+  - regex: \.com
+  - regex: \.org
+  - regex: \.net
+  - regex: \.edu
+  - regex: \.gov
+false_positives:
+- All kind of software downloads
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/web/proxy_generic/proxy_download_susp_tlds_whitelist.yml.
+  References: Internal Research'
+references:
+- Internal Research
+tags:
+- attack.initial-access
+- attack.t1566
+- attack.execution
+- attack.t1203
+- attack.t1204.002
+_sigma_source: rules/web/proxy_generic/proxy_download_susp_tlds_whitelist.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems)
+_sigma_date: 2017-03-13

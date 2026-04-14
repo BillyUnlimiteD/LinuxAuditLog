@@ -1,0 +1,31 @@
+id: SIGMA-LIN-OVERWRITING_THE_FILE
+title: Overwriting the File with Dev Zero or Null
+category: audit
+subcategory: detection
+mitre_technique: T1485
+mitre_tactic: impact
+severity: low
+confidence: low
+enabled: true
+description: Detects overwriting (effectively wiping/deleting) of a file.
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: EXECVE
+  - regex: if=/dev/null
+  - regex: if=/dev/zero
+false_positives:
+- Appending null bytes to files.
+- Legitimate overwrite of files.
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/execve/lnx_auditd_dd_delete_file.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1485/T1485.md'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1485/T1485.md
+tags:
+- attack.impact
+- attack.t1485
+_sigma_source: rules/linux/auditd/execve/lnx_auditd_dd_delete_file.yml
+_sigma_status: stable
+_sigma_author: Jakob Weinzettl, oscd.community
+_sigma_date: 2019-10-23

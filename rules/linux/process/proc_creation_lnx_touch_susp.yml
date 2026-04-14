@@ -1,0 +1,31 @@
+id: SIGMA-LIN-TOUCH_SUSPICIOUS_SER
+title: Touch Suspicious Service File
+category: process
+subcategory: detection
+mitre_technique: T1070.006
+mitre_tactic: ''
+severity: medium
+confidence: low
+enabled: true
+description: Detects usage of the "touch" process in service file.
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /touch
+  - regex: '\ \-t\ '
+  - regex: \.service
+false_positives:
+- Admin changing date of files.
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_touch_susp.yml.
+  References: https://blogs.blackberry.com/, https://twitter.com/Joseliyo_Jstnk/status/1620131033474822144'
+references:
+- https://blogs.blackberry.com/
+- https://twitter.com/Joseliyo_Jstnk/status/1620131033474822144
+tags:
+- attack.defense-evasion
+- attack.t1070.006
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_touch_susp.yml
+_sigma_status: test
+_sigma_author: Joseliyo Sanchez, @Joseliyo_Jstnk
+_sigma_date: 2023-01-11

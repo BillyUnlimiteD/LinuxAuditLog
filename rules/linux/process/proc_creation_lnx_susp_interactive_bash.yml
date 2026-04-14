@@ -1,0 +1,38 @@
+id: SIGMA-LIN-INTERACTIVE_BASH_SUS
+title: Interactive Bash Suspicious Children
+category: process
+subcategory: detection
+mitre_technique: T1059.004
+mitre_tactic: execution
+severity: medium
+confidence: low
+enabled: true
+description: Detects suspicious interactive bash as a parent to rather uncommon child
+  processes
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: bash\ \-i
+  - regex: '\-c\ import\ '
+  - regex: base64
+  - regex: pty\.spawn
+  - regex: whoami
+  - regex: iptables
+  - regex: /ncat
+  - regex: /netcat
+false_positives:
+- Legitimate software that uses these patterns
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_susp_interactive_bash.yml.
+  References: Internal Research'
+references:
+- Internal Research
+tags:
+- attack.execution
+- attack.defense-evasion
+- attack.t1059.004
+- attack.t1036
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_susp_interactive_bash.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems)
+_sigma_date: 2022-03-14

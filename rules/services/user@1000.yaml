@@ -1,0 +1,39 @@
+id: SVC-USER@1000-001
+title: user@1000 systemd user service lifecycle monitoring
+category: service
+subcategory: user@1000
+mitre_technique: T1543.003
+mitre_tactic: persistence
+severity: medium
+confidence: medium
+enabled: true
+description: >
+  Detects systemd lifecycle events for the user@1000 service unit, including
+  unexpected start/stop events and failures. User-level systemd units can be
+  abused for persistence or to hide malicious activity under a normal login session.
+service: user@1000
+detection:
+  type: pattern
+  patterns:
+    - regex: "type=SERVICE_START .*msg='unit=user@1000 .* res=(?:success|failed)'"
+    - regex: "type=SERVICE_STOP .*msg='unit=user@1000 .* res=(?:success|failed)'"
+    - regex: "type=SERVICE_(?:START|STOP) .*unit=user@1000 .* subj=.*init_t"
+    - regex: "type=SERVICE_(?:START|STOP) .*unit=user@1000 .* res=failed"
+false_positives:
+  - Normal user session service start/stop events during login/logout
+  - Expected systemd user instance restarts under the same UID
+recommendation: >
+  1. Correlate user@1000 service events with login activity and user sessions.
+  2. Confirm that user@1000 service starts are expected and not the result of hidden
+     persistence mechanisms.
+  3. Review the systemd unit file and the user session environment for unauthorized
+     service units.
+references:
+  - "https://attack.mitre.org/techniques/T1543/003/"
+  - "https://www.freedesktop.org/wiki/Software/systemd/"
+tags:
+  - user@1000
+  - systemd
+  - audit
+  - persistence
+  - user_service

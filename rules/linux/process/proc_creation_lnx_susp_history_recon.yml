@@ -1,0 +1,33 @@
+id: SIGMA-LIN-PRINT_HISTORY_FILE_C
+title: Print History File Contents
+category: process
+subcategory: detection
+mitre_technique: T1592.004
+mitre_tactic: reconnaissance
+severity: medium
+confidence: low
+enabled: true
+description: Detects events in which someone prints the contents of history files
+  to the commandline or redirects it to a file for reconnaissance
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /cat
+  - regex: /head
+  - regex: /tail
+  - regex: /more
+false_positives:
+- Legitimate administration activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_susp_history_recon.yml.
+  References: https://github.com/sleventyeleven/linuxprivchecker/, https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1552.003/T1552.003.md'
+references:
+- https://github.com/sleventyeleven/linuxprivchecker/
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1552.003/T1552.003.md
+tags:
+- attack.reconnaissance
+- attack.t1592.004
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_susp_history_recon.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems)
+_sigma_date: 2022-06-20

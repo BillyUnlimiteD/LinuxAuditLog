@@ -1,0 +1,49 @@
+id: SIGMA-WEB-SQL_INJECTION_STRING
+title: SQL Injection Strings In URI
+category: web
+subcategory: detection
+mitre_technique: T1190
+mitre_tactic: ''
+severity: high
+confidence: low
+enabled: true
+description: Detects potential SQL injection attempts via GET requests in access logs.
+service: '*'
+detection:
+  type: pattern
+  patterns:
+  - regex: '@@version'
+  - regex: '%271%27%3D%271'
+  - regex: '=select\ '
+  - regex: =select\(
+  - regex: =select%20
+  - regex: concat_ws\(
+  - regex: CONCAT\(0x
+  - regex: from\ mysql\.innodb_table_stats
+  - regex: from%20mysql\.innodb_table_stats
+  - regex: group_concat\(
+false_positives:
+- Java scripts and CSS Files
+- User searches in search boxes of the respective website
+- Internal vulnerability scanners can cause some serious FPs when used, if you experience
+  a lot of FPs due to this think of adding more filters such as "User Agent" strings
+  and more response codes
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/web/webserver_generic/web_sql_injection_in_access_logs.yml.
+  References: https://www.acunetix.com/blog/articles/exploiting-sql-injection-example/,
+  https://www.acunetix.com/blog/articles/using-logs-to-investigate-a-web-application-attack/,
+  https://brightsec.com/blog/sql-injection-payloads/, https://github.com/payloadbox/sql-injection-payload-list,
+  https://book.hacktricks.xyz/pentesting-web/sql-injection/mysql-injection'
+references:
+- https://www.acunetix.com/blog/articles/exploiting-sql-injection-example/
+- https://www.acunetix.com/blog/articles/using-logs-to-investigate-a-web-application-attack/
+- https://brightsec.com/blog/sql-injection-payloads/
+- https://github.com/payloadbox/sql-injection-payload-list
+- https://book.hacktricks.xyz/pentesting-web/sql-injection/mysql-injection
+tags:
+- attack.initial-access
+- attack.t1190
+_sigma_source: rules/web/webserver_generic/web_sql_injection_in_access_logs.yml
+_sigma_status: test
+_sigma_author: Saw Win Naung, Nasreddine Bencherchali (Nextron Systems), Thurein Oo
+  (Yoma Bank)
+_sigma_date: 2020-02-22

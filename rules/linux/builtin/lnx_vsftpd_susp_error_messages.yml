@@ -1,0 +1,38 @@
+id: SIGMA-LIN-SUSPICIOUS_VSFTPD_ER
+title: Suspicious VSFTPD Error Messages
+category: authentication
+subcategory: detection
+mitre_technique: T1190
+mitre_tactic: ''
+severity: medium
+confidence: low
+enabled: true
+description: Detects suspicious VSFTPD error messages that indicate a fatal or suspicious
+  error that could be caused by exploiting attempts
+service: vsftpd
+detection:
+  type: pattern
+  patterns:
+  - regex: Connection\ refused:\ too\ many\ sessions\ for\ this\ address\.
+  - regex: Connection\ refused:\ tcp_wrappers\ denial\.
+  - regex: Bad\ HTTP\ verb\.
+  - regex: port\ and\ pasv\ both\ active
+  - regex: pasv\ and\ port\ both\ active
+  - regex: Transfer\ done\ \(but\ failed\ to\ open\ directory\)\.
+  - regex: Could\ not\ set\ file\ modification\ time\.
+  - regex: bug:\ pid\ active\ in\ ptrace_sandbox_free
+  - regex: PTRACE_SETOPTIONS\ failure
+  - regex: 'weird\ status:'
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/builtin/vsftpd/lnx_vsftpd_susp_error_messages.yml.
+  References: https://github.com/dagwieers/vsftpd/'
+references:
+- https://github.com/dagwieers/vsftpd/
+tags:
+- attack.initial-access
+- attack.t1190
+_sigma_source: rules/linux/builtin/vsftpd/lnx_vsftpd_susp_error_messages.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems)
+_sigma_date: 2017-07-05

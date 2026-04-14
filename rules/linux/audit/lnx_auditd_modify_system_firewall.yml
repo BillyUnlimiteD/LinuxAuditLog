@@ -1,0 +1,46 @@
+id: SIGMA-LIN-MODIFY_SYSTEM_FIREWA
+title: Modify System Firewall
+category: audit
+subcategory: detection
+mitre_technique: T1562.004
+mitre_tactic: ''
+severity: medium
+confidence: low
+enabled: true
+description: 'Detects the removal of system firewall rules. Adversaries may only delete
+  or modify a specific system firewall rule to bypass controls limiting network usage
+  or access.
+
+  Detection rules that match only on the disabling of firewalls will miss this.
+
+  '
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: EXECVE
+  - regex: iptables
+  - regex: DROP
+  - regex: EXECVE
+  - regex: firewall\-cmd
+  - regex: remove
+  - regex: EXECVE
+  - regex: delete
+  - regex: EXECVE
+  - regex: delete
+false_positives:
+- Legitimate admin activity
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/execve/lnx_auditd_modify_system_firewall.yml.
+  References: https://www.trendmicro.com/en_us/research/22/c/cyclops-blink-sets-sights-on-asus-routers--.html,
+  https://blog.aquasec.com/container-security-tnt-container-attack, https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/configuring_and_managing_networking/getting-started-with-nftables_configuring-and-managing-networking'
+references:
+- https://www.trendmicro.com/en_us/research/22/c/cyclops-blink-sets-sights-on-asus-routers--.html
+- https://blog.aquasec.com/container-security-tnt-container-attack
+- https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/configuring_and_managing_networking/getting-started-with-nftables_configuring-and-managing-networking
+tags:
+- attack.t1562.004
+- attack.defense-evasion
+_sigma_source: rules/linux/auditd/execve/lnx_auditd_modify_system_firewall.yml
+_sigma_status: test
+_sigma_author: IAI
+_sigma_date: 2023-03-06

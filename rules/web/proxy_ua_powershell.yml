@@ -1,0 +1,30 @@
+id: SIGMA-WEB-WINDOWS_POWERSHELL_U
+title: Windows PowerShell User Agent
+category: web
+subcategory: execution
+mitre_technique: T1071.001
+mitre_tactic: ''
+severity: medium
+confidence: low
+enabled: true
+description: Detects Windows PowerShell Web Access
+service: '*'
+detection:
+  type: pattern
+  patterns:
+  - regex: \ WindowsPowerShell/
+false_positives:
+- Administrative scripts that download files from the Internet
+- Administrative scripts that retrieve certain website contents
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/web/proxy_generic/proxy_ua_powershell.yml.
+  References: https://msdn.microsoft.com/powershell/reference/5.1/microsoft.powershell.utility/Invoke-WebRequest'
+references:
+- https://msdn.microsoft.com/powershell/reference/5.1/microsoft.powershell.utility/Invoke-WebRequest
+tags:
+- attack.defense-evasion
+- attack.command-and-control
+- attack.t1071.001
+_sigma_source: rules/web/proxy_generic/proxy_ua_powershell.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems)
+_sigma_date: 2017-03-13

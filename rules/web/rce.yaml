@@ -1,0 +1,45 @@
+id: WEB-004
+title: Remote Code Execution Attempt
+category: web
+subcategory: rce
+mitre_technique: T1190
+mitre_tactic: initial_access
+severity: critical
+confidence: high
+enabled: true
+description: >
+  Detects Remote Code Execution (RCE) attempts via web application vulnerabilities.
+  Indicators include: OS command injection in URL parameters, deserialization attack
+  payloads, server-side template injection (SSTI), and exploitation of known RCE
+  patterns in common frameworks (Log4Shell, Shellshock, Spring4Shell).
+service: "*"
+detection:
+  type: pattern
+  patterns:
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>[^\"]*(?:\\$\\{jndi:|\\$\\{\\$\\{|%24%7bjndi|\\$%7bjndi)[^\"]*)\""
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>[^\"]*(?:;id;|;whoami;|;uname;|%3bid%3b|%3bwhoami)[^\"]*)\""
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>[^\"]*(?:\\|id\\b|\\|cat\\s|\\|ls\\s|\\|wget\\s|\\|curl\\s|&&id|&&cat|&&wget)[^\"]*)\""
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>[^\"]*(?:\\(\\)\\s*\\{.*\\}.*;|\\(\\)%20%7B)[^\"]*)\""
+    - regex: "(?P<src_ip>[\\d.]+).*User-Agent.*\\(\\)\\s*\\{.*\\}.*;"
+false_positives:
+  - Security scanner payloads during authorized penetration testing
+  - Unusual legitimate application parameters containing shell-like syntax
+recommendation: >
+  1. CRITICAL: Determine if the payload was executed (check for unusual processes or files).
+  2. For Log4Shell: check if jndi DNS or HTTP callbacks were made from the server.
+  3. Isolate the system if execution is confirmed.
+  4. Patch the vulnerable application component immediately.
+  5. Review application server logs for command execution output.
+  6. Check for new files, processes, or network connections spawned by the web server user.
+references:
+  - "https://attack.mitre.org/techniques/T1190/"
+  - "https://nvd.nist.gov/vuln/detail/CVE-2021-44228"
+  - "https://nvd.nist.gov/vuln/detail/CVE-2014-6271"
+  - "https://owasp.org/www-community/attacks/Command_Injection"
+tags:
+  - rce
+  - command_injection
+  - log4shell
+  - shellshock
+  - web
+  - owasp_a03

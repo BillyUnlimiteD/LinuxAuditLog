@@ -1,0 +1,40 @@
+id: SIGMA-LIN-PROGRAM_EXECUTIONS_I
+title: Program Executions in Suspicious Folders
+category: audit
+subcategory: execution
+mitre_technique: T1587
+mitre_tactic: ''
+severity: medium
+confidence: low
+enabled: true
+description: Detects program executions in suspicious non-program folders related
+  to malware or hacking activity
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: SYSCALL
+  - regex: /tmp/
+  - regex: /var/www/
+  - regex: /home/.*/public_html/
+  - regex: /usr/local/apache2/
+  - regex: /usr/local/httpd/
+  - regex: /var/apache/
+  - regex: /srv/www/
+  - regex: /home/httpd/html/
+  - regex: /srv/http/
+false_positives:
+- Admin activity (especially in /tmp folders)
+- Crazy web applications
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/syscall/lnx_auditd_susp_exe_folders.yml.
+  References: Internal Research'
+references:
+- Internal Research
+tags:
+- attack.t1587
+- attack.t1584
+- attack.resource-development
+_sigma_source: rules/linux/auditd/syscall/lnx_auditd_susp_exe_folders.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems)
+_sigma_date: 2018-01-23

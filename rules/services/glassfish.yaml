@@ -1,0 +1,42 @@
+id: SVC-GLASSFISH-001
+title: GlassFish service anomalous activity
+category: service
+subcategory: glassfish
+mitre_technique: T1543.003
+mitre_tactic: persistence
+severity: high
+confidence: medium
+enabled: true
+description: >
+  Detects anomalous GlassFish service behavior and administrative activity
+  including failed GlassFish service stops or restarts, suspicious log cleanup
+  commands executed as root, and GlassFish domain startup/shutdown failures.
+service: glassfish
+detection:
+  type: pattern
+  patterns:
+    - regex: "type=SERVICE_STOP .*msg='unit=glassfish .* res=failed'"
+    - regex: "type=SERVICE_START .*msg='unit=glassfish .* res=(?:success|failed)'"
+    - regex: 'glassfish\.service: Failed with result ''exit-code'''
+    - regex: 'glassfish\.service: Main process exited, code=exited, status=143/n/a'
+    - regex: '\(root\) CMD \(sh /home/script/ClearLogsGlassfish\.sh\)'
+    - regex: '\(root\) CMDOUT \(glassfish/glassfish4/glassfish/domains/domain1/(?:config|logs|generated|applications|domain\.xml(?:~)?|local-password(?:~)?|pid(?:\.prev)?~)\)'
+    - regex: "java CLI306: Warning - The server located at /home/glassfish/glassfish4/glassfish/domains/domain1 is not running."
+false_positives:
+  - Planned GlassFish service restarts and normal maintenance by administrators
+  - Cron-driven log cleanup tasks for GlassFish that are documented and expected
+recommendation: >
+  1. Review GlassFish service lifecycle events for unexpected stops or failures.
+  2. Validate any root cron jobs touching GlassFish configuration or log files.
+  3. Ensure GlassFish is running under an appropriate non-root account.
+  4. Confirm that GlassFish startup/shutdown failures are not caused by resource issues or stale locks.
+references:
+  - "https://attack.mitre.org/techniques/T1543/003/"
+  - "https://glassfish.org/"
+  - "https://www.freedesktop.org/wiki/Software/systemd/"
+tags:
+  - glassfish
+  - systemd
+  - audit
+  - service_failure
+  - log_cleanup

@@ -1,0 +1,34 @@
+id: SIGMA-LIN-ENABLE_BPF_KPROBES_T
+title: Enable BPF Kprobes Tracing
+category: process
+subcategory: detection
+mitre_technique: ''
+mitre_tactic: execution
+severity: medium
+confidence: low
+enabled: true
+description: Detects common command used to enable bpf kprobes tracing
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: echo\ 1\ >
+  - regex: /sys/kernel/debug/tracing/events/kprobes/
+  - regex: /myprobe/enable
+  - regex: /myretprobe/enable
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_bpf_kprob_tracing_enabled.yml.
+  References: https://embracethered.com/blog/posts/2021/offensive-bpf-bpftrace/, https://bpftrace.org/,
+  https://www.kernel.org/doc/html/v5.0/trace/kprobetrace.html'
+references:
+- https://embracethered.com/blog/posts/2021/offensive-bpf-bpftrace/
+- https://bpftrace.org/
+- https://www.kernel.org/doc/html/v5.0/trace/kprobetrace.html
+tags:
+- attack.execution
+- attack.defense-evasion
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_bpf_kprob_tracing_enabled.yml
+_sigma_status: test
+_sigma_author: Nasreddine Bencherchali (Nextron Systems)
+_sigma_date: 2023-01-25

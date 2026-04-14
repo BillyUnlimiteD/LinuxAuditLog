@@ -1,0 +1,41 @@
+id: WEB-001
+title: SQL Injection Attempt
+category: web
+subcategory: injection
+mitre_technique: T1190
+mitre_tactic: initial_access
+severity: high
+confidence: medium
+enabled: true
+description: >
+  Detects SQL injection patterns in web server access logs. Indicators include
+  classic SQL keywords in URI parameters, common SQLi payloads, blind SQLi
+  time-based probes, and error-based injection attempts. SQLi can lead to
+  data exfiltration, authentication bypass, or command execution.
+service: "*"
+detection:
+  type: pattern
+  patterns:
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>[^\"]*(?:union.{0,20}select|select.{0,20}from|insert.{0,20}into|drop.{0,20}table|update.{0,20}set|delete.{0,20}from|exec\\(|execute\\(|xp_cmdshell|information_schema|pg_sleep|waitfor.{0,10}delay|benchmark\\()[^\"]*)\""
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>[^\"]*(?:'--|\\'\\s*or\\s*['\"]?1['\"]?\\s*=\\s*['\"]?1|%27|0x27)[^\"]*)\""
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>[^\"]*(?:1=1|1%3d1|'%20or%20'|%20union%20|%20select%20)[^\"]*)\""
+false_positives:
+  - Security scanners performing authorized assessments
+  - Developers testing with SQL-related parameter names
+  - Legitimate searches containing SQL-like keywords
+recommendation: >
+  1. Identify whether the injection was successful (HTTP 200 response with unusual body size).
+  2. Review application logs for database errors or unusual query results.
+  3. Check for data exfiltration indicators (large response sizes, time-delayed responses).
+  4. Implement or verify WAF rules blocking common SQLi patterns.
+  5. Audit database query logs for the same time window.
+  6. Ensure parameterized queries are used throughout the application.
+references:
+  - "https://attack.mitre.org/techniques/T1190/"
+  - "https://owasp.org/www-community/attacks/SQL_Injection"
+  - "https://portswigger.net/web-security/sql-injection"
+tags:
+  - sqli
+  - injection
+  - web
+  - owasp_a03

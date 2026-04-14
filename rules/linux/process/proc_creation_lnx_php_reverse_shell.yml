@@ -1,0 +1,41 @@
+id: SIGMA-LIN-POTENTIAL_PHP_REVERS
+title: Potential PHP Reverse Shell
+category: process
+subcategory: execution
+mitre_technique: ''
+mitre_tactic: execution
+severity: high
+confidence: low
+enabled: true
+description: 'Detects usage of the PHP CLI with the "-r" flag which allows it to run
+  inline PHP code. The rule looks for calls to the "fsockopen" function which allows
+  the creation of sockets.
+
+  Attackers often leverage this in combination with functions such as "exec" or "fopen"
+  to initiate a reverse shell connection.
+
+  '
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /php
+  - regex: '\ \-r\ '
+  - regex: fsockopen
+  - regex: bash
+  - regex: pdksh
+  - regex: tcsh
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_php_reverse_shell.yml.
+  References: https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet,
+  https://www.revshells.com/'
+references:
+- https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet
+- https://www.revshells.com/
+tags:
+- attack.execution
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_php_reverse_shell.yml
+_sigma_status: test
+_sigma_author: '@d4ns4n_'
+_sigma_date: 2023-04-07

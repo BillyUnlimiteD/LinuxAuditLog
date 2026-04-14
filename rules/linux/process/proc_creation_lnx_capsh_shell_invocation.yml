@@ -1,0 +1,32 @@
+id: SIGMA-LIN-CAPSH_SHELL_INVOCATI
+title: Capsh Shell Invocation - Linux
+category: process
+subcategory: execution
+mitre_technique: T1059
+mitre_tactic: execution
+severity: high
+confidence: low
+enabled: true
+description: 'Detects the use of the "capsh" utility to invoke a shell.
+
+  '
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /capsh
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_capsh_shell_invocation.yml.
+  References: https://gtfobins.github.io/gtfobins/capsh/#shell, https://www.elastic.co/guide/en/security/current/linux-restricted-shell-breakout-via-linux-binary-s.html'
+references:
+- https://gtfobins.github.io/gtfobins/capsh/#shell
+- https://www.elastic.co/guide/en/security/current/linux-restricted-shell-breakout-via-linux-binary-s.html
+tags:
+- attack.execution
+- attack.t1059
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_capsh_shell_invocation.yml
+_sigma_status: test
+_sigma_author: Li Ling, Andy Parkidomo, Robert Rakowski, Blake Hartstein (Bloomberg
+  L.P.)
+_sigma_date: 2024-09-02

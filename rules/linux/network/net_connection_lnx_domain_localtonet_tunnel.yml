@@ -1,0 +1,42 @@
+id: SIGMA-LIN-COMMUNICATION_TO_LOC
+title: Communication To LocaltoNet Tunneling Service Initiated - Linux
+category: network
+subcategory: detection
+mitre_technique: T1572
+mitre_tactic: ''
+severity: high
+confidence: low
+enabled: true
+description: 'Detects an executable initiating a network connection to "LocaltoNet"
+  tunneling sub-domains.
+
+  LocaltoNet is a reverse proxy that enables localhost services to be exposed to the
+  Internet.
+
+  Attackers have been seen to use this service for command-and-control activities
+  to bypass MFA and perimeter controls.
+
+  '
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: \.localto\.net
+  - regex: \.localtonet\.com
+  - regex: 'true'
+false_positives:
+- Legitimate use of the LocaltoNet service.
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/network_connection/net_connection_lnx_domain_localtonet_tunnel.yml.
+  References: https://localtonet.com/documents/supported-tunnels, https://cloud.google.com/blog/topics/threat-intelligence/unc3944-targets-saas-applications'
+references:
+- https://localtonet.com/documents/supported-tunnels
+- https://cloud.google.com/blog/topics/threat-intelligence/unc3944-targets-saas-applications
+tags:
+- attack.command-and-control
+- attack.t1572
+- attack.t1090
+- attack.t1102
+_sigma_source: rules/linux/network_connection/net_connection_lnx_domain_localtonet_tunnel.yml
+_sigma_status: test
+_sigma_author: Andreas Braathen (mnemonic.io)
+_sigma_date: 2024-06-17

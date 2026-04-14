@@ -1,0 +1,34 @@
+id: SIGMA-WEB-F__BIG_IP_ICONTROL_R
+title: F5 BIG-IP iControl Rest API Command Execution - Proxy
+category: web
+subcategory: execution
+mitre_technique: T1190
+mitre_tactic: ''
+severity: medium
+confidence: low
+enabled: true
+description: Detects POST requests to the F5 BIG-IP iControl Rest API "bash" endpoint,
+  which allows the execution of commands on the BIG-IP
+service: '*'
+detection:
+  type: pattern
+  patterns:
+  - regex: POST
+  - regex: /mgmt/tm/util/bash
+false_positives:
+- Legitimate usage of the BIG IP REST API to execute command for administration purposes
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/web/proxy_generic/proxy_f5_tm_utility_bash_api_request.yml.
+  References: https://f5-sdk.readthedocs.io/en/latest/apidoc/f5.bigip.tm.util.html#module-f5.bigip.tm.util.bash,
+  https://community.f5.com/t5/technical-forum/icontrolrest-11-5-execute-bash-command/td-p/203029,
+  https://community.f5.com/t5/technical-forum/running-bash-commands-via-rest-api/td-p/272516'
+references:
+- https://f5-sdk.readthedocs.io/en/latest/apidoc/f5.bigip.tm.util.html#module-f5.bigip.tm.util.bash
+- https://community.f5.com/t5/technical-forum/icontrolrest-11-5-execute-bash-command/td-p/203029
+- https://community.f5.com/t5/technical-forum/running-bash-commands-via-rest-api/td-p/272516
+tags:
+- attack.initial-access
+- attack.t1190
+_sigma_source: rules/web/proxy_generic/proxy_f5_tm_utility_bash_api_request.yml
+_sigma_status: test
+_sigma_author: Nasreddine Bencherchali (Nextron Systems), Thurein Oo
+_sigma_date: 2023-11-08

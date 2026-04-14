@@ -1,0 +1,33 @@
+id: SIGMA-LIN-STEGANOGRAPHY_EXTRAC
+title: Steganography Extract Files with Steghide
+category: audit
+subcategory: detection
+mitre_technique: T1027.003
+mitre_tactic: ''
+severity: low
+confidence: low
+enabled: true
+description: Detects extraction of files with usage of steghide binary, the adversaries
+  may use this technique to prevent the detection of hidden information.
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: EXECVE
+  - regex: steghide
+  - regex: extract
+  - regex: \.jpg
+  - regex: \.png
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/execve/lnx_auditd_steghide_extract_steganography.yml.
+  References: https://vitux.com/how-to-hide-confidential-files-in-images-on-debian-using-steganography/'
+references:
+- https://vitux.com/how-to-hide-confidential-files-in-images-on-debian-using-steganography/
+tags:
+- attack.defense-evasion
+- attack.t1027.003
+_sigma_source: rules/linux/auditd/execve/lnx_auditd_steghide_extract_steganography.yml
+_sigma_status: test
+_sigma_author: Pawel Mazur
+_sigma_date: 2021-09-11

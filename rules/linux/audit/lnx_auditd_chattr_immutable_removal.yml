@@ -1,0 +1,29 @@
+id: SIGMA-LIN-REMOVE_IMMUTABLE_FIL
+title: Remove Immutable File Attribute - Auditd
+category: audit
+subcategory: detection
+mitre_technique: T1222.002
+mitre_tactic: ''
+severity: medium
+confidence: low
+enabled: true
+description: Detects removing immutable file attribute.
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: EXECVE
+  - regex: chattr
+false_positives:
+- Administrator interacting with immutable files (e.g. for instance backups).
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/execve/lnx_auditd_chattr_immutable_removal.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1222.002/T1222.002.md'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1222.002/T1222.002.md
+tags:
+- attack.defense-evasion
+- attack.t1222.002
+_sigma_source: rules/linux/auditd/execve/lnx_auditd_chattr_immutable_removal.yml
+_sigma_status: test
+_sigma_author: Jakob Weinzettl, oscd.community
+_sigma_date: 2019-09-23

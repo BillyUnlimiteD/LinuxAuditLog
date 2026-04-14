@@ -1,0 +1,46 @@
+id: SVC-APACHE-001
+title: Apache2 Anomalous Activity
+category: web
+subcategory: apache2
+mitre_technique: T1190
+mitre_tactic: initial_access
+severity: medium
+confidence: medium
+enabled: true
+description: >
+  Detects suspicious patterns in Apache2 access and error logs including:
+  access to sensitive Apache internals (server-status, server-info), mod_cgi
+  exploitation, .htaccess bypass attempts, Apache Struts and Log4j exploitation
+  patterns, directory listing abuse, and anomalous HTTP method usage (TRACE, PUT,
+  DELETE). Also covers Apache-specific CVEs.
+service: apache2
+detection:
+  type: pattern
+  patterns:
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>/(?:server-status|server-info|balancer-manager|manager/html|jkstatus)[^\"]*)\""
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?P<method>TRACE|TRACK|CONNECT|DELETE|PUT) (?P<uri>[^\"]+)\""
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>[^\"]*(?:struts2?|strutsAction|action\\.do|\\?actionErrors|\\?debug=browser)[^\"]*)\""
+    - regex: "\\[error\\].*(?P<msg>attempt to invoke directory as script|malformed header from script|suexec policy violation|access to \\S+ denied)"
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>[^\"]*cgi-bin/[^\"]*(?:\\?|%3F)(?:[^\"]*(?:;|%3B|\\|)))\""
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|HEAD) (?P<uri>[^\"]*(?:/\\.htaccess|/\\.htpasswd|/\\.svn/|/\\.git/config)[^\"]*)\""
+    - regex: "(?P<src_ip>[\\d.]+).*(?:ApacheBench|ab/\\d|peach|apachebench).*\" (?P<status>[245]\\d{2}) "
+false_positives:
+  - Authorized security teams accessing server-status for monitoring
+  - Legitimate REST APIs using DELETE/PUT methods
+  - Apache Bench load testing by authorized staff
+recommendation: >
+  1. Disable server-status and server-info in production (or restrict by IP).
+  2. Disable TRACE and TRACK methods: TraceEnable Off
+  3. Ensure mod_cgi scripts are reviewed and cannot be injected.
+  4. Set Options -Indexes to prevent directory listing.
+  5. Keep Apache updated — check for CVEs affecting your version (apache2 -v).
+  6. Implement ModSecurity WAF for pattern-based blocking.
+references:
+  - "https://attack.mitre.org/techniques/T1190/"
+  - "https://httpd.apache.org/docs/2.4/misc/security_tips.html"
+  - "https://modsecurity.org/"
+tags:
+  - apache2
+  - web
+  - cgi
+  - configuration_exposure

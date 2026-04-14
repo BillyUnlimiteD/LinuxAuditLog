@@ -1,0 +1,31 @@
+id: SIGMA-LIN-LOGGING_CONFIGURATIO
+title: Logging Configuration Changes on Linux Host
+category: audit
+subcategory: detection
+mitre_technique: T1562.006
+mitre_tactic: ''
+severity: high
+confidence: low
+enabled: true
+description: Detect changes of syslog daemons configuration files
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: PATH
+  - regex: /etc/syslog\.conf
+  - regex: /etc/rsyslog\.conf
+  - regex: /etc/syslog\-ng/syslog\-ng\.conf
+false_positives:
+- Legitimate administrative activity
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/path/lnx_auditd_logging_config_change.yml.
+  References: self experience'
+references:
+- self experience
+tags:
+- attack.defense-evasion
+- attack.t1562.006
+_sigma_source: rules/linux/auditd/path/lnx_auditd_logging_config_change.yml
+_sigma_status: test
+_sigma_author: Mikhail Larin, oscd.community
+_sigma_date: 2019-10-25

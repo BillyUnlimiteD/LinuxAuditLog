@@ -1,0 +1,36 @@
+id: SVC-TIMEDATEX-001
+title: timedatex — System Time Manipulation
+category: system
+subcategory: time_sync
+mitre_technique: T1565.001
+mitre_tactic: impact
+severity: medium
+confidence: medium
+enabled: true
+description: >
+  Detects suspicious use of timedatex (the D-Bus time/date service on
+  RHEL/CentOS). Attackers may manipulate system time to evade time-based
+  controls, expire certificates, or corrupt log timestamps to hinder forensics.
+service: timedatex
+detection:
+  type: pattern
+  patterns:
+    - regex: "timedatex.*time.*set.*offset (?P<secs>-?[6-9]\\d\\.|[6-9]\\d\\.|[1-9]\\d{2,}\\.)"
+    - regex: "timedatex.*NTP.*disabled|timedatex.*RTC.*set|timedatex.*timezone.*changed"
+    - regex: "timedatex.*org\\.freedesktop\\.timedate1.*SetTime|timedatex.*SetNTP.*false"
+    - regex: "timedatex.*authentication.*failed|timedatex.*not authorized"
+false_positives:
+  - Legitimate timezone changes by administrators
+  - NTP synchronization corrections at startup
+recommendation: >
+  1. Alert on NTP being disabled via timedatex outside maintenance windows.
+  2. Monitor for manual time changes via D-Bus (SetTime calls).
+  3. Correlate time changes with other suspicious events.
+references:
+  - "https://attack.mitre.org/techniques/T1565/001/"
+  - "https://www.freedesktop.org/software/systemd/man/timedatectl.html"
+tags:
+  - timedatex
+  - time_manipulation
+  - rhel
+  - centos

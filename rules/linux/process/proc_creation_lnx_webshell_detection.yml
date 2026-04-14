@@ -1,0 +1,39 @@
+id: SIGMA-LIN-LINUX_WEBSHELL_INDIC
+title: Linux Webshell Indicators
+category: process
+subcategory: execution
+mitre_technique: T1505.003
+mitre_tactic: persistence
+severity: high
+confidence: low
+enabled: true
+description: Detects suspicious sub processes of web server processes
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /httpd
+  - regex: /lighttpd
+  - regex: /nginx
+  - regex: /apache2
+  - regex: /node
+  - regex: /caddy
+  - regex: /bin/java
+  - regex: tomcat
+  - regex: /bin/java
+  - regex: websphere
+false_positives:
+- Web applications that invoke Linux command line tools
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_webshell_detection.yml.
+  References: https://www.acunetix.com/blog/articles/web-shells-101-using-php-introduction-web-shells-part-2/,
+  https://media.defense.gov/2020/Jun/09/2002313081/-1/-1/0/CSI-DETECT-AND-PREVENT-WEB-SHELL-MALWARE-20200422.PDF'
+references:
+- https://www.acunetix.com/blog/articles/web-shells-101-using-php-introduction-web-shells-part-2/
+- https://media.defense.gov/2020/Jun/09/2002313081/-1/-1/0/CSI-DETECT-AND-PREVENT-WEB-SHELL-MALWARE-20200422.PDF
+tags:
+- attack.persistence
+- attack.t1505.003
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_webshell_detection.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
+_sigma_date: 2021-10-15

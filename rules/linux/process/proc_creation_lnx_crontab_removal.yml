@@ -1,0 +1,32 @@
+id: SIGMA-LIN-REMOVE_SCHEDULED_CRO
+title: Remove Scheduled Cron Task/Job
+category: process
+subcategory: detection
+mitre_technique: ''
+mitre_tactic: ''
+severity: medium
+confidence: low
+enabled: true
+description: 'Detects usage of the ''crontab'' utility to remove the current crontab.
+
+  This is a common occurrence where cryptocurrency miners compete against each other
+  by removing traces of other miners to hijack the maximum amount of resources possible
+
+  '
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: crontab
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_crontab_removal.yml.
+  References: https://www.trendmicro.com/en_us/research/22/i/how-malicious-actors-abuse-native-linux-tools-in-their-attacks.html'
+references:
+- https://www.trendmicro.com/en_us/research/22/i/how-malicious-actors-abuse-native-linux-tools-in-their-attacks.html
+tags:
+- attack.defense-evasion
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_crontab_removal.yml
+_sigma_status: test
+_sigma_author: Nasreddine Bencherchali (Nextron Systems)
+_sigma_date: 2022-09-15

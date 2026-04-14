@@ -1,0 +1,45 @@
+id: SIGMA-WEB-DOWNLOAD_FROM_SUSPIC
+title: Download From Suspicious TLD - Blacklist
+category: web
+subcategory: detection
+mitre_technique: T1566
+mitre_tactic: execution
+severity: low
+confidence: low
+enabled: true
+description: Detects download of certain file types from hosts in suspicious TLDs
+service: '*'
+detection:
+  type: pattern
+  patterns:
+  - regex: docm
+  - regex: xlsm
+  - regex: pptm
+  - regex: \.country
+  - regex: \.stream
+  - regex: \.gdn
+  - regex: \.mom
+  - regex: \.xin
+  - regex: \.kim
+  - regex: \.men
+false_positives:
+- All kinds of software downloads
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/web/proxy_generic/proxy_download_susp_tlds_blacklist.yml.
+  References: https://www.symantec.com/connect/blogs/shady-tld-research-gdn-and-our-2016-wrap,
+  https://promos.mcafee.com/en-US/PDF/MTMW_Report.pdf, https://www.spamhaus.org/statistics/tlds/,
+  https://krebsonsecurity.com/2018/06/bad-men-at-work-please-dont-click/'
+references:
+- https://www.symantec.com/connect/blogs/shady-tld-research-gdn-and-our-2016-wrap
+- https://promos.mcafee.com/en-US/PDF/MTMW_Report.pdf
+- https://www.spamhaus.org/statistics/tlds/
+- https://krebsonsecurity.com/2018/06/bad-men-at-work-please-dont-click/
+tags:
+- attack.initial-access
+- attack.t1566
+- attack.execution
+- attack.t1203
+- attack.t1204.002
+_sigma_source: rules/web/proxy_generic/proxy_download_susp_tlds_blacklist.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems)
+_sigma_date: 2017-11-07

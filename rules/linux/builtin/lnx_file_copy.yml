@@ -1,0 +1,31 @@
+id: SIGMA-LIN-REMOTE_FILE_COPY
+title: Remote File Copy
+category: authentication
+subcategory: detection
+mitre_technique: T1105
+mitre_tactic: ''
+severity: low
+confidence: low
+enabled: true
+description: Detects the use of tools that copy files from or to remote systems
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: 'scp\ '
+  - regex: 'rsync\ '
+  - regex: 'sftp\ '
+false_positives:
+- Legitimate administration activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/builtin/lnx_file_copy.yml.
+  References: https://www.cisa.gov/stopransomware/ransomware-guide'
+references:
+- https://www.cisa.gov/stopransomware/ransomware-guide
+tags:
+- attack.command-and-control
+- attack.lateral-movement
+- attack.t1105
+_sigma_source: rules/linux/builtin/lnx_file_copy.yml
+_sigma_status: stable
+_sigma_author: Ömer Günal
+_sigma_date: 2020-06-18

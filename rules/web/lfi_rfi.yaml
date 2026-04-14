@@ -1,0 +1,40 @@
+id: WEB-003
+title: Local/Remote File Inclusion Attempt
+category: web
+subcategory: file_inclusion
+mitre_technique: T1190
+mitre_tactic: initial_access
+severity: critical
+confidence: medium
+enabled: true
+description: >
+  Detects Local File Inclusion (LFI) and Remote File Inclusion (RFI) attempts.
+  LFI allows reading or executing local files; RFI allows loading and executing
+  code from remote servers. Both are critical vulnerabilities that can lead to
+  full Remote Code Execution. Common PHP targets include include=, page=, file=
+  parameters.
+service: "*"
+detection:
+  type: pattern
+  patterns:
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>[^\"]*(?:(?:include|require|page|file|path|template|module|doc)(?:=|%3d)(?:\\.\\./|%2e%2e|/etc/|/proc/|/var/log)[^\"]+))\""
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>[^\"]*(?:(?:include|require|page|file|path)(?:=|%3d)(?:https?://|ftp://|data://|php://|zip://|phar://)[^\"]+))\""
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>[^\"]*(?:php://input|php://filter|data://text|expect://|zip://)[^\"]*)\""
+false_positives:
+  - Legitimate file serving via URL parameters (must be validated server-side)
+  - Security scanners performing authorized assessments
+recommendation: >
+  1. Check if RFI was successful — look for subsequent requests from the compromised IP.
+  2. Verify whether any PHP wrappers (php://filter) exposed sensitive file contents.
+  3. Disable allow_url_include in PHP configuration immediately.
+  4. Implement strict input validation and allowlisting for file parameters.
+  5. Consider using a WAF with virtual patching while applying code fixes.
+references:
+  - "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/07-Input_Validation_Testing/11.1-Testing_for_Local_File_Inclusion"
+  - "https://attack.mitre.org/techniques/T1190/"
+tags:
+  - lfi
+  - rfi
+  - file_inclusion
+  - web
+  - owasp_a03

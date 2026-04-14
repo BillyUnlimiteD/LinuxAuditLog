@@ -1,0 +1,31 @@
+id: SIGMA-LIN-SUSPICIOUS_NAMED_ERR
+title: Suspicious Named Error
+category: authentication
+subcategory: detection
+mitre_technique: T1190
+mitre_tactic: ''
+severity: high
+confidence: low
+enabled: true
+description: Detects suspicious DNS error messages that indicate a fatal or suspicious
+  error that could be caused by exploiting attempts
+service: syslog
+detection:
+  type: pattern
+  patterns:
+  - regex: '\ dropping\ source\ port\ zero\ packet\ from\ '
+  - regex: '\ denied\ AXFR\ from\ '
+  - regex: \ exiting\ \(due\ to\ fatal\ error\)
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/builtin/syslog/lnx_syslog_susp_named.yml.
+  References: https://github.com/ossec/ossec-hids/blob/1ecffb1b884607cb12e619f9ab3c04f530801083/etc/rules/named_rules.xml'
+references:
+- https://github.com/ossec/ossec-hids/blob/1ecffb1b884607cb12e619f9ab3c04f530801083/etc/rules/named_rules.xml
+tags:
+- attack.initial-access
+- attack.t1190
+_sigma_source: rules/linux/builtin/syslog/lnx_syslog_susp_named.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems)
+_sigma_date: 2018-02-20

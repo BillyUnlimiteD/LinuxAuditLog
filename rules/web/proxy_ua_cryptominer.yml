@@ -1,0 +1,32 @@
+id: SIGMA-WEB-CRYPTO_MINER_USER_AG
+title: Crypto Miner User Agent
+category: web
+subcategory: detection
+mitre_technique: T1071.001
+mitre_tactic: ''
+severity: high
+confidence: low
+enabled: true
+description: Detects suspicious user agent strings used by crypto miners in proxy
+  logs
+service: '*'
+detection:
+  type: pattern
+  patterns:
+  - regex: 'XMRig\ '
+  - regex: ccminer
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/web/proxy_generic/proxy_ua_cryptominer.yml.
+  References: https://github.com/xmrig/xmrig/blob/da22b3e6c45825f3ac1f208255126cb8585cd4fc/src/base/kernel/Platform_win.cpp#L65,
+  https://github.com/xmrig/xmrig/blob/427b6516e0550200c17ca28675118f0fffcc323f/src/version.h'
+references:
+- https://github.com/xmrig/xmrig/blob/da22b3e6c45825f3ac1f208255126cb8585cd4fc/src/base/kernel/Platform_win.cpp#L65
+- https://github.com/xmrig/xmrig/blob/427b6516e0550200c17ca28675118f0fffcc323f/src/version.h
+tags:
+- attack.command-and-control
+- attack.t1071.001
+_sigma_source: rules/web/proxy_generic/proxy_ua_cryptominer.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems)
+_sigma_date: 2019-10-21

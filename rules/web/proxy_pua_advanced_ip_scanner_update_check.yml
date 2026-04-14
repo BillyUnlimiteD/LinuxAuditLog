@@ -1,0 +1,37 @@
+id: SIGMA-WEB-PUA___ADVANCED_IP_PO
+title: PUA - Advanced IP/Port Scanner Update Check
+category: web
+subcategory: detection
+mitre_technique: T1590
+mitre_tactic: reconnaissance
+severity: medium
+confidence: low
+enabled: true
+description: Detect the update check performed by Advanced IP/Port Scanner utilities.
+service: '*'
+detection:
+  type: pattern
+  patterns:
+  - regex: /checkupdate\.php
+  - regex: lng=
+  - regex: ver=
+  - regex: beta=
+  - regex: type=
+  - regex: rmode=
+  - regex: product=
+false_positives:
+- Expected if you legitimately use the Advanced IP or Port Scanner utilities in your
+  environement.
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/web/proxy_generic/proxy_pua_advanced_ip_scanner_update_check.yml.
+  References: https://www.advanced-ip-scanner.com/, https://www.advanced-port-scanner.com/'
+references:
+- https://www.advanced-ip-scanner.com/
+- https://www.advanced-port-scanner.com/
+tags:
+- attack.discovery
+- attack.reconnaissance
+- attack.t1590
+_sigma_source: rules/web/proxy_generic/proxy_pua_advanced_ip_scanner_update_check.yml
+_sigma_status: test
+_sigma_author: Axel Olsson
+_sigma_date: 2022-08-14

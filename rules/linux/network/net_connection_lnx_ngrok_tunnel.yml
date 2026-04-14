@@ -1,0 +1,42 @@
+id: SIGMA-LIN-COMMUNICATION_TO_NGR
+title: Communication To Ngrok Tunneling Service - Linux
+category: network
+subcategory: detection
+mitre_technique: T1567
+mitre_tactic: exfiltration
+severity: high
+confidence: low
+enabled: true
+description: Detects an executable accessing an ngrok tunneling endpoint, which could
+  be a sign of forbidden exfiltration of data exfiltration by malicious actors
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: tunnel\.us\.ngrok\.com
+  - regex: tunnel\.eu\.ngrok\.com
+  - regex: tunnel\.ap\.ngrok\.com
+  - regex: tunnel\.au\.ngrok\.com
+  - regex: tunnel\.sa\.ngrok\.com
+  - regex: tunnel\.jp\.ngrok\.com
+  - regex: tunnel\.in\.ngrok\.com
+false_positives:
+- Legitimate use of ngrok
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/network_connection/net_connection_lnx_ngrok_tunnel.yml.
+  References: https://twitter.com/hakluke/status/1587733971814977537/photo/1, https://ngrok.com/docs/secure-tunnels/tunnels/ssh-reverse-tunnel-agent'
+references:
+- https://twitter.com/hakluke/status/1587733971814977537/photo/1
+- https://ngrok.com/docs/secure-tunnels/tunnels/ssh-reverse-tunnel-agent
+tags:
+- attack.exfiltration
+- attack.command-and-control
+- attack.t1567
+- attack.t1568.002
+- attack.t1572
+- attack.t1090
+- attack.t1102
+- attack.s0508
+_sigma_source: rules/linux/network_connection/net_connection_lnx_ngrok_tunnel.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems)
+_sigma_date: 2022-11-03

@@ -1,0 +1,38 @@
+id: SIGMA-LIN-SUSPICIOUS_GIT_CLONE
+title: Suspicious Git Clone - Linux
+category: process
+subcategory: detection
+mitre_technique: T1593.003
+mitre_tactic: reconnaissance
+severity: medium
+confidence: low
+enabled: true
+description: Detects execution of "git" in order to clone a remote repository that
+  contain suspicious keywords which might be suspicious
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /git
+  - regex: '\ clone\ '
+  - regex: exploit
+  - regex: Vulns
+  - regex: vulnerability
+  - regex: RemoteCodeExecution
+  - regex: Invoke\-
+  - regex: CVE\-
+  - regex: poc\-
+  - regex: ProofOfConcept
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_susp_git_clone.yml.
+  References: https://gist.githubusercontent.com/MichaelKoczwara/12faba9c061c12b5814b711166de8c2f/raw/e2068486692897b620c25fde1ea258c8218fe3d3/history.txt'
+references:
+- https://gist.githubusercontent.com/MichaelKoczwara/12faba9c061c12b5814b711166de8c2f/raw/e2068486692897b620c25fde1ea258c8218fe3d3/history.txt
+tags:
+- attack.reconnaissance
+- attack.t1593.003
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_susp_git_clone.yml
+_sigma_status: test
+_sigma_author: Nasreddine Bencherchali (Nextron Systems)
+_sigma_date: 2023-01-03

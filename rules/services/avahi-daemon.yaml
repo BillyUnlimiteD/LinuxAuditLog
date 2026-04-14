@@ -1,0 +1,37 @@
+id: SVC-AVAHI_DAEMON-001
+title: Avahi daemon mDNS service discovery activity
+category: service
+subcategory: avahi-daemon
+mitre_technique: T1046
+mitre_tactic: discovery
+severity: low
+confidence: medium
+enabled: true
+description: Detects Avahi daemon (mDNS/DNS-SD) service discovery events including host announcements, service registrations, and potential network reconnaissance activity.
+service: avahi-daemon
+detection:
+  type: pattern
+  patterns:
+    - regex: 'avahi-daemon.*:.*Host name conflict'
+    - regex: 'avahi-daemon.*:.*Service.*collision'
+    - regex: 'avahi-daemon.*:.*Failed to create server'
+    - regex: 'avahi-daemon.*:.*Invalid.*packet'
+    - regex: 'avahi-daemon.*:.*Received.*response'
+    - regex: 'avahi-daemon.*:.*Withdrawing.*address'
+false_positives:
+  - Normal mDNS traffic in local networks
+  - Expected service announcements during device connections
+recommendation: >
+  1. Review Avahi service announcements for unauthorized devices on the network.
+  2. Disable Avahi if mDNS service discovery is not required.
+  3. Configure Avahi to restrict service announcements to trusted interfaces.
+  4. Monitor for unusual host name conflicts or service collisions.
+references:
+  - https://www.avahi.org/
+  - https://attack.mitre.org/techniques/T1046/
+tags:
+  - avahi-daemon
+  - mdns
+  - service_discovery
+  - network
+  - audit

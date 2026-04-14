@@ -1,0 +1,39 @@
+id: SIGMA-LIN-EQUATION_GROUP_INDIC
+title: Equation Group Indicators
+category: authentication
+subcategory: detection
+mitre_technique: T1059.004
+mitre_tactic: execution
+severity: high
+confidence: low
+enabled: true
+description: Detects suspicious shell commands used in various Equation Group scripts
+  and tools
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: 'chown\ root.*chmod\ 4777\ '
+  - regex: cp\ /bin/sh\ \.;chown
+  - regex: chmod\ 4777\ /tmp/\.scsi/dev/bin/gsh
+  - regex: chown\ root:root\ /tmp/\.scsi/dev/bin/
+  - regex: chown\ root:root\ x;
+  - regex: /bin/telnet\ locip\ locport\ <\ /dev/console\ \|\ /bin/sh
+  - regex: /tmp/ratload
+  - regex: 'ewok\ \-t\ '
+  - regex: 'xspy\ \-display\ '
+  - regex: cat\ >\ /dev/tcp/127\.0\.0\.1/80\ <<END
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/builtin/lnx_apt_equationgroup_lnx.yml.
+  References: https://medium.com/@shadowbrokerss/dont-forget-your-base-867d304a94b1'
+references:
+- https://medium.com/@shadowbrokerss/dont-forget-your-base-867d304a94b1
+tags:
+- attack.execution
+- attack.g0020
+- attack.t1059.004
+_sigma_source: rules/linux/builtin/lnx_apt_equationgroup_lnx.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems)
+_sigma_date: 2017-04-09

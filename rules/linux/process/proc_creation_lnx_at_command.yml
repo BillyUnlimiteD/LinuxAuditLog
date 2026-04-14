@@ -1,0 +1,36 @@
+id: SIGMA-LIN-SCHEDULED_TASK_JOB_A
+title: Scheduled Task/Job At
+category: process
+subcategory: detection
+mitre_technique: T1053.002
+mitre_tactic: persistence
+severity: low
+confidence: low
+enabled: true
+description: 'Detects the use of at/atd which are utilities that are used to schedule
+  tasks.
+
+  They are often abused by adversaries to maintain persistence or to perform task
+  scheduling for initial or recurring execution of malicious code
+
+  '
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /atd
+false_positives:
+- Legitimate administration activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_at_command.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1053.002/T1053.002.md'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1053.002/T1053.002.md
+tags:
+- attack.privilege-escalation
+- attack.execution
+- attack.persistence
+- attack.t1053.002
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_at_command.yml
+_sigma_status: stable
+_sigma_author: Ömer Günal, oscd.community
+_sigma_date: 2020-10-06

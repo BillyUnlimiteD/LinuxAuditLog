@@ -1,0 +1,65 @@
+id: SVC-SAMBA-001
+title: Samba/SMB Suspicious Activity
+category: file_sharing
+subcategory: samba
+mitre_technique: T1021.002
+mitre_tactic: lateral_movement
+severity: high
+confidence: medium
+enabled: true
+description: >
+  Detects suspicious activity in Samba (smbd/nmbd) logs including:
+  authentication failures and brute force attempts against SMB shares,
+  access to sensitive administrative shares (IPC$, ADMIN$, C$),
+  privilege escalation via writable shares, anonymous/guest authentication,
+  lateral movement patterns (pass-the-hash, EternalBlue-style probes),
+  share enumeration by scanners, and unauthorized modifications to
+  smb.conf or sensitive files accessed via SMB.
+  Covers both smbd (file sharing) and nmbd (NetBIOS name service) log patterns.
+service: smbd
+detection:
+  type: pattern
+  patterns:
+    - regex: "smbd.*Authentication failure|smbd.*NT_STATUS_WRONG_PASSWORD|smbd.*NT_STATUS_NO_SUCH_USER|smbd.*NT_STATUS_ACCOUNT_DISABLED"
+    - regex: "smbd.*(?P<user>\\S+).*connect to service (?P<share>IPC\\$|ADMIN\\$|C\\$|print\\$)"
+    - regex: "smbd.*(?P<user>anonymous|guest|nobody).*connect to service"
+    - regex: "smbd.*NT_STATUS_ACCESS_DENIED.*(?P<uri>[^\\s]+)"
+    - regex: "smbd.*(?P<src_ip>[\\d.]+).*TCONX.*(?P<share>\\\\\\\\[^\\\\]+\\\\[^\\s]+)"
+    - regex: "(?P<src_ip>[\\d.]+).*IPC\\$.*\\bpipe\\b.*\\b(?:samr|lsarpc|srvsvc|winreg|svcctl)\\b"
+    - regex: "smbd.*NT_STATUS_LOGON_FAILURE.*(?P<src_ip>[\\d.]+).*(?P<user>[^\\s]+)"
+    - regex: "smbd.*write_file.*error writing.*(?P<path>[^:]+)"
+    - regex: "nmbd.*(?P<msg>Attempting to become DMB|Attempting to become LMB|election|browser)"
+    - regex: "smbd.*setuid_failed|smbd.*failed to gain root|smbd.*cannot open config file"
+    - regex: "smbd.*kernel panic|smbd.*Terminating due to internal error|smbd.*INTERNAL ERROR"
+false_positives:
+  - Legitimate administrative access to IPC$ (required by Windows domain operations)
+  - Backup software connecting to ADMIN$ for remote backup
+  - Monitoring tools enumerating shares
+  - Domain join operations generating multiple auth attempts
+  - Password policy enforcement causing temporary lockouts
+recommendation: >
+  1. Disable guest/anonymous access: set 'map to guest = never' and 'restrict anonymous = 2' in smb.conf.
+  2. Restrict access to administrative shares (IPC$, ADMIN$, C$) to specific admin IPs using 'hosts allow'.
+  3. Enable SMB signing to prevent relay attacks: 'server signing = mandatory'.
+  4. Disable SMBv1 entirely: 'min protocol = SMB2'.
+  5. Investigate brute force sources — block offending IPs with iptables/fail2ban.
+  6. Audit share permissions: no share should be writable by 'Everyone' or 'guest'.
+  7. Review named pipe access (samr, lsarpc) — common in lateral movement and domain enumeration.
+  8. Enable Samba audit module for detailed file access logging:
+     'vfs objects = full_audit' with 'full_audit:success = open write rename unlink'.
+  9. Check for smb.conf modifications (should only change during maintenance windows).
+references:
+  - "https://attack.mitre.org/techniques/T1021/002/"
+  - "https://attack.mitre.org/techniques/T1110/"
+  - "https://www.samba.org/samba/docs/current/man-html/smb.conf.5.html"
+  - "https://www.cisa.gov/news-events/alerts/2017/05/12/indicators-associated-wannacry-ransomware"
+  - "https://github.com/SigmaHQ/sigma/blob/master/rules/linux/other/lnx_samba_cve_2021_44142.yml"
+tags:
+  - samba
+  - smb
+  - smbd
+  - nmbd
+  - lateral_movement
+  - brute_force
+  - file_sharing
+  - share_enumeration

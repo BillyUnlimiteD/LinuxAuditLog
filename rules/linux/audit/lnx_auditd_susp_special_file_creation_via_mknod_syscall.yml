@@ -1,0 +1,45 @@
+id: SIGMA-LIN-SPECIAL_FILE_CREATIO
+title: Special File Creation via Mknod Syscall
+category: audit
+subcategory: detection
+mitre_technique: T1543.003
+mitre_tactic: persistence
+severity: low
+confidence: low
+enabled: true
+description: 'Detects usage of the `mknod` syscall to create special files (e.g.,
+  character or block devices).
+
+  Attackers or malware might use `mknod` to create fake devices, interact with kernel
+  interfaces,
+
+  or establish covert channels in Linux systems.
+
+  Monitoring the use of `mknod` is important because this syscall is rarely used by
+  legitimate applications,
+
+  and it can be abused to bypass file system restrictions or create backdoors.
+
+  '
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: SYSCALL
+  - regex: mknod
+false_positives:
+- Device creation by legitimate scripts or init systems (udevadm, MAKEDEV)
+- Container runtimes or security tools during initialization
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/syscall/lnx_auditd_susp_special_file_creation_via_mknod_syscall.yml.
+  References: https://man7.org/linux/man-pages/man2/mknod.2.html, https://hopeness.medium.com/master-the-linux-mknod-command-a-comprehensive-guide-1c150a546aa8'
+references:
+- https://man7.org/linux/man-pages/man2/mknod.2.html
+- https://hopeness.medium.com/master-the-linux-mknod-command-a-comprehensive-guide-1c150a546aa8
+tags:
+- attack.privilege-escalation
+- attack.persistence
+- attack.t1543.003
+_sigma_source: rules/linux/auditd/syscall/lnx_auditd_susp_special_file_creation_via_mknod_syscall.yml
+_sigma_status: experimental
+_sigma_author: Milad Cheraghi
+_sigma_date: 2025-05-31

@@ -1,0 +1,37 @@
+id: SIGMA-LIN-LOCAL_GROUPS_DISCOVE
+title: Local Groups Discovery - Linux
+category: process
+subcategory: detection
+mitre_technique: T1069.001
+mitre_tactic: discovery
+severity: low
+confidence: low
+enabled: true
+description: Detects enumeration of local system groups. Adversaries may attempt to
+  find local system groups and permission settings
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /groups
+  - regex: /cat
+  - regex: /head
+  - regex: /less
+  - regex: /more
+  - regex: /nano
+  - regex: /tail
+  - regex: /vim
+  - regex: /etc/group
+false_positives:
+- Legitimate administration activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_local_groups.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1069.001/T1069.001.md'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1069.001/T1069.001.md
+tags:
+- attack.discovery
+- attack.t1069.001
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_local_groups.yml
+_sigma_status: test
+_sigma_author: Ömer Günal, Alejandro Ortuno, oscd.community
+_sigma_date: 2020-10-11

@@ -1,0 +1,38 @@
+id: SVC-GETTY-001
+title: getty — Physical Console Login Activity
+category: initial_access
+subcategory: local_console
+mitre_technique: T1078.003
+mitre_tactic: initial_access
+severity: high
+confidence: high
+enabled: true
+description: >
+  Detects suspicious physical or virtual console logins via getty/agetty.
+  In server environments console logins are unusual and may indicate
+  unauthorized physical access, KVM/IPMI abuse, or an attacker with
+  out-of-band access bypassing SSH controls.
+service: getty@tty1
+detection:
+  type: pattern
+  patterns:
+    - regex: "login.*tty[0-9]+.*(?P<user>\\S+).*(?:FAILED|failure|Invalid)"
+    - regex: "agetty.*(?P<tty>tty[0-9]+).*opened|getty.*(?P<tty2>tty[0-9]+).*started"
+    - regex: "PAM.*auth.*failure.*tty=(?P<tty>tty[0-9]+)"
+    - regex: "systemd-logind.*New session.*(?P<id>\\d+) of user (?P<user>\\w+).*seat"
+    - regex: "login.*ROOT LOGIN.*ON (?P<tty>tty[0-9]+)"
+false_positives:
+  - Legitimate administrator console access during maintenance
+  - KVM console sessions during server management
+recommendation: >
+  1. Alert on all console logins in production environments — they should be rare.
+  2. Correlate console login times with change management records.
+  3. Consider disabling getty on unused ttys in /etc/systemd/system/.
+  4. Enable BIOS/UEFI passwords and restrict physical access.
+references:
+  - "https://attack.mitre.org/techniques/T1078/003/"
+tags:
+  - getty
+  - console
+  - physical_access
+  - local_login

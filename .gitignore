@@ -1,0 +1,21 @@
+jobs/
+__pycache__/
+*.pyc
+*.pyo
+.env
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+*.log
+*.tmp
+
+# uv — gestor portable (binario + Python gestionado + cache)
+.tools/python/
+.tools/cache/
+# .tools/uv y .tools/uv.exe se pueden incluir para evitar la descarga inicial,
+# o excluirlos para mantener el repo ligero (los scripts los descargan solos).
+# Por defecto se excluyen:
+.tools/uv
+.tools/uv.exe

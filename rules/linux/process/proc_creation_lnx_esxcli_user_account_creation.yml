@@ -1,0 +1,33 @@
+id: SIGMA-LIN-ESXI_ACCOUNT_CREATIO
+title: ESXi Account Creation Via ESXCLI
+category: process
+subcategory: detection
+mitre_technique: T1136
+mitre_tactic: execution
+severity: medium
+confidence: low
+enabled: true
+description: Detects user account creation on ESXi system via esxcli
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /esxcli
+  - regex: 'system\ '
+  - regex: 'account\ '
+  - regex: 'add\ '
+false_positives:
+- Legitimate administration activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_esxcli_user_account_creation.yml.
+  References: https://developer.broadcom.com/xapis/esxcli-command-reference/7.0.0/namespace/esxcli_system.html'
+references:
+- https://developer.broadcom.com/xapis/esxcli-command-reference/7.0.0/namespace/esxcli_system.html
+tags:
+- attack.persistence
+- attack.execution
+- attack.t1136
+- attack.t1059.012
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_esxcli_user_account_creation.yml
+_sigma_status: test
+_sigma_author: Cedric Maurugeon
+_sigma_date: 2023-08-22

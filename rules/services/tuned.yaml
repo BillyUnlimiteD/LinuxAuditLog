@@ -1,0 +1,37 @@
+id: SVC-TUNED-001
+title: tuned — Performance Profile Tampering
+category: system
+subcategory: configuration
+mitre_technique: T1562.001
+mitre_tactic: defense_evasion
+severity: low
+confidence: low
+enabled: true
+description: >
+  Detects abnormal activity in the tuned performance management daemon.
+  While rarely targeted directly, attackers may abuse tuned's ability to
+  modify kernel parameters (sysctl), disable security-related kernel settings,
+  or load custom profiles that weaken system hardening.
+service: tuned
+detection:
+  type: pattern
+  patterns:
+    - regex: "tuned.*profile.*(?P<profile>\\S+).*(?:applied|activated|loaded)"
+    - regex: "tuned.*sysctl.*(?:kernel\\.(?:randomize_va_space|perf_event_paranoid|dmesg_restrict)|net\\.ipv4\\.(?:tcp_syncookies|conf\\.all\\.rp_filter))"
+    - regex: "tuned.*error.*applying.*profile|tuned.*plugin.*failed"
+    - regex: "tuned.*custom.*profile.*loaded|tuned.*unknown.*profile"
+false_positives:
+  - Legitimate profile changes by administrators (e.g., throughput-performance, latency-performance)
+  - Automatic profile changes triggered by power management
+recommendation: >
+  1. Restrict /etc/tuned/ profile directories to root write access.
+  2. Alert on profile changes that disable kernel security parameters.
+  3. Verify custom profiles do not override /etc/sysctl.d/ hardening settings.
+references:
+  - "https://attack.mitre.org/techniques/T1562/001/"
+  - "https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/monitoring_and_managing_system_status_and_performance/customizing-tuned-profiles_monitoring-and-managing-system-status-and-performance"
+tags:
+  - tuned
+  - sysctl
+  - configuration
+  - rhel

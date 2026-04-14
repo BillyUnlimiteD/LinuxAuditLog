@@ -1,0 +1,32 @@
+id: SIGMA-LIN-DISABLING_SECURITY_T
+title: Disabling Security Tools - Builtin
+category: authentication
+subcategory: detection
+mitre_technique: T1562.004
+mitre_tactic: ''
+severity: medium
+confidence: low
+enabled: true
+description: Detects disabling security tools
+service: syslog
+detection:
+  type: pattern
+  patterns:
+  - regex: stopping\ iptables
+  - regex: stopping\ ip6tables
+  - regex: stopping\ firewalld
+  - regex: stopping\ cbdaemon
+  - regex: stopping\ falcon\-sensor
+false_positives:
+- Legitimate administration activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/builtin/syslog/lnx_syslog_security_tools_disabling_syslog.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.004/T1562.004.md'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.004/T1562.004.md
+tags:
+- attack.defense-evasion
+- attack.t1562.004
+_sigma_source: rules/linux/builtin/syslog/lnx_syslog_security_tools_disabling_syslog.yml
+_sigma_status: test
+_sigma_author: Ömer Günal, Alejandro Ortuno, oscd.community
+_sigma_date: 2020-06-17

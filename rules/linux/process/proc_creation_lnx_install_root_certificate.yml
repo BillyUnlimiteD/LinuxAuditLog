@@ -1,0 +1,30 @@
+id: SIGMA-LIN-INSTALL_ROOT_CERTIFI
+title: Install Root Certificate
+category: process
+subcategory: detection
+mitre_technique: T1553.004
+mitre_tactic: ''
+severity: low
+confidence: low
+enabled: true
+description: Detects installation of new certificate on the system which attackers
+  may use to avoid warnings when connecting to controlled web servers or C2s
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /update\-ca\-certificates
+  - regex: /update\-ca\-trust
+false_positives:
+- Legitimate administration activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_install_root_certificate.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1553.004/T1553.004.md'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1553.004/T1553.004.md
+tags:
+- attack.defense-evasion
+- attack.t1553.004
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_install_root_certificate.yml
+_sigma_status: test
+_sigma_author: Ömer Günal, oscd.community
+_sigma_date: 2020-10-05

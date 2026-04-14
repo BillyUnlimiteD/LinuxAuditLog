@@ -1,0 +1,48 @@
+id: SIGMA-LIN-SUSPICIOUS_INVOCATIO
+title: Suspicious Invocation of Shell via AWK - Linux
+category: process
+subcategory: execution
+mitre_technique: T1059
+mitre_tactic: execution
+severity: high
+confidence: low
+enabled: true
+description: 'Detects the execution of "awk" or it''s sibling commands, to invoke
+  a shell using the system() function.
+
+  This behavior is commonly associated with attempts to execute arbitrary commands
+  or escalate privileges, potentially leading to unauthorized access or further exploitation.
+
+  '
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /awk
+  - regex: /gawk
+  - regex: /mawk
+  - regex: /nawk
+  - regex: BEGIN\ \{system
+  - regex: /bin/bash
+  - regex: /bin/dash
+  - regex: /bin/fish
+  - regex: /bin/sh
+  - regex: /bin/zsh
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_awk_shell_spawn.yml.
+  References: https://gtfobins.github.io/gtfobins/awk/#shell, https://gtfobins.github.io/gtfobins/gawk/#shell,
+  https://gtfobins.github.io/gtfobins/nawk/#shell, https://gtfobins.github.io/gtfobins/mawk/#shell'
+references:
+- https://gtfobins.github.io/gtfobins/awk/#shell
+- https://gtfobins.github.io/gtfobins/gawk/#shell
+- https://gtfobins.github.io/gtfobins/nawk/#shell
+- https://gtfobins.github.io/gtfobins/mawk/#shell
+tags:
+- attack.execution
+- attack.t1059
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_awk_shell_spawn.yml
+_sigma_status: test
+_sigma_author: Li Ling, Andy Parkidomo, Robert Rakowski, Blake Hartstein (Bloomberg
+  L.P.)
+_sigma_date: 2024-09-02

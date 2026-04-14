@@ -1,0 +1,51 @@
+id: LIN-PROC-006
+title: Git Hook Persistence or Credential Theft
+category: persistence
+subcategory: git_hook
+mitre_technique: T1195.001
+mitre_tactic: persistence
+severity: high
+confidence: medium
+enabled: true
+description: >
+  Detects malicious use of Git for persistence via hook scripts, credential
+  harvesting via git credential helpers, and supply chain manipulation.
+  Git hooks (pre-commit, post-commit, pre-push, post-checkout) execute
+  arbitrary code automatically on git operations — they are a reliable
+  persistence mechanism that survives reboots and persists inside repositories.
+  Git credential helpers can silently harvest all developer credentials.
+service: "*"
+detection:
+  type: pattern
+  patterns:
+    - regex: "git.*config.*(?:--global|--system).*credential\\.helper\\s+(?!(?:store|manager|osxkeychain|libsecret)\\b)(?P<helper>\\S+)"
+    - regex: "(?:write|create|chmod|tee|echo).*\\.git/hooks/(?P<hook>pre-commit|post-commit|pre-push|post-checkout|prepare-commit-msg|commit-msg)"
+    - regex: "git.*config.*(?:--global|--system).*(?:core\\.hooksPath|http\\.proxy|https\\.proxy).*(?P<value>\\S+)"
+    - regex: "git\\s+clone.*(?:--depth|--recursive).*(?P<url>(?:http|https|git|ftp)://\\S+)"
+    - regex: "git.*remote\\s+(?:add|set-url).*(?P<url>(?:http|https|git)://(?!(?:github\\.com|gitlab\\.com|bitbucket\\.org))\\S+)"
+    - regex: "\\.gitconfig.*(?:credential|helper|proxy|sslVerify\\s*=\\s*false)"
+    - regex: "git.*config.*http\\.sslVerify\\s*=\\s*false|git.*-c\\s+http\\.sslVerify=false"
+false_positives:
+  - Legitimate hook scripts installed by developer tooling (husky, pre-commit framework)
+  - Corporate proxy configuration for git
+  - Self-hosted GitLab/Gitea as remote URL
+recommendation: >
+  1. Audit all git hooks in repositories: find . -path '*/.git/hooks/*' -type f -executable
+  2. Review global git config for unexpected credential helpers:
+     git config --global --list | grep credential
+  3. Check core.hooksPath override which can redirect hooks globally:
+     git config --global core.hooksPath
+  4. Rotate any credentials stored via git-credential-store (~/.git-credentials).
+  5. Disable SSL verification globally is a red flag — never acceptable in production.
+  6. Monitor ~/.gitconfig and /etc/gitconfig for unauthorized changes.
+references:
+  - "https://attack.mitre.org/techniques/T1195/001/"
+  - "https://attack.mitre.org/techniques/T1199/"
+  - "https://git-scm.com/docs/githooks"
+  - "https://git-scm.com/docs/git-credential"
+tags:
+  - git
+  - persistence
+  - hooks
+  - credential_theft
+  - supply_chain

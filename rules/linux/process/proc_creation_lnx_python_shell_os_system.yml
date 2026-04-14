@@ -1,0 +1,38 @@
+id: SIGMA-LIN-INLINE_PYTHON_EXECUT
+title: Inline Python Execution - Spawn Shell Via OS System Library
+category: process
+subcategory: execution
+mitre_technique: T1059
+mitre_tactic: execution
+severity: high
+confidence: low
+enabled: true
+description: 'Detects execution of inline Python code via the "-c" in order to call
+  the "system" function from the "os" library, and spawn a shell.
+
+  '
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: '\ \-c\ '
+  - regex: os\.system\(
+  - regex: /bin/bash
+  - regex: /bin/dash
+  - regex: /bin/fish
+  - regex: /bin/sh
+  - regex: /bin/zsh
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_python_shell_os_system.yml.
+  References: https://gtfobins.github.io/gtfobins/python/#shell'
+references:
+- https://gtfobins.github.io/gtfobins/python/#shell
+tags:
+- attack.execution
+- attack.t1059
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_python_shell_os_system.yml
+_sigma_status: test
+_sigma_author: Li Ling, Andy Parkidomo, Robert Rakowski, Blake Hartstein (Bloomberg
+  L.P.)
+_sigma_date: 2024-09-02

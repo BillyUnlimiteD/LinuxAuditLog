@@ -1,0 +1,46 @@
+id: SIGMA-LIN-VIM_GTFOBIN_ABUSE
+title: Vim GTFOBin Abuse - Linux
+category: process
+subcategory: detection
+mitre_technique: T1083
+mitre_tactic: discovery
+severity: high
+confidence: low
+enabled: true
+description: 'Detects the use of "vim" and it''s siblings commands to execute a shell
+  or proxy commands.
+
+  Such behavior may be associated with privilege escalation, unauthorized command
+  execution, or to break out from restricted environments.
+
+  '
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /rvim
+  - regex: /vim
+  - regex: /vimdiff
+  - regex: \ \-\-cmd
+  - regex: '\ \-c\ '
+  - regex: ':lua\ '
+  - regex: ':py\ '
+  - regex: /bin/bash
+  - regex: /bin/dash
+  - regex: /bin/fish
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_vim_shell_execution.yml.
+  References: https://gtfobins.github.io/gtfobins/vim/, https://gtfobins.github.io/gtfobins/rvim/,
+  https://gtfobins.github.io/gtfobins/vimdiff/'
+references:
+- https://gtfobins.github.io/gtfobins/vim/
+- https://gtfobins.github.io/gtfobins/rvim/
+- https://gtfobins.github.io/gtfobins/vimdiff/
+tags:
+- attack.discovery
+- attack.t1083
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_vim_shell_execution.yml
+_sigma_status: test
+_sigma_author: Nasreddine Bencherchali (Nextron Systems)
+_sigma_date: 2022-12-28

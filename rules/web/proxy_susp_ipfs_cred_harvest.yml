@@ -1,0 +1,35 @@
+id: SIGMA-WEB-SUSPICIOUS_NETWORK_C
+title: Suspicious Network Communication With IPFS
+category: web
+subcategory: detection
+mitre_technique: T1056
+mitre_tactic: collection
+severity: low
+confidence: low
+enabled: true
+description: Detects connections to interplanetary file system (IPFS) containing a
+  user's email address which mirrors behaviours observed in recent phishing campaigns
+  leveraging IPFS to host credential harvesting webpages.
+service: '*'
+detection:
+  type: pattern
+  patterns:
+  - regex: \(\?i\)\(ipfs\\\.io/\|ipfs\\\.io\\s\)\.\+\\\.\.\+@\.\+\\\.\[a\-z\]\+
+false_positives:
+- Legitimate use of IPFS being used in the organisation. However the cs-uri regex
+  looking for a user email will likely negate this.
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/web/proxy_generic/proxy_susp_ipfs_cred_harvest.yml.
+  References: https://blog.talosintelligence.com/ipfs-abuse/, https://github.com/Cisco-Talos/IOCs/tree/80caca039988252fbb3f27a2e89c2f2917f582e0/2022/11,
+  https://isc.sans.edu/diary/IPFS%20phishing%20and%20the%20need%20for%20correctly%20set%20HTTP%20security%20headers/29638'
+references:
+- https://blog.talosintelligence.com/ipfs-abuse/
+- https://github.com/Cisco-Talos/IOCs/tree/80caca039988252fbb3f27a2e89c2f2917f582e0/2022/11
+- https://isc.sans.edu/diary/IPFS%20phishing%20and%20the%20need%20for%20correctly%20set%20HTTP%20security%20headers/29638
+tags:
+- attack.collection
+- attack.credential-access
+- attack.t1056
+_sigma_source: rules/web/proxy_generic/proxy_susp_ipfs_cred_harvest.yml
+_sigma_status: test
+_sigma_author: Gavin Knapp
+_sigma_date: 2023-03-16

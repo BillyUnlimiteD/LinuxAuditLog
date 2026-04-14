@@ -1,0 +1,39 @@
+id: SIGMA-LIN-KASPERSKY_ENDPOINT_S
+title: Kaspersky Endpoint Security Stopped Via CommandLine - Linux
+category: process
+subcategory: execution
+mitre_technique: T1562.001
+mitre_tactic: execution
+severity: high
+confidence: low
+enabled: true
+description: 'Detects execution of the Kaspersky init.d stop script on Linux systems
+  either directly or via systemctl.
+
+  This activity may indicate a manual interruption of the antivirus service by an
+  administrator, or it could be a sign of potential tampering or evasion attempts
+  by malicious actors.
+
+  '
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /systemctl
+  - regex: /bash
+  - regex: stop
+  - regex: kesl
+false_positives:
+- System administrator manually stopping Kaspersky services
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_av_kaspersky_av_disabled.yml.
+  References: https://support.kaspersky.com/KES4Linux/12.0.0/en-US/197929.htm'
+references:
+- https://support.kaspersky.com/KES4Linux/12.0.0/en-US/197929.htm
+tags:
+- attack.execution
+- attack.defense-evasion
+- attack.t1562.001
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_av_kaspersky_av_disabled.yml
+_sigma_status: experimental
+_sigma_author: Milad Cheraghi
+_sigma_date: 2025-10-18

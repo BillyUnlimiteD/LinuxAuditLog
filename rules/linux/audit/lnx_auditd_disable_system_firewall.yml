@@ -1,0 +1,33 @@
+id: SIGMA-LIN-DISABLE_SYSTEM_FIREW
+title: Disable System Firewall
+category: audit
+subcategory: detection
+mitre_technique: T1562.004
+mitre_tactic: ''
+severity: high
+confidence: low
+enabled: true
+description: Detects disabling of system firewalls which could be used by adversaries
+  to bypass controls that limit usage of the network.
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: SERVICE_STOP
+  - regex: firewalld
+  - regex: iptables
+false_positives:
+- Admin activity
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/service_stop/lnx_auditd_disable_system_firewall.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.004/T1562.004.md,
+  https://firewalld.org/documentation/man-pages/firewall-cmd.html'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.004/T1562.004.md
+- https://firewalld.org/documentation/man-pages/firewall-cmd.html
+tags:
+- attack.t1562.004
+- attack.defense-evasion
+_sigma_source: rules/linux/auditd/service_stop/lnx_auditd_disable_system_firewall.yml
+_sigma_status: test
+_sigma_author: Pawel Mazur
+_sigma_date: 2022-01-22

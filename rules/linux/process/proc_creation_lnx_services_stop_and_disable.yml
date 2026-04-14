@@ -1,0 +1,32 @@
+id: SIGMA-LIN-DISABLE_OR_STOP_SERV
+title: Disable Or Stop Services
+category: process
+subcategory: detection
+mitre_technique: ''
+mitre_tactic: ''
+severity: medium
+confidence: low
+enabled: true
+description: Detects the usage of utilities such as 'systemctl', 'service'...etc to
+  stop or disable tools and services
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /service
+  - regex: /systemctl
+  - regex: /chkconfig
+  - regex: stop
+  - regex: disable
+false_positives:
+- Legitimate administration activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_services_stop_and_disable.yml.
+  References: https://www.trendmicro.com/pl_pl/research/20/i/the-evolution-of-malicious-shell-scripts.html'
+references:
+- https://www.trendmicro.com/pl_pl/research/20/i/the-evolution-of-malicious-shell-scripts.html
+tags:
+- attack.defense-evasion
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_services_stop_and_disable.yml
+_sigma_status: test
+_sigma_author: Nasreddine Bencherchali (Nextron Systems)
+_sigma_date: 2022-09-15

@@ -1,0 +1,42 @@
+id: SIGMA-LIN-LOADING_OF_KERNEL_MO
+title: Loading of Kernel Module via Insmod
+category: audit
+subcategory: detection
+mitre_technique: T1547.006
+mitre_tactic: persistence
+severity: high
+confidence: low
+enabled: true
+description: 'Detects loading of kernel modules with insmod command.
+
+  Loadable Kernel Modules (LKMs) are pieces of code that can be loaded and unloaded
+  into the kernel upon demand.
+
+  Adversaries may use LKMs to obtain persistence within the system or elevate the
+  privileges.
+
+  '
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: SYSCALL
+  - regex: insmod
+  - regex: /usr/bin/kmod
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/syscall/lnx_auditd_load_module_insmod.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1547.006/T1547.006.md,
+  https://linux.die.net/man/8/insmod, https://man7.org/linux/man-pages/man8/kmod.8.html'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1547.006/T1547.006.md
+- https://linux.die.net/man/8/insmod
+- https://man7.org/linux/man-pages/man8/kmod.8.html
+tags:
+- attack.persistence
+- attack.privilege-escalation
+- attack.t1547.006
+_sigma_source: rules/linux/auditd/syscall/lnx_auditd_load_module_insmod.yml
+_sigma_status: test
+_sigma_author: Pawel Mazur
+_sigma_date: 2021-11-02

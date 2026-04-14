@@ -1,0 +1,42 @@
+id: SIGMA-WEB-CROSS_SITE_SCRIPTING
+title: Cross Site Scripting Strings
+category: web
+subcategory: detection
+mitre_technique: T1189
+mitre_tactic: ''
+severity: high
+confidence: low
+enabled: true
+description: Detects XSS attempts injected via GET requests in access logs
+service: '*'
+detection:
+  type: pattern
+  patterns:
+  - regex: =<script>
+  - regex: =%3Cscript%3E
+  - regex: =%253Cscript%253E
+  - regex: '<iframe\ '
+  - regex: '%3Ciframe\ '
+  - regex: '<svg\ '
+  - regex: '%3Csvg\ '
+  - regex: document\.cookie
+  - regex: document\.domain
+  - regex: \ onerror=
+false_positives:
+- JavaScripts,CSS Files and PNG files
+- User searches in search boxes of the respective website
+- Internal vulnerability scanners can cause some serious FPs when used, if you experience
+  a lot of FPs due to this think of adding more filters such as "User Agent" strings
+  and more response codes
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/web/webserver_generic/web_xss_in_access_logs.yml.
+  References: https://github.com/payloadbox/xss-payload-list, https://portswigger.net/web-security/cross-site-scripting/contexts'
+references:
+- https://github.com/payloadbox/xss-payload-list
+- https://portswigger.net/web-security/cross-site-scripting/contexts
+tags:
+- attack.initial-access
+- attack.t1189
+_sigma_source: rules/web/webserver_generic/web_xss_in_access_logs.yml
+_sigma_status: test
+_sigma_author: Saw Win Naung, Nasreddine Bencherchali
+_sigma_date: 2021-08-15

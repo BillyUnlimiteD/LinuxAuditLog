@@ -1,0 +1,39 @@
+id: LIN-AUTH-002
+title: Suspicious Sudo Usage or Abuse
+category: authentication
+subcategory: privilege_abuse
+mitre_technique: T1548.003
+mitre_tactic: privilege_escalation
+severity: high
+confidence: medium
+enabled: true
+description: >
+  Detects abnormal or abusive sudo usage patterns including: sudo commands run by
+  unexpected users, sudo authentication failures, commands run as root via sudo
+  that are commonly used for persistence or lateral movement, and attempts to
+  modify sudo configuration.
+service: sudo
+detection:
+  type: pattern
+  patterns:
+    - regex: "sudo: (?P<user>\\S+) : (?:command not allowed|user NOT in sudoers)"
+    - regex: "sudo: authentication failure.*user=(?P<user>\\S+)"
+    - regex: "sudo: (?P<user>\\S+) :.*COMMAND=(?P<command>/(?:bin|sbin|usr/bin|usr/sbin)/(?:bash|sh|dash|nc|ncat|netcat|python|perl|ruby|curl|wget|chmod|chown|visudo|passwd|adduser|useradd|usermod|crontab))"
+    - regex: "sudo: (?P<user>\\S+) :.*COMMAND=.*(?P<command>/tmp/|/var/tmp/|/dev/shm/)"
+false_positives:
+  - Legitimate system administrator running maintenance scripts
+  - DevOps automation tools using sudo for deployments
+  - Package managers invoked via sudo
+recommendation: >
+  1. Review the sudoers configuration and restrict commands to minimum required.
+  2. Investigate the user account and session associated with the suspicious sudo usage.
+  3. Check for unauthorized modifications to /etc/sudoers or /etc/sudoers.d/.
+  4. Consider enabling sudo logging to a separate secure log file.
+  5. Implement NOPASSWD restrictions only for specific safe commands.
+references:
+  - "https://attack.mitre.org/techniques/T1548/003/"
+  - "https://www.sudo.ws/docs/man/sudoers.man/"
+tags:
+  - sudo
+  - privilege_escalation
+  - authentication

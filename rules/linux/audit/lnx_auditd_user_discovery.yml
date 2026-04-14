@@ -1,0 +1,40 @@
+id: SIGMA-LIN-SYSTEM_OWNER_OR_USER
+title: System Owner or User Discovery - Linux
+category: audit
+subcategory: detection
+mitre_technique: T1033
+mitre_tactic: discovery
+severity: low
+confidence: low
+enabled: true
+description: 'Detects the execution of host or user discovery utilities such as "whoami",
+  "hostname", "id", etc.
+
+  Adversaries may use the information from System Owner/User Discovery during automated
+  discovery to shape follow-on behaviors, including whether or not the adversary fully
+  infects the target and/or attempts specific actions.
+
+  '
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: EXECVE
+  - regex: hostname
+  - regex: last
+  - regex: uname
+  - regex: users
+  - regex: whoami
+false_positives:
+- Admin activity
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/execve/lnx_auditd_user_discovery.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1033/T1033.md'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1033/T1033.md
+tags:
+- attack.discovery
+- attack.t1033
+_sigma_source: rules/linux/auditd/execve/lnx_auditd_user_discovery.yml
+_sigma_status: test
+_sigma_author: Timur Zinniatullin, oscd.community
+_sigma_date: 2019-10-21

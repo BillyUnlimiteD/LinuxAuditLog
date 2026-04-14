@@ -1,0 +1,40 @@
+id: SIGMA-LIN-FLUSH_IPTABLES_UFW_C
+title: Flush Iptables Ufw Chain
+category: process
+subcategory: detection
+mitre_technique: T1562.004
+mitre_tactic: ''
+severity: medium
+confidence: low
+enabled: true
+description: Detect use of iptables to flush all firewall rules, tables and chains
+  and allow all network traffic
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /iptables
+  - regex: /xtables\-legacy\-multi
+  - regex: /iptables\-legacy\-multi
+  - regex: /ip6tables
+  - regex: /ip6tables\-legacy\-multi
+  - regex: ufw\-logging\-deny
+  - regex: ufw\-logging\-allow
+  - regex: ufw6\-logging\-deny
+  - regex: ufw6\-logging\-allow
+false_positives:
+- Network administrators
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_iptables_flush_ufw.yml.
+  References: https://blogs.blackberry.com/, https://www.cyberciti.biz/tips/linux-iptables-how-to-flush-all-rules.html,
+  https://twitter.com/Joseliyo_Jstnk/status/1620131033474822144'
+references:
+- https://blogs.blackberry.com/
+- https://www.cyberciti.biz/tips/linux-iptables-how-to-flush-all-rules.html
+- https://twitter.com/Joseliyo_Jstnk/status/1620131033474822144
+tags:
+- attack.defense-evasion
+- attack.t1562.004
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_iptables_flush_ufw.yml
+_sigma_status: test
+_sigma_author: Joseliyo Sanchez, @Joseliyo_Jstnk
+_sigma_date: 2023-01-18

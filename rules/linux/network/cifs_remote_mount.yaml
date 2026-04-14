@@ -1,0 +1,47 @@
+id: LIN-NET-004
+title: Remote CIFS/SMB Share Mount
+category: lateral_movement
+subcategory: remote_share_access
+mitre_technique: T1021.002
+mitre_tactic: lateral_movement
+severity: medium
+confidence: medium
+enabled: true
+description: >
+  Detects mounting of remote CIFS/SMB network shares, which may indicate lateral
+  movement, data staging for exfiltration, or access to shared resources on
+  other hosts. In server environments, interactive CIFS mounts by admin users
+  are unusual and warrant review — legitimate persistent mounts are typically
+  configured in /etc/fstab.
+  Observed in this environment: 'adminsis' mounted //146.155.10.34/home to /mnt
+  using user 'gserrano' credentials on 2025-01-20.
+service: "*"
+detection:
+  type: pattern
+  patterns:
+    - regex: "mount.*-t\\s+cifs.*//(?P<host>[\\d.a-zA-Z\\-]+)/(?P<share>\\S+)"
+    - regex: "mount\\.cifs.*//(?P<host>[\\d.a-zA-Z\\-]+)/(?P<share>\\S+)"
+    - regex: "smbmount.*//(?P<host>[\\d.a-zA-Z\\-]+)/(?P<share>\\S+)"
+    - regex: "USER_CMD.*cmd=.*mount.*cifs.*//(?P<host>[\\d.a-zA-Z\\-]+)"
+    - regex: "kernel:.*CIFS.*(?:mounted|Session established).*(?P<host>[\\d.]+)"
+false_positives:
+  - Legitimate file server mounts configured and managed by sysadmins
+  - Backup solution mounting remote shares for data transfer
+  - Home directory mounts via autofs on desktop systems
+recommendation: >
+  1. Verify the destination host (//146.155.10.34) is an authorized file server.
+  2. Review what data was accessed or copied from /mnt after the mount.
+  3. Confirm the credentials used are appropriate for the share being accessed.
+  4. If this mount was legitimate, convert to /etc/fstab with a credentials file
+     (chmod 600) to avoid exposing passwords in command history and audit logs.
+  5. Audit 146.155.10.34 for evidence of access from this host.
+references:
+  - "https://attack.mitre.org/techniques/T1021/002/"
+  - "https://attack.mitre.org/techniques/T1039/"
+  - "https://www.samba.org/samba/docs/current/man-html/mount.cifs.8.html"
+tags:
+  - cifs
+  - smb
+  - lateral_movement
+  - network_share
+  - mount

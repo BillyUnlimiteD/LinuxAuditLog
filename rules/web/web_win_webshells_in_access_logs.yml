@@ -1,0 +1,40 @@
+id: SIGMA-WEB-WINDOWS_WEBSHELL_STR
+title: Windows Webshell Strings
+category: web
+subcategory: execution
+mitre_technique: T1505.003
+mitre_tactic: persistence
+severity: high
+confidence: low
+enabled: true
+description: Detects common commands used in Windows webshells
+service: '*'
+detection:
+  type: pattern
+  patterns:
+  - regex: =whoami
+  - regex: =net%20user
+  - regex: =net\+user
+  - regex: =net%2Buser
+  - regex: =cmd%20/c%
+  - regex: =cmd\+/c\+
+  - regex: =cmd%2B/c%
+  - regex: =cmd%20/r%
+  - regex: =cmd\+/r\+
+  - regex: =cmd%2B/r%
+false_positives:
+- Web sites like wikis with articles on os commands and pages that include the os
+  commands in the URLs
+- User searches in search boxes of the respective website
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/web/webserver_generic/web_win_webshells_in_access_logs.yml.
+  References: https://bad-jubies.github.io/RCE-NOW-WHAT/, https://m365internals.com/2022/10/07/hunting-in-on-premises-exchange-server-logs/'
+references:
+- https://bad-jubies.github.io/RCE-NOW-WHAT/
+- https://m365internals.com/2022/10/07/hunting-in-on-premises-exchange-server-logs/
+tags:
+- attack.persistence
+- attack.t1505.003
+_sigma_source: rules/web/webserver_generic/web_win_webshells_in_access_logs.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems), Nasreddine Bencherchali (Nextron Systems)
+_sigma_date: 2017-02-19

@@ -1,0 +1,39 @@
+id: SIGMA-LIN-ACCESS_OF_SUDOERS_FI
+title: Access of Sudoers File Content
+category: process
+subcategory: detection
+mitre_technique: T1592.004
+mitre_tactic: reconnaissance
+severity: medium
+confidence: low
+enabled: true
+description: Detects the execution of a text-based file access or inspection utilities
+  to read the content of /etc/sudoers in order to potentially list all users that
+  have sudo rights.
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /cat
+  - regex: /egrep
+  - regex: /emacs
+  - regex: /fgrep
+  - regex: /grep
+  - regex: /head
+  - regex: /less
+  - regex: /more
+  - regex: /nano
+  - regex: /tail
+false_positives:
+- Legitimate administration activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_susp_process_reading_sudoers.yml.
+  References: https://github.com/sleventyeleven/linuxprivchecker/'
+references:
+- https://github.com/sleventyeleven/linuxprivchecker/
+tags:
+- attack.reconnaissance
+- attack.t1592.004
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_susp_process_reading_sudoers.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems)
+_sigma_date: 2022-06-20

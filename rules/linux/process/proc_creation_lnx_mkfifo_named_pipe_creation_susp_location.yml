@@ -1,0 +1,31 @@
+id: SIGMA-LIN-POTENTIALLY_SUSPICIO
+title: Potentially Suspicious Named Pipe Created Via Mkfifo
+category: process
+subcategory: detection
+mitre_technique: ''
+mitre_tactic: execution
+severity: medium
+confidence: low
+enabled: true
+description: Detects the creation of a new named pipe using the "mkfifo" utility in
+  a potentially suspicious location
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /mkfifo
+  - regex: \ /tmp/
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_mkfifo_named_pipe_creation_susp_location.yml.
+  References: https://dev.to/0xbf/use-mkfifo-to-create-named-pipe-linux-tips-5bbk,
+  https://www.mandiant.com/resources/blog/barracuda-esg-exploited-globally'
+references:
+- https://dev.to/0xbf/use-mkfifo-to-create-named-pipe-linux-tips-5bbk
+- https://www.mandiant.com/resources/blog/barracuda-esg-exploited-globally
+tags:
+- attack.execution
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_mkfifo_named_pipe_creation_susp_location.yml
+_sigma_status: test
+_sigma_author: Nasreddine Bencherchali (Nextron Systems)
+_sigma_date: 2023-06-16

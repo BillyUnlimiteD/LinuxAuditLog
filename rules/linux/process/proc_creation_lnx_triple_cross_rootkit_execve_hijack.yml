@@ -1,0 +1,30 @@
+id: SIGMA-LIN-TRIPLE_CROSS_EBPF_RO
+title: Triple Cross eBPF Rootkit Execve Hijack
+category: process
+subcategory: detection
+mitre_technique: ''
+mitre_tactic: ''
+severity: high
+confidence: low
+enabled: true
+description: Detects execution of a the file "execve_hijack" which is used by the
+  Triple Cross rootkit as a way to elevate privileges
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /sudo
+  - regex: execve_hijack
+false_positives:
+- Unlikely
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_triple_cross_rootkit_execve_hijack.yml.
+  References: https://github.com/h3xduck/TripleCross/blob/1f1c3e0958af8ad9f6ebe10ab442e75de33e91de/src/helpers/execve_hijack.c#L275'
+references:
+- https://github.com/h3xduck/TripleCross/blob/1f1c3e0958af8ad9f6ebe10ab442e75de33e91de/src/helpers/execve_hijack.c#L275
+tags:
+- attack.defense-evasion
+- attack.privilege-escalation
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_triple_cross_rootkit_execve_hijack.yml
+_sigma_status: test
+_sigma_author: Nasreddine Bencherchali (Nextron Systems)
+_sigma_date: 2022-07-05

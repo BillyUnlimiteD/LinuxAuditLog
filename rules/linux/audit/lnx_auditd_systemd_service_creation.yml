@@ -1,0 +1,34 @@
+id: SIGMA-LIN-SYSTEMD_SERVICE_CREA
+title: Systemd Service Creation
+category: audit
+subcategory: detection
+mitre_technique: T1543.002
+mitre_tactic: persistence
+severity: medium
+confidence: low
+enabled: true
+description: Detects a creation of systemd services which could be used by adversaries
+  to execute malicious code.
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: PATH
+  - regex: CREATE
+  - regex: /usr/lib/systemd/system/
+  - regex: /etc/systemd/system/
+  - regex: /\.config/systemd/user/
+false_positives:
+- Admin work like legit service installs.
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/path/lnx_auditd_systemd_service_creation.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1543.002/T1543.002.md'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1543.002/T1543.002.md
+tags:
+- attack.privilege-escalation
+- attack.persistence
+- attack.t1543.002
+_sigma_source: rules/linux/auditd/path/lnx_auditd_systemd_service_creation.yml
+_sigma_status: test
+_sigma_author: Pawel Mazur
+_sigma_date: 2022-02-03

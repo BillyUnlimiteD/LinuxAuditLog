@@ -1,0 +1,45 @@
+id: SIGMA-LIN-ASLR_DISABLED_VIA_SY
+title: ASLR Disabled Via Sysctl or Direct Syscall - Linux
+category: audit
+subcategory: detection
+mitre_technique: T1562.001
+mitre_tactic: ''
+severity: high
+confidence: low
+enabled: true
+description: "Detects actions that disable Address Space Layout Randomization (ASLR)\
+  \ in Linux, including:\n  - Use of the `personality` syscall with the ADDR_NO_RANDOMIZE\
+  \ flag (0x0040000)\n  - Modification of the /proc/sys/kernel/randomize_va_space\
+  \ file\n  - Execution of the `sysctl` command to set `kernel.randomize_va_space=0`\n\
+  Disabling ASLR is often used by attackers during exploit development or to bypass\
+  \ memory protection mechanisms.\nA successful use of these methods can reduce the\
+  \ effectiveness of ASLR and make memory "
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: SYSCALL
+  - regex: personality
+  - regex: EXECVE
+  - regex: sysctl
+  - regex: kernel\.randomize_va_space=0
+false_positives:
+- Debugging or legitimate software testing
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/lnx_auditd_disable_aslr_protection.yml.
+  References: https://github.com/CheraghiMilad/bypass-Neo23x0-auditd-config/blob/f1c478a37911a5447d5ffcd580f22b167bf3df14/personality-syscall/README.md,
+  https://man7.org/linux/man-pages/man2/personality.2.html, https://manual.cs50.io/2/personality,
+  https://linux-audit.com/linux-aslr-and-kernelrandomize_va_space-setting/'
+references:
+- https://github.com/CheraghiMilad/bypass-Neo23x0-auditd-config/blob/f1c478a37911a5447d5ffcd580f22b167bf3df14/personality-syscall/README.md
+- https://man7.org/linux/man-pages/man2/personality.2.html
+- https://manual.cs50.io/2/personality
+- https://linux-audit.com/linux-aslr-and-kernelrandomize_va_space-setting/
+tags:
+- attack.privilege-escalation
+- attack.defense-evasion
+- attack.t1562.001
+- attack.t1055.009
+_sigma_source: rules/linux/auditd/lnx_auditd_disable_aslr_protection.yml
+_sigma_status: experimental
+_sigma_author: Milad Cheraghi
+_sigma_date: 2025-05-26

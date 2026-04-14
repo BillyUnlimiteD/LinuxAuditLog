@@ -1,0 +1,31 @@
+id: SIGMA-LIN-BASH_INTERACTIVE_SHE
+title: Bash Interactive Shell
+category: process
+subcategory: execution
+mitre_technique: ''
+mitre_tactic: execution
+severity: low
+confidence: low
+enabled: true
+description: Detects execution of the bash shell with the interactive flag "-i".
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /bash
+  - regex: '\ \-i\ '
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_bash_interactive_shell.yml.
+  References: https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet,
+  https://www.revshells.com/, https://linux.die.net/man/1/bash'
+references:
+- https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet
+- https://www.revshells.com/
+- https://linux.die.net/man/1/bash
+tags:
+- attack.execution
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_bash_interactive_shell.yml
+_sigma_status: test
+_sigma_author: '@d4ns4n_'
+_sigma_date: 2023-04-07

@@ -1,0 +1,55 @@
+id: SVC-MYSQL-001
+title: MySQL/MariaDB Suspicious Activity
+category: database
+subcategory: mysql
+mitre_technique: T1505.001
+mitre_tactic: persistence
+severity: high
+confidence: medium
+enabled: true
+description: >
+  Detects suspicious MySQL and MariaDB activity in error logs and general query
+  logs including: authentication failures, unauthorized access attempts, privilege
+  escalation via GRANT, UDF (User Defined Function) abuse for code execution,
+  INTO OUTFILE exploitation for file write, LOAD DATA INFILE for file read,
+  and evidence of SQL injection in slow query log. Also covers MySQL-specific
+  privilege abuse patterns (EVENT, TRIGGER, UDF).
+service: mysql
+detection:
+  type: pattern
+  patterns:
+    - regex: "(?P<msg>Access denied for user '(?P<user>[^']+)'@'(?P<host>[^']+)')"
+    - regex: "(?P<msg>GRANT ALL|GRANT.*FILE|GRANT.*SUPER|GRANT.*EXECUTE).*TO '(?P<user>[^']+)'@'(?P<host>[^']+)'"
+    - regex: "(?P<msg>CREATE\\s+(?:FUNCTION|PROCEDURE).*SONAME|INSTALL PLUGIN.*SO|DROP FUNCTION.*UDF)"
+    - regex: "(?P<msg>SELECT.*INTO\\s+(?:OUTFILE|DUMPFILE)\\s+'(?P<path>[^']+)')"
+    - regex: "(?P<msg>LOAD\\s+DATA\\s+(?:LOCAL\\s+)?INFILE\\s+'(?P<path>[^']+)')"
+    - regex: "(?P<msg>CREATE\\s+USER.*IDENTIFIED|ALTER\\s+USER.*IDENTIFIED|SET\\s+PASSWORD)"
+    - regex: "\\[Warning\\].*(?P<msg>Aborted connection|Got an error reading|Got packets out of order|Received too large packet)"
+    - regex: "(?P<msg>mysqld.*got signal \\d+|innodb.*fatal error|table.*is marked as crashed)"
+    - regex: "(?P<msg>FLUSH PRIVILEGES|SHOW GRANTS|SHOW MASTER STATUS|SHOW SLAVE STATUS)"
+false_positives:
+  - Legitimate database administration (CREATE USER, GRANT for new deployments)
+  - Database backup tools using SELECT INTO OUTFILE
+  - ORM frameworks generating complex GRANT statements
+  - Application connection pool reconnections generating Aborted connection warnings
+recommendation: >
+  1. Investigate the source of authentication failures — multiple failures indicate brute force.
+  2. Audit GRANT statements — ensure no excessive privileges were assigned.
+  3. Check for UDF (.so files) in plugin directory: SELECT * FROM information_schema.PLUGINS;
+  4. Review INTO OUTFILE targets — file write can be used to create webshells.
+  5. Disable LOAD DATA LOCAL INFILE if not required.
+  6. Bind MySQL to 127.0.0.1 unless remote access is explicitly required.
+  7. Rotate root and application user passwords if access failure is from external IPs.
+  8. Review slow query log for SQLi-like patterns (UNION, SLEEP, BENCHMARK).
+references:
+  - "https://attack.mitre.org/techniques/T1505/001/"
+  - "https://dev.mysql.com/doc/refman/8.0/en/security-guidelines.html"
+  - "https://owasp.org/www-community/attacks/SQL_Injection"
+  - "https://book.hacktricks.xyz/network-services-pentesting/pentesting-mysql"
+tags:
+  - mysql
+  - mariadb
+  - database
+  - udf
+  - privilege_escalation
+  - persistence

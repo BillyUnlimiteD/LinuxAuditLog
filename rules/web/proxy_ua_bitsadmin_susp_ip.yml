@@ -1,0 +1,32 @@
+id: SIGMA-WEB-BITSADMIN_TO_UNCOMMO
+title: Bitsadmin to Uncommon IP Server Address
+category: web
+subcategory: detection
+mitre_technique: T1071.001
+mitre_tactic: persistence
+severity: high
+confidence: low
+enabled: true
+description: Detects Bitsadmin connections to IP addresses instead of FQDN names
+service: '*'
+detection:
+  type: pattern
+  patterns:
+  - regex: Microsoft\ BITS/
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/web/proxy_generic/proxy_ua_bitsadmin_susp_ip.yml.
+  References: https://isc.sans.edu/diary/Microsoft+BITS+Used+to+Download+Payloads/21027'
+references:
+- https://isc.sans.edu/diary/Microsoft+BITS+Used+to+Download+Payloads/21027
+tags:
+- attack.command-and-control
+- attack.t1071.001
+- attack.defense-evasion
+- attack.persistence
+- attack.t1197
+- attack.s0190
+_sigma_source: rules/web/proxy_generic/proxy_ua_bitsadmin_susp_ip.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems)
+_sigma_date: 2022-06-10

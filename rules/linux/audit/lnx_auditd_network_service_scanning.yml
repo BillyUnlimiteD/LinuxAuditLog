@@ -1,0 +1,34 @@
+id: SIGMA-LIN-LINUX_NETWORK_SERVIC
+title: Linux Network Service Scanning - Auditd
+category: network
+subcategory: detection
+mitre_technique: T1046
+mitre_tactic: discovery
+severity: low
+confidence: low
+enabled: true
+description: Detects enumeration of local or remote network services.
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: SYSCALL
+  - regex: /telnet
+  - regex: /nmap
+  - regex: /netcat
+  - regex: /ncat
+  - regex: /nc\.openbsd
+  - regex: network_connect_4
+false_positives:
+- Legitimate administration activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/syscall/lnx_auditd_network_service_scanning.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1046/T1046.md'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1046/T1046.md
+tags:
+- attack.discovery
+- attack.t1046
+_sigma_source: rules/linux/auditd/syscall/lnx_auditd_network_service_scanning.yml
+_sigma_status: test
+_sigma_author: Alejandro Ortuno, oscd.community
+_sigma_date: 2020-10-21

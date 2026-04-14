@@ -1,0 +1,33 @@
+id: SIGMA-LIN-USER_ADDED_TO_ROOT_S
+title: User Added To Root/Sudoers Group Using Usermod
+category: process
+subcategory: detection
+mitre_technique: ''
+mitre_tactic: persistence
+severity: medium
+confidence: low
+enabled: true
+description: Detects usage of the "usermod" binary to add users add users to the root
+  or suoders groups
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /usermod
+  - regex: \-aG\ root
+  - regex: \-aG\ sudoers
+false_positives:
+- Legitimate administrator activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_usermod_susp_group.yml.
+  References: https://pberba.github.io/security/2021/11/23/linux-threat-hunting-for-persistence-account-creation-manipulation/,
+  https://www.configserverfirewall.com/ubuntu-linux/ubuntu-add-user-to-root-group/'
+references:
+- https://pberba.github.io/security/2021/11/23/linux-threat-hunting-for-persistence-account-creation-manipulation/
+- https://www.configserverfirewall.com/ubuntu-linux/ubuntu-add-user-to-root-group/
+tags:
+- attack.privilege-escalation
+- attack.persistence
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_usermod_susp_group.yml
+_sigma_status: test
+_sigma_author: TuanLe (GTSC)
+_sigma_date: 2022-12-21

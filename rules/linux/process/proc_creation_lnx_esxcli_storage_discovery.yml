@@ -1,0 +1,40 @@
+id: SIGMA-LIN-ESXI_STORAGE_INFORMA
+title: ESXi Storage Information Discovery Via ESXCLI
+category: process
+subcategory: detection
+mitre_technique: T1033
+mitre_tactic: execution
+severity: medium
+confidence: low
+enabled: true
+description: Detects execution of the "esxcli" command with the "storage" flag in
+  order to retrieve information about the storage status and other related information.
+  Seen used by malware such as DarkSide and LockBit.
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /esxcli
+  - regex: storage
+  - regex: \ get
+  - regex: \ list
+false_positives:
+- Legitimate administration activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_esxcli_storage_discovery.yml.
+  References: https://www.trendmicro.com/en_us/research/21/e/darkside-linux-vms-targeted.html,
+  https://www.trendmicro.com/en_us/research/22/a/analysis-and-Impact-of-lockbit-ransomwares-first-linux-and-vmware-esxi-variant.html,
+  https://developer.broadcom.com/xapis/esxcli-command-reference/7.0.0/namespace/esxcli_storage.html'
+references:
+- https://www.trendmicro.com/en_us/research/21/e/darkside-linux-vms-targeted.html
+- https://www.trendmicro.com/en_us/research/22/a/analysis-and-Impact-of-lockbit-ransomwares-first-linux-and-vmware-esxi-variant.html
+- https://developer.broadcom.com/xapis/esxcli-command-reference/7.0.0/namespace/esxcli_storage.html
+tags:
+- attack.discovery
+- attack.execution
+- attack.t1033
+- attack.t1007
+- attack.t1059.012
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_esxcli_storage_discovery.yml
+_sigma_status: test
+_sigma_author: Nasreddine Bencherchali (Nextron Systems), Cedric Maurugeon
+_sigma_date: 2023-09-04

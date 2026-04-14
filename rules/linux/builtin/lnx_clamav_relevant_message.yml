@@ -1,0 +1,32 @@
+id: SIGMA-LIN-RELEVANT_CLAMAV_MESS
+title: Relevant ClamAV Message
+category: authentication
+subcategory: detection
+mitre_technique: T1588.001
+mitre_tactic: ''
+severity: high
+confidence: low
+enabled: true
+description: Detects relevant ClamAV messages
+service: clamav
+detection:
+  type: pattern
+  patterns:
+  - regex: Trojan.*FOUND
+  - regex: VirTool.*FOUND
+  - regex: Webshell.*FOUND
+  - regex: Rootkit.*FOUND
+  - regex: Htran.*FOUND
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/builtin/clamav/lnx_clamav_relevant_message.yml.
+  References: https://github.com/ossec/ossec-hids/blob/1ecffb1b884607cb12e619f9ab3c04f530801083/etc/rules/clam_av_rules.xml'
+references:
+- https://github.com/ossec/ossec-hids/blob/1ecffb1b884607cb12e619f9ab3c04f530801083/etc/rules/clam_av_rules.xml
+tags:
+- attack.resource-development
+- attack.t1588.001
+_sigma_source: rules/linux/builtin/clamav/lnx_clamav_relevant_message.yml
+_sigma_status: stable
+_sigma_author: Florian Roth (Nextron Systems)
+_sigma_date: 2017-03-01

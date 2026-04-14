@@ -1,0 +1,31 @@
+id: SIGMA-LIN-SHELLSHOCK_EXPRESSIO
+title: Shellshock Expression
+category: authentication
+subcategory: execution
+mitre_technique: T1505.003
+mitre_tactic: persistence
+severity: high
+confidence: low
+enabled: true
+description: Detects shellshock expressions in log files
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: \(\)\{:;\};
+  - regex: \(\)\ \{:;\};
+  - regex: \(\)\ \{\ :;\};
+  - regex: \(\)\ \{\ :;\ \};
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/builtin/lnx_shellshock.yml.
+  References: https://owasp.org/www-pdf-archive/Shellshock_-_Tudor_Enache.pdf'
+references:
+- https://owasp.org/www-pdf-archive/Shellshock_-_Tudor_Enache.pdf
+tags:
+- attack.persistence
+- attack.t1505.003
+_sigma_source: rules/linux/builtin/lnx_shellshock.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems)
+_sigma_date: 2017-03-14

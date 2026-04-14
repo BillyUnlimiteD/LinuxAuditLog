@@ -1,0 +1,33 @@
+id: SIGMA-LIN-POTENTIAL_LINUX_PROC
+title: Potential Linux Process Code Injection Via DD Utility
+category: process
+subcategory: detection
+mitre_technique: T1055.009
+mitre_tactic: ''
+severity: medium
+confidence: low
+enabled: true
+description: Detects the injection of code by overwriting the memory map of a Linux
+  process using the "dd" Linux command.
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /proc/
+  - regex: /mem
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_dd_process_injection.yml.
+  References: https://www.aon.com/cyber-solutions/aon_cyber_labs/linux-based-inter-process-code-injection-without-ptrace2/,
+  https://github.com/AonCyberLabs/Cexigua/blob/34d338620afae4c6335ba8d8d499e1d7d3d5d7b5/overwrite.sh'
+references:
+- https://www.aon.com/cyber-solutions/aon_cyber_labs/linux-based-inter-process-code-injection-without-ptrace2/
+- https://github.com/AonCyberLabs/Cexigua/blob/34d338620afae4c6335ba8d8d499e1d7d3d5d7b5/overwrite.sh
+tags:
+- attack.privilege-escalation
+- attack.defense-evasion
+- attack.t1055.009
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_dd_process_injection.yml
+_sigma_status: test
+_sigma_author: Joseph Kamau
+_sigma_date: 2023-12-01

@@ -1,0 +1,35 @@
+id: SIGMA-LIN-SYSTEM_NETWORK_DISCO
+title: System Network Discovery - Linux
+category: process
+subcategory: detection
+mitre_technique: T1016
+mitre_tactic: discovery
+severity: info
+confidence: low
+enabled: true
+description: Detects enumeration of local network configuration
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /firewall\-cmd
+  - regex: /ufw
+  - regex: /iptables
+  - regex: /netstat
+  - regex: /ifconfig
+  - regex: /systemd\-resolve
+  - regex: /route
+  - regex: /etc/resolv\.conf
+false_positives:
+- Legitimate administration activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_system_network_discovery.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1016/T1016.md'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1016/T1016.md
+tags:
+- attack.discovery
+- attack.t1016
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_system_network_discovery.yml
+_sigma_status: test
+_sigma_author: Ömer Günal and remotephone, oscd.community
+_sigma_date: 2020-10-06

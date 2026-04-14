@@ -1,0 +1,31 @@
+id: SIGMA-LIN-CODE_INJECTION_BY_LD
+title: Code Injection by ld.so Preload
+category: authentication
+subcategory: detection
+mitre_technique: T1574.006
+mitre_tactic: persistence
+severity: high
+confidence: low
+enabled: true
+description: Detects the ld.so preload persistence file. See `man ld.so` for more
+  information.
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /etc/ld\.so\.preload
+false_positives:
+- Rare temporary workaround for library misconfiguration
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/builtin/lnx_ldso_preload_injection.yml.
+  References: https://man7.org/linux/man-pages/man8/ld.so.8.html'
+references:
+- https://man7.org/linux/man-pages/man8/ld.so.8.html
+tags:
+- attack.defense-evasion
+- attack.persistence
+- attack.privilege-escalation
+- attack.t1574.006
+_sigma_source: rules/linux/builtin/lnx_ldso_preload_injection.yml
+_sigma_status: test
+_sigma_author: Christian Burkard (Nextron Systems)
+_sigma_date: 2021-05-05

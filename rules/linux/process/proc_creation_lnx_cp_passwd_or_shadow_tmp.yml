@@ -1,0 +1,31 @@
+id: SIGMA-LIN-COPY_PASSWD_OR_SHADO
+title: Copy Passwd Or Shadow From TMP Path
+category: process
+subcategory: detection
+mitre_technique: T1552.001
+mitre_tactic: ''
+severity: high
+confidence: low
+enabled: true
+description: Detects when the file "passwd" or "shadow" is copied from tmp path
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /tmp/
+  - regex: passwd
+  - regex: shadow
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_cp_passwd_or_shadow_tmp.yml.
+  References: https://blogs.blackberry.com/, https://twitter.com/Joseliyo_Jstnk/status/1620131033474822144'
+references:
+- https://blogs.blackberry.com/
+- https://twitter.com/Joseliyo_Jstnk/status/1620131033474822144
+tags:
+- attack.credential-access
+- attack.t1552.001
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_cp_passwd_or_shadow_tmp.yml
+_sigma_status: test
+_sigma_author: Joseliyo Sanchez, @Joseliyo_Jstnk
+_sigma_date: 2023-01-31

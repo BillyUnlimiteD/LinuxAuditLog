@@ -1,0 +1,33 @@
+id: SIGMA-LIN-SCHEDULED_CRON_TASK
+title: Scheduled Cron Task/Job - Linux
+category: process
+subcategory: detection
+mitre_technique: T1053.003
+mitre_tactic: persistence
+severity: medium
+confidence: low
+enabled: true
+description: Detects abuse of the cron utility to perform task scheduling for initial
+  or recurring execution of malicious code. Detection will focus on crontab jobs uploaded
+  from the tmp folder.
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: crontab
+  - regex: /tmp/
+false_positives:
+- Legitimate administration activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_schedule_task_job_cron.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1053.003/T1053.003.md'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1053.003/T1053.003.md
+tags:
+- attack.execution
+- attack.persistence
+- attack.privilege-escalation
+- attack.t1053.003
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_schedule_task_job_cron.yml
+_sigma_status: test
+_sigma_author: Alejandro Ortuno, oscd.community
+_sigma_date: 2020-10-06

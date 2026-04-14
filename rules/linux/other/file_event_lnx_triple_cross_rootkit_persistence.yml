@@ -1,0 +1,32 @@
+id: SIGMA-LIN-TRIPLE_CROSS_EBPF_RO
+title: Triple Cross eBPF Rootkit Default Persistence
+category: generic
+subcategory: detection
+mitre_technique: T1053.003
+mitre_tactic: persistence
+severity: high
+confidence: low
+enabled: true
+description: Detects the creation of "ebpfbackdoor" files in both "cron.d" and "sudoers.d"
+  directories. Which both are related to the TripleCross persistence method
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: ebpfbackdoor
+false_positives:
+- Unlikely
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/file_event/file_event_lnx_triple_cross_rootkit_persistence.yml.
+  References: https://github.com/h3xduck/TripleCross/blob/12629558b8b0a27a5488a0b98f1ea7042e76f8ab/apps/deployer.sh'
+references:
+- https://github.com/h3xduck/TripleCross/blob/12629558b8b0a27a5488a0b98f1ea7042e76f8ab/apps/deployer.sh
+tags:
+- attack.privilege-escalation
+- attack.execution
+- attack.persistence
+- attack.defense-evasion
+- attack.t1053.003
+_sigma_source: rules/linux/file_event/file_event_lnx_triple_cross_rootkit_persistence.yml
+_sigma_status: test
+_sigma_author: Nasreddine Bencherchali (Nextron Systems)
+_sigma_date: 2022-07-05

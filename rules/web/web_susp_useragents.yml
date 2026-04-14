@@ -1,0 +1,36 @@
+id: SIGMA-WEB-SUSPICIOUS_USER_AGEN
+title: Suspicious User-Agents Related To Recon Tools
+category: web
+subcategory: detection
+mitre_technique: T1190
+mitre_tactic: ''
+severity: medium
+confidence: low
+enabled: true
+description: Detects known suspicious (default) user-agents related to scanning/recon
+  tools
+service: '*'
+detection:
+  type: pattern
+  patterns:
+  - regex: Wfuzz/
+  - regex: WPScan\ v
+  - regex: Recon\-ng/v
+  - regex: GIS\ \-\ AppSec\ Team\ \-\ Project\ Vision
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/web/webserver_generic/web_susp_useragents.yml.
+  References: https://github.com/wpscanteam/wpscan/blob/196fbab5b1ce3870a43515153d4f07878a89d410/lib/wpscan/browser.rb,
+  https://github.com/xmendez/wfuzz/blob/1b695ee9a87d66a7d7bf6cae70d60a33fae51541/docs/user/basicusage.rst,
+  https://github.com/lanmaster53/recon-ng/blob/9e907dfe09fce2997f0301d746796408e01a60b7/recon/core/base.py#L92'
+references:
+- https://github.com/wpscanteam/wpscan/blob/196fbab5b1ce3870a43515153d4f07878a89d410/lib/wpscan/browser.rb
+- https://github.com/xmendez/wfuzz/blob/1b695ee9a87d66a7d7bf6cae70d60a33fae51541/docs/user/basicusage.rst
+- https://github.com/lanmaster53/recon-ng/blob/9e907dfe09fce2997f0301d746796408e01a60b7/recon/core/base.py#L92
+tags:
+- attack.initial-access
+- attack.t1190
+_sigma_source: rules/web/webserver_generic/web_susp_useragents.yml
+_sigma_status: test
+_sigma_author: Nasreddine Bencherchali (Nextron Systems), Tim Shelton
+_sigma_date: 2022-07-19

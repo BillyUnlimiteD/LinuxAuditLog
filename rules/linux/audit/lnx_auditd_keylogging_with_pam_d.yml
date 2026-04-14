@@ -1,0 +1,38 @@
+id: SIGMA-LIN-LINUX_KEYLOGGING_WIT
+title: Linux Keylogging with Pam.d
+category: audit
+subcategory: detection
+mitre_technique: T1003
+mitre_tactic: collection
+severity: high
+confidence: low
+enabled: true
+description: Detect attempt to enable auditing of TTY input
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: PATH
+  - regex: /etc/pam\.d/system\-auth
+  - regex: /etc/pam\.d/password\-auth
+  - regex: USER_TTY
+false_positives:
+- Administrative work
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/lnx_auditd_keylogging_with_pam_d.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1056.001/T1056.001.md,
+  https://linux.die.net/man/8/pam_tty_audit, https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/security_guide/sec-configuring_pam_for_auditing,
+  https://access.redhat.com/articles/4409591#audit-record-types-2'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1056.001/T1056.001.md
+- https://linux.die.net/man/8/pam_tty_audit
+- https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/security_guide/sec-configuring_pam_for_auditing
+- https://access.redhat.com/articles/4409591#audit-record-types-2
+tags:
+- attack.collection
+- attack.credential-access
+- attack.t1003
+- attack.t1056.001
+_sigma_source: rules/linux/auditd/lnx_auditd_keylogging_with_pam_d.yml
+_sigma_status: test
+_sigma_author: Pawel Mazur
+_sigma_date: 2021-05-24

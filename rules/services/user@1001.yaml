@@ -1,0 +1,38 @@
+id: SVC-USER1001-001
+title: User Session Service — Suspicious User Lingerer Activity
+category: persistence
+subcategory: user_session
+mitre_technique: T1053.006
+mitre_tactic: persistence
+severity: medium
+confidence: medium
+enabled: true
+description: >
+  Monitors the systemd user session service for UID 1001. Attackers who
+  obtain a shell as a non-root user may install persistent user-level systemd
+  units (timers, services) to maintain access without requiring root privileges.
+  User lingering enables these units to survive logoff.
+service: user@1001
+detection:
+  type: pattern
+  patterns:
+    - regex: "systemd.*user@1001.*(?:started|activated).*(?P<unit>[^.]+\\.(?:service|timer|socket))"
+    - regex: "systemd.*user@1001.*Failed.*(?P<unit>\\S+\\.service)"
+    - regex: "loginctl.*enable-linger.*1001|systemd-logind.*linger.*1001"
+    - regex: "systemd.*user@1001.*New.*slice.*(?P<slice>\\S+)"
+false_positives:
+  - Legitimate user services (e.g., pipewire, dbus-broker, at-spi2)
+  - Desktop environment user services
+recommendation: >
+  1. Audit ~/.config/systemd/user/ for UID 1001 for unexpected service units.
+  2. Investigate if lingering was enabled without explicit administrator approval.
+  3. Review enabled user timers — common persistence mechanism.
+  4. Identify what UID 1001 corresponds to on this system (getent passwd 1001).
+references:
+  - "https://attack.mitre.org/techniques/T1053/006/"
+  - "https://www.freedesktop.org/software/systemd/man/loginctl.html"
+tags:
+  - user_session
+  - persistence
+  - systemd
+  - linger

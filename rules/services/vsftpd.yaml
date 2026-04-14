@@ -1,0 +1,39 @@
+id: SVC-VSFTPD-001
+title: vsftpd FTP server access and authentication events
+category: service
+subcategory: vsftpd
+mitre_technique: T1078
+mitre_tactic: initial_access
+severity: medium
+confidence: medium
+enabled: true
+description: Detects vsftpd FTP server events including failed logins, anonymous connections, file transfers, and potential brute force attempts.
+service: vsftpd
+detection:
+  type: pattern
+  patterns:
+    - regex: 'vsftpd.*: FAIL LOGIN'
+    - regex: 'vsftpd.*: OK LOGIN'
+    - regex: 'vsftpd.*: Client .* connected'
+    - regex: 'vsftpd.*: ANON'
+    - regex: 'vsftpd.*: UPLOAD'
+    - regex: 'vsftpd.*: DELETE'
+    - regex: 'vsftpd.*: Connection refused'
+false_positives:
+  - Normal FTP usage in legitimate environments
+  - Expected anonymous access if configured
+recommendation: >
+  1. Review failed login attempts for brute force patterns.
+  2. Monitor anonymous FTP access for unauthorized file sharing.
+  3. Ensure vsftpd is configured with strong authentication and chroot.
+  4. Disable anonymous access if not required.
+  5. Log all FTP activities for forensic analysis.
+references:
+  - https://security.appspot.com/vsftpd.html
+  - https://attack.mitre.org/techniques/T1078/
+tags:
+  - vsftpd
+  - ftp
+  - authentication
+  - file_transfer
+  - audit

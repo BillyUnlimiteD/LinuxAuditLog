@@ -1,0 +1,38 @@
+id: SIGMA-LIN-SUSPICIOUS_CURL_FILE
+title: Suspicious Curl File Upload - Linux
+category: process
+subcategory: detection
+mitre_technique: T1567
+mitre_tactic: exfiltration
+severity: medium
+confidence: low
+enabled: true
+description: Detects a suspicious curl process start the adds a file to a web request
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /curl
+  - regex: ://localhost
+  - regex: ://127\.0\.0\.1
+false_positives:
+- Scripts created by developers and admins
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_susp_curl_fileupload.yml.
+  References: https://twitter.com/d1r4c/status/1279042657508081664, https://medium.com/@petehouston/upload-files-with-curl-93064dcccc76,
+  https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1105/T1105.md#atomic-test-19---curl-upload-file,
+  https://curl.se/docs/manpage.html, https://www.trendmicro.com/en_us/research/22/i/how-malicious-actors-abuse-native-linux-tools-in-their-attacks.html'
+references:
+- https://twitter.com/d1r4c/status/1279042657508081664
+- https://medium.com/@petehouston/upload-files-with-curl-93064dcccc76
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1105/T1105.md#atomic-test-19---curl-upload-file
+- https://curl.se/docs/manpage.html
+- https://www.trendmicro.com/en_us/research/22/i/how-malicious-actors-abuse-native-linux-tools-in-their-attacks.html
+tags:
+- attack.exfiltration
+- attack.command-and-control
+- attack.t1567
+- attack.t1105
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_susp_curl_fileupload.yml
+_sigma_status: test
+_sigma_author: Nasreddine Bencherchali (Nextron Systems), Cedric MAURUGEON (Update)
+_sigma_date: 2022-09-15

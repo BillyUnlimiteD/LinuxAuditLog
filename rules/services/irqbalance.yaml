@@ -1,0 +1,32 @@
+id: SVC-IRQBALANCE-001
+title: irqbalance — Abnormal Interrupt Handling
+category: system
+subcategory: hardware
+mitre_technique: T1499
+mitre_tactic: impact
+severity: low
+confidence: low
+enabled: true
+description: >
+  Monitors irqbalance for abnormal conditions that may indicate hardware
+  manipulation, DoS attempts via IRQ flooding, or signs of a hypervisor
+  escape in virtualized environments.
+service: irqbalance
+detection:
+  type: pattern
+  patterns:
+    - regex: "irqbalance.*IRQ.*banned|irqbalance.*failed to|irqbalance.*error"
+    - regex: "irqbalance.*No IRQ.*rebalance|irqbalance.*balance.*impossible"
+    - regex: "irqbalance.*shutdown|irqbalance.*SIGTERM|irqbalance.*unexpected"
+false_positives:
+  - Normal irqbalance operation on single-CPU systems (no rebalancing needed)
+  - Shutdown messages during planned maintenance
+recommendation: >
+  1. Investigate repeated irqbalance errors on multi-CPU systems.
+  2. Correlate with hardware failure alerts or unusual CPU utilization spikes.
+references:
+  - "https://attack.mitre.org/techniques/T1499/"
+tags:
+  - irqbalance
+  - hardware
+  - system

@@ -1,0 +1,31 @@
+id: SIGMA-LIN-FILE_DELETION
+title: File Deletion
+category: process
+subcategory: detection
+mitre_technique: T1070.004
+mitre_tactic: ''
+severity: info
+confidence: low
+enabled: true
+description: Detects file deletion using "rm", "shred" or "unlink" commands which
+  are used often by adversaries to delete files left behind by the actions of their
+  intrusion activity
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /shred
+  - regex: /unlink
+false_positives:
+- Legitimate administration activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_file_deletion.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1070.004/T1070.004.md'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1070.004/T1070.004.md
+tags:
+- attack.defense-evasion
+- attack.t1070.004
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_file_deletion.yml
+_sigma_status: stable
+_sigma_author: Ömer Günal, oscd.community
+_sigma_date: 2020-10-07

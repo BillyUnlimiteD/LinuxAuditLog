@@ -1,0 +1,46 @@
+id: SIGMA-LIN-SUSPICIOUS_DOWNLOAD
+title: Suspicious Download and Execute Pattern via Curl/Wget
+category: process
+subcategory: execution
+mitre_technique: T1059.004
+mitre_tactic: execution
+severity: high
+confidence: low
+enabled: true
+description: 'Detects suspicious use of command-line tools such as curl or wget to
+  download remote
+
+  content - particularly scripts - into temporary directories (e.g., /dev/shm, /tmp),
+  followed by
+
+  immediate execution, indicating potential malicious activity. This pattern is commonly
+  used
+
+  by malicious scripts, stagers, or downloaders in fileless or multi-stage Linux attacks.
+
+  '
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /curl
+  - regex: /wget
+  - regex: /tmp/
+  - regex: /dev/shm/
+  - regex: sh\ \-c
+false_positives:
+- System update scripts using temporary files
+- Installer scripts or automated provisioning tools
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_curl_wget_exec_tmp.yml.
+  References: https://gtfobins.github.io/gtfobins/wget/, https://gtfobins.github.io/gtfobins/curl/'
+references:
+- https://gtfobins.github.io/gtfobins/wget/
+- https://gtfobins.github.io/gtfobins/curl/
+tags:
+- attack.execution
+- attack.t1059.004
+- attack.t1203
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_curl_wget_exec_tmp.yml
+_sigma_status: experimental
+_sigma_author: Aayush Gupta
+_sigma_date: 2025-06-17

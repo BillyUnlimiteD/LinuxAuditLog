@@ -1,0 +1,38 @@
+id: SVC-NM-001
+title: NetworkManager — Suspicious Network Configuration Change
+category: network
+subcategory: configuration
+mitre_technique: T1562.007
+mitre_tactic: defense_evasion
+severity: high
+confidence: medium
+enabled: true
+description: >
+  Detects unauthorized or suspicious network configuration changes via
+  NetworkManager: new connections added at runtime, DNS server changes,
+  VPN activations, device state changes, and routing table modifications
+  that may indicate persistence or exfiltration setup.
+service: networkmanager
+detection:
+  type: pattern
+  patterns:
+    - regex: "NetworkManager.*connection '(?P<conn>[^']+)' (?:added|activated|deactivated)"
+    - regex: "NetworkManager.*device.*(?P<iface>\\w+).*state change.*disconnected|ip-config|failed"
+    - regex: "NetworkManager.*(?:DNS|nameserver|resolv\\.conf).*(?:changed|updated|override)"
+    - regex: "NetworkManager.*VPN.*(?:activated|connection|plugin)"
+    - regex: "NetworkManager.*policy.*route.*added|NetworkManager.*routing.*changed"
+false_positives:
+  - Legitimate network reconfigurations by administrators
+  - DHCP lease renewals causing connection events
+recommendation: >
+  1. Monitor for new VPN connections activated outside business hours.
+  2. Alert on DNS server changes — may indicate DNS hijacking.
+  3. Review new connection profiles added to /etc/NetworkManager/system-connections/.
+references:
+  - "https://attack.mitre.org/techniques/T1562/007/"
+  - "https://networkmanager.dev/docs/"
+tags:
+  - networkmanager
+  - network
+  - dns
+  - vpn

@@ -1,0 +1,41 @@
+id: LIN-NET-001
+title: Network Port Scanning Activity
+category: network
+subcategory: reconnaissance
+mitre_technique: T1046
+mitre_tactic: discovery
+severity: medium
+confidence: low
+enabled: true
+description: >
+  Detects patterns consistent with network port scanning targeting this host.
+  Indicators include: rapid connection attempts to multiple ports from a single
+  source IP, TCP SYN flood patterns in kernel logs, and repeated connection
+  resets. Scanning often precedes exploitation attempts.
+service: "*"
+detection:
+  type: threshold
+  patterns:
+    - regex: "kernel.*(?:nf_conntrack|iptables|firewall).*(?:SYN_SENT|DROP|REJECT).*SRC=(?P<src_ip>[\\d.]+)"
+    - regex: "(?:refused connect|connection refused).*from (?P<src_ip>[\\d.]+)"
+    - regex: "Invalid user.*from (?P<src_ip>[\\d.]+) port (?:(?!22)\\d+)"
+    - regex: "Did not receive identification string from (?P<src_ip>[\\d.]+)"
+  aggregation:
+    field: src_ip
+    count: 15
+    window_seconds: 60
+false_positives:
+  - Legitimate vulnerability scanners (Nessus, Qualys) in authorized assessments
+  - Load balancer health checks
+  - Network monitoring tools
+recommendation: >
+  1. Block the scanning source IP at the perimeter firewall.
+  2. Check whether the scan was followed by a successful connection or authentication attempt.
+  3. Review firewall rules to ensure unnecessary ports are not exposed.
+  4. Implement port knocking or VPN for sensitive services.
+references:
+  - "https://attack.mitre.org/techniques/T1046/"
+tags:
+  - reconnaissance
+  - scanning
+  - network

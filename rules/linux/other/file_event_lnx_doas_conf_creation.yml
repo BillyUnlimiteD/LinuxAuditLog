@@ -1,0 +1,31 @@
+id: SIGMA-LIN-LINUX_DOAS_CONF_FILE
+title: Linux Doas Conf File Creation
+category: generic
+subcategory: detection
+mitre_technique: T1548
+mitre_tactic: ''
+severity: medium
+confidence: low
+enabled: true
+description: Detects the creation of doas.conf file in linux host platform.
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /etc/doas\.conf
+false_positives:
+- Unlikely
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/file_event/file_event_lnx_doas_conf_creation.yml.
+  References: https://research.splunk.com/endpoint/linux_doas_conf_file_creation/,
+  https://www.makeuseof.com/how-to-install-and-use-doas/'
+references:
+- https://research.splunk.com/endpoint/linux_doas_conf_file_creation/
+- https://www.makeuseof.com/how-to-install-and-use-doas/
+tags:
+- attack.defense-evasion
+- attack.privilege-escalation
+- attack.t1548
+_sigma_source: rules/linux/file_event/file_event_lnx_doas_conf_creation.yml
+_sigma_status: stable
+_sigma_author: Sittikorn S, Teoderick Contreras
+_sigma_date: 2022-01-20

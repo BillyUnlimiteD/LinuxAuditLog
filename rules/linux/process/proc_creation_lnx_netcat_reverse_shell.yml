@@ -1,0 +1,44 @@
+id: SIGMA-LIN-POTENTIAL_NETCAT_REV
+title: Potential Netcat Reverse Shell Execution
+category: process
+subcategory: execution
+mitre_technique: T1059
+mitre_tactic: execution
+severity: high
+confidence: low
+enabled: true
+description: Detects execution of netcat with the "-e" flag followed by common shells.
+  This could be a sign of a potential reverse shell setup.
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /ncat
+  - regex: '\ \-c\ '
+  - regex: '\ \-e\ '
+  - regex: \ ash
+  - regex: \ bash
+  - regex: \ bsh
+  - regex: \ csh
+  - regex: \ ksh
+  - regex: \ pdksh
+  - regex: \ tcsh
+false_positives:
+- Unlikely
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_netcat_reverse_shell.yml.
+  References: https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet,
+  https://www.revshells.com/, https://www.hackingtutorials.org/networking/hacking-netcat-part-2-bind-reverse-shells/,
+  https://www.infosecademy.com/netcat-reverse-shells/, https://man7.org/linux/man-pages/man1/ncat.1.html'
+references:
+- https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet
+- https://www.revshells.com/
+- https://www.hackingtutorials.org/networking/hacking-netcat-part-2-bind-reverse-shells/
+- https://www.infosecademy.com/netcat-reverse-shells/
+- https://man7.org/linux/man-pages/man1/ncat.1.html
+tags:
+- attack.execution
+- attack.t1059
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_netcat_reverse_shell.yml
+_sigma_status: test
+_sigma_author: '@d4ns4n_, Nasreddine Bencherchali (Nextron Systems)'
+_sigma_date: 2023-04-07

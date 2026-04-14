@@ -1,0 +1,30 @@
+id: SIGMA-LIN-SYMLINK_ETC_PASSWD
+title: Symlink Etc Passwd
+category: authentication
+subcategory: detection
+mitre_technique: T1204.001
+mitre_tactic: execution
+severity: high
+confidence: low
+enabled: true
+description: Detects suspicious command lines that look as if they would create symbolic
+  links to /etc/passwd
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: ln\ \-s\ \-f\ /etc/passwd
+  - regex: ln\ \-s\ /etc/passwd
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/builtin/lnx_symlink_etc_passwd.yml.
+  References: https://www.qualys.com/2021/05/04/21nails/21nails.txt'
+references:
+- https://www.qualys.com/2021/05/04/21nails/21nails.txt
+tags:
+- attack.t1204.001
+- attack.execution
+_sigma_source: rules/linux/builtin/lnx_symlink_etc_passwd.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems)
+_sigma_date: 2019-04-05

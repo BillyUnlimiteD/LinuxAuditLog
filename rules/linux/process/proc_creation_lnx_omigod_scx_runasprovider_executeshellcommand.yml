@@ -1,0 +1,45 @@
+id: SIGMA-LIN-OMIGOD_SCX_RUNASPROV
+title: OMIGOD SCX RunAsProvider ExecuteShellCommand
+category: process
+subcategory: execution
+mitre_technique: T1068
+mitre_tactic: execution
+severity: high
+confidence: low
+enabled: true
+description: 'Rule to detect the use of the SCX RunAsProvider Invoke_ExecuteShellCommand
+  to execute any UNIX/Linux command using the /bin/sh shell.
+
+  SCXcore, started as the Microsoft Operations Manager UNIX/Linux Agent, is now used
+  in a host of products including
+
+  Microsoft Operations Manager, Microsoft Azure, and Microsoft Operations Management
+  Suite.
+
+  '
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: root
+  - regex: /var/opt/microsoft/scx/tmp
+  - regex: /bin/sh
+false_positives:
+- Legitimate use of SCX RunAsProvider Invoke_ExecuteShellCommand.
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_omigod_scx_runasprovider_executeshellcommand.yml.
+  References: https://www.wiz.io/blog/omigod-critical-vulnerabilities-in-omi-azure,
+  https://github.com/Azure/Azure-Sentinel/pull/3059'
+references:
+- https://www.wiz.io/blog/omigod-critical-vulnerabilities-in-omi-azure
+- https://github.com/Azure/Azure-Sentinel/pull/3059
+tags:
+- attack.privilege-escalation
+- attack.initial-access
+- attack.execution
+- attack.t1068
+- attack.t1190
+- attack.t1203
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_omigod_scx_runasprovider_executeshellcommand.yml
+_sigma_status: test
+_sigma_author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research), MSTIC
+_sigma_date: 2021-10-15

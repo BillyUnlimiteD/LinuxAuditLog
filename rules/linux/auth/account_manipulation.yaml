@@ -1,0 +1,43 @@
+id: LIN-AUTH-004
+title: Account Creation or Modification
+category: authentication
+subcategory: account_manipulation
+mitre_technique: T1136.001
+mitre_tactic: persistence
+severity: high
+confidence: high
+enabled: true
+description: >
+  Detects creation of new local user accounts, modification of existing accounts,
+  addition of SSH authorized keys, or changes to privileged groups. Attackers
+  commonly create backdoor accounts or add SSH keys to maintain persistent access
+  after initial compromise.
+service: "*"
+detection:
+  type: pattern
+  patterns:
+    - regex: "new user: name=(?P<user>\\S+),.*uid=(?P<uid>\\d+)"
+    - regex: "useradd.*(?P<user>\\S+)|adduser.*(?P<new_user>\\S+)"
+    - regex: "usermod.*-G.*(?P<group>sudo|wheel|admin|root).*(?P<user>\\S+)"
+    - regex: "gpasswd.*(?P<user>\\S+).*(?P<group>sudo|wheel|admin)"
+    - regex: "passwd: password changed for (?P<user>\\S+)"
+    - regex: "chage.*(?P<user>\\S+)"
+    - regex: "authorized_keys.*(?P<action>modified|changed|written|updated)"
+false_positives:
+  - Legitimate user management by system administrators
+  - Automated provisioning systems (Ansible, Terraform)
+  - Initial system setup procedures
+recommendation: >
+  1. Verify whether the account creation/modification was authorized.
+  2. Check the UID assigned — low UIDs or UID 0 clones are suspicious.
+  3. Review /home/<user>/.ssh/authorized_keys for new entries.
+  4. Verify group memberships of the affected accounts.
+  5. If unauthorized, disable the account immediately and audit its activity.
+  6. Check for changes to /etc/passwd and /etc/shadow modification timestamps.
+references:
+  - "https://attack.mitre.org/techniques/T1136/001/"
+  - "https://attack.mitre.org/techniques/T1098/004/"
+tags:
+  - account_creation
+  - persistence
+  - ssh_keys

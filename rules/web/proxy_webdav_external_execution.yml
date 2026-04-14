@@ -1,0 +1,47 @@
+id: SIGMA-WEB-SUSPICIOUS_EXTERNAL
+title: Suspicious External WebDAV Execution
+category: web
+subcategory: execution
+mitre_technique: T1584
+mitre_tactic: ''
+severity: high
+confidence: low
+enabled: true
+description: 'Detects executables launched from external WebDAV shares using the WebDAV
+  Explorer integration, commonly seen in initial access campaigns.
+
+  '
+service: '*'
+detection:
+  type: pattern
+  patterns:
+  - regex: Microsoft\-WebDAV\-MiniRedir/
+  - regex: \.bat
+  - regex: \.dat
+  - regex: \.cmd
+  - regex: \.exe
+  - regex: \.lnk
+  - regex: \.ps1
+  - regex: \.rar
+  - regex: \.url
+  - regex: \.vbe
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/web/proxy_generic/proxy_webdav_external_execution.yml.
+  References: https://dear-territory-023.notion.site/WebDav-Share-Testing-e4950fa0c00149c3aa430d779b9b1d0f?pvs=4,
+  https://micahbabinski.medium.com/search-ms-webdav-and-chill-99c5b23ac462, https://www.trendmicro.com/en_no/research/24/b/cve202421412-water-hydra-targets-traders-with-windows-defender-s.html,
+  https://www.trellix.com/en-us/about/newsroom/stories/research/beyond-file-search-a-novel-method.html'
+references:
+- https://dear-territory-023.notion.site/WebDav-Share-Testing-e4950fa0c00149c3aa430d779b9b1d0f?pvs=4
+- https://micahbabinski.medium.com/search-ms-webdav-and-chill-99c5b23ac462
+- https://www.trendmicro.com/en_no/research/24/b/cve202421412-water-hydra-targets-traders-with-windows-defender-s.html
+- https://www.trellix.com/en-us/about/newsroom/stories/research/beyond-file-search-a-novel-method.html
+tags:
+- attack.initial-access
+- attack.resource-development
+- attack.t1584
+- attack.t1566
+_sigma_source: rules/web/proxy_generic/proxy_webdav_external_execution.yml
+_sigma_status: test
+_sigma_author: Ahmed Farouk
+_sigma_date: 2024-05-10

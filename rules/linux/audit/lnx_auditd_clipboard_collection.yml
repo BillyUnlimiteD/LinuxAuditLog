@@ -1,0 +1,42 @@
+id: SIGMA-LIN-CLIPBOARD_COLLECTION
+title: Clipboard Collection with Xclip Tool - Auditd
+category: audit
+subcategory: detection
+mitre_technique: T1115
+mitre_tactic: collection
+severity: low
+confidence: low
+enabled: true
+description: 'Detects attempts to collect data stored in the clipboard from users
+  with the usage of xclip tool.
+
+  Xclip has to be installed.
+
+  Highly recommended using rule on servers, due to high usage of clipboard utilities
+  on user workstations.
+
+  '
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: EXECVE
+  - regex: xclip
+  - regex: \-selection
+  - regex: \-sel
+  - regex: clipboard
+  - regex: clip
+false_positives:
+- Legitimate usage of xclip tools
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/execve/lnx_auditd_clipboard_collection.yml.
+  References: https://linux.die.net/man/1/xclip, https://www.cyberciti.biz/faq/xclip-linux-insert-files-command-output-intoclipboard/'
+references:
+- https://linux.die.net/man/1/xclip
+- https://www.cyberciti.biz/faq/xclip-linux-insert-files-command-output-intoclipboard/
+tags:
+- attack.collection
+- attack.t1115
+_sigma_source: rules/linux/auditd/execve/lnx_auditd_clipboard_collection.yml
+_sigma_status: test
+_sigma_author: Pawel Mazur
+_sigma_date: 2021-09-24

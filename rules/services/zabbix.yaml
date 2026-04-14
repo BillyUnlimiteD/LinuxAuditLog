@@ -1,0 +1,51 @@
+id: SVC-ZABBIX-001
+title: Zabbix Agent Suspicious Activity
+category: monitoring
+subcategory: zabbix
+mitre_technique: T1219
+mitre_tactic: command_and_control
+severity: high
+confidence: medium
+enabled: true
+description: >
+  Detects suspicious activity related to the Zabbix monitoring agent including:
+  unauthorized remote command execution via UserParameter, agent configuration
+  tampering, unexpected external connections from the agent process, privilege
+  escalation through unsafe agent parameters, and exploitation of CVE-2022-23131
+  (SAML SSO bypass) and related Zabbix vulnerabilities.
+  Zabbix agents running with AllowRoot=1 or executing shell commands via
+  UserParameter are high-risk vectors for lateral movement and persistence.
+service: zabbix-agent
+detection:
+  type: pattern
+  patterns:
+    - regex: "(?P<msg>Got signal \\d+\\. Zabbix agent stopped)"
+    - regex: "(?P<msg>active check host \\[(?P<host>[^\\]]+)\\] failed)"
+    - regex: "(?P<msg>cannot connect to Zabbix server|connection to Zabbix server.*failed)"
+    - regex: "(?P<msg>cannot execute command '(?P<cmd>[^']+)'.*Permission denied)"
+    - regex: "(?P<msg>UserParameter[^:]*:.*(?:bash|sh|python|perl|nc|curl|wget|chmod|chown|passwd))"
+    - regex: "(?P<msg>warning.*AllowRoot|started with AllowRoot=1)"
+    - regex: "(?P<msg>(?:item|check) '(?P<item>[^']+)' became supported|is not supported)"
+    - regex: "(?P<msg>failed to accept an incoming connection.*from (?P<src_ip>[\\d.]+))"
+false_positives:
+  - Legitimate Zabbix server performing standard monitoring checks
+  - Agent restarts during maintenance windows
+  - Temporary connectivity failures to Zabbix server
+recommendation: >
+  1. Review /etc/zabbix/zabbix_agentd.conf — ensure Server= and ServerActive= only list known Zabbix servers.
+  2. Disable AllowRoot=1 unless strictly required; run agent as dedicated zabbix user.
+  3. Audit all UserParameter entries — avoid shell=* patterns that allow arbitrary execution.
+  4. Restrict agent to listen only on required interfaces (ListenIP= directive).
+  5. Verify Zabbix server/proxy IP against expected infrastructure.
+  6. Check for CVE-2022-23131 if using Zabbix Web with SAML SSO — patch to 5.4.9+/6.0.3+.
+  7. Review active check configuration for unexpected items being monitored.
+references:
+  - "https://attack.mitre.org/techniques/T1219/"
+  - "https://www.zabbix.com/documentation/current/en/manual/config/items/userparameters"
+  - "https://nvd.nist.gov/vuln/detail/CVE-2022-23131"
+  - "https://www.zabbix.com/security_advisories"
+tags:
+  - zabbix
+  - monitoring_agent
+  - remote_execution
+  - lateral_movement

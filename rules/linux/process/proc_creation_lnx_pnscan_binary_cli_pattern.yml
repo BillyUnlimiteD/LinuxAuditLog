@@ -1,0 +1,40 @@
+id: SIGMA-LIN-PNSCAN_BINARY_DATA_T
+title: Pnscan Binary Data Transmission Activity
+category: process
+subcategory: detection
+mitre_technique: T1046
+mitre_tactic: discovery
+severity: medium
+confidence: low
+enabled: true
+description: 'Detects command line patterns associated with the use of Pnscan for
+  sending and receiving binary data across the network.
+
+  This behavior has been identified in a Linux malware campaign targeting Docker,
+  Apache Hadoop, Redis, and Confluence and was previously used by the threat actor
+  known as TeamTNT
+
+  '
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: \-\(W\|R\)\\s\?\(\\s\|"\|'\)\(\[0\-9a\-fA\-F\]\{2\}\\s\?\)\{2,20\}\(\\s\|"\|'\)
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_pnscan_binary_cli_pattern.yml.
+  References: https://www.cadosecurity.com/blog/spinning-yarn-a-new-linux-malware-campaign-targets-docker-apache-hadoop-redis-and-confluence,
+  https://intezer.com/wp-content/uploads/2021/09/TeamTNT-Cryptomining-Explosion.pdf,
+  https://regex101.com/r/RugQYK/1, https://www.virustotal.com/gui/file/beddf70a7bab805f0c0b69ac0989db6755949f9f68525c08cb874988353f78a9/content'
+references:
+- https://www.cadosecurity.com/blog/spinning-yarn-a-new-linux-malware-campaign-targets-docker-apache-hadoop-redis-and-confluence
+- https://intezer.com/wp-content/uploads/2021/09/TeamTNT-Cryptomining-Explosion.pdf
+- https://regex101.com/r/RugQYK/1
+- https://www.virustotal.com/gui/file/beddf70a7bab805f0c0b69ac0989db6755949f9f68525c08cb874988353f78a9/content
+tags:
+- attack.discovery
+- attack.t1046
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_pnscan_binary_cli_pattern.yml
+_sigma_status: test
+_sigma_author: David Burkett (@signalblur)
+_sigma_date: 2024-04-16

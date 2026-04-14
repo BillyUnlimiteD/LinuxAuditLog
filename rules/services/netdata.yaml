@@ -1,0 +1,37 @@
+id: SVC-NETDATA-001
+title: Netdata monitoring service suspicious access and error events
+category: service
+subcategory: netdata
+mitre_technique: T1539
+mitre_tactic: collection
+severity: medium
+confidence: low
+enabled: false
+description: >
+  Detects suspicious Netdata access and internal service events. This rule
+  targets Netdata access log entries that indicate failed or denied operations,
+  authentication problems, or unusual service health conditions.
+service: netdata
+detection:
+  type: pattern
+  patterns:
+    - regex: "comm=netdata source=access level=(?:error|warning|notice).*msg=.*(?:failed|denied|unauthorized|authentication|error|exception|timeout|unable|invalid)"
+    - regex: "comm=netdata source=access .*msg=\"ACLK (?:ERR|WAN|ACC) [.*]:.*\""
+false_positives:
+  - Normal Netdata health monitoring messages and access metrics
+  - Expected internal Netdata access checks in managed monitoring environments
+recommendation: >
+  1. Review Netdata access logs to verify whether unusual errors or authentication
+     failures are legitimate.
+  2. Harden Netdata access control and limit access to trusted IP ranges.
+  3. Ensure the Netdata repository configuration is valid and not exposing
+     package metadata download attempts from untrusted sources.
+references:
+  - "https://learn.netdata.cloud/docs/agent/"
+  - "https://attack.mitre.org/techniques/T1539/"
+tags:
+  - netdata
+  - monitoring
+  - access
+  - service_health
+  - log_monitoring

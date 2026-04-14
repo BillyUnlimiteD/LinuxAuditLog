@@ -1,0 +1,35 @@
+id: SIGMA-LIN-COMMANDS_TO_CLEAR_OR
+title: Commands to Clear or Remove the Syslog - Builtin
+category: authentication
+subcategory: execution
+mitre_technique: T1565.001
+mitre_tactic: impact
+severity: high
+confidence: low
+enabled: true
+description: Detects specific commands commonly used to remove or empty the syslog
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: rm\ /var/log/syslog
+  - regex: rm\ \-r\ /var/log/syslog
+  - regex: rm\ \-f\ /var/log/syslog
+  - regex: rm\ \-rf\ /var/log/syslog
+  - regex: mv\ /var/log/syslog
+  - regex: \ >/var/log/syslog
+  - regex: \ >\ /var/log/syslog
+  - regex: /syslog\.
+false_positives:
+- Log rotation
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/builtin/lnx_clear_syslog.yml.
+  References: https://www.virustotal.com/gui/file/fc614fb4bda24ae8ca2c44e812d12c0fab6dd7a097472a35dd12ded053ab8474'
+references:
+- https://www.virustotal.com/gui/file/fc614fb4bda24ae8ca2c44e812d12c0fab6dd7a097472a35dd12ded053ab8474
+tags:
+- attack.impact
+- attack.t1565.001
+_sigma_source: rules/linux/builtin/lnx_clear_syslog.yml
+_sigma_status: test
+_sigma_author: Max Altgelt (Nextron Systems)
+_sigma_date: 2021-09-10

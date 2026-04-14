@@ -1,0 +1,37 @@
+id: SIGMA-LIN-LINUX_CRYPTO_MINING
+title: Linux Crypto Mining Pool Connections
+category: network
+subcategory: detection
+mitre_technique: T1496
+mitre_tactic: impact
+severity: high
+confidence: low
+enabled: true
+description: Detects process connections to a Monero crypto mining pool
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: pool\.minexmr\.com
+  - regex: fr\.minexmr\.com
+  - regex: de\.minexmr\.com
+  - regex: sg\.minexmr\.com
+  - regex: ca\.minexmr\.com
+  - regex: us\-west\.minexmr\.com
+  - regex: pool\.supportxmr\.com
+  - regex: mine\.c3pool\.com
+  - regex: xmr\-eu1\.nanopool\.org
+  - regex: xmr\-eu2\.nanopool\.org
+false_positives:
+- Legitimate use of crypto miners
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/network_connection/net_connection_lnx_crypto_mining_indicators.yml.
+  References: https://www.poolwatch.io/coin/monero'
+references:
+- https://www.poolwatch.io/coin/monero
+tags:
+- attack.impact
+- attack.t1496
+_sigma_source: rules/linux/network_connection/net_connection_lnx_crypto_mining_indicators.yml
+_sigma_status: stable
+_sigma_author: Florian Roth (Nextron Systems)
+_sigma_date: 2021-10-26

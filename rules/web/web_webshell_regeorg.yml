@@ -1,0 +1,36 @@
+id: SIGMA-WEB-WEBSHELL_REGEORG_DET
+title: Webshell ReGeorg Detection Via Web Logs
+category: web
+subcategory: execution
+mitre_technique: T1505.003
+mitre_tactic: persistence
+severity: high
+confidence: low
+enabled: true
+description: Certain strings in the uri_query field when combined with null referer
+  and null user agent can indicate activity associated with the webshell ReGeorg.
+service: '*'
+detection:
+  type: pattern
+  patterns:
+  - regex: cmd=read
+  - regex: connect\&target
+  - regex: cmd=connect
+  - regex: cmd=disconnect
+  - regex: cmd=forward
+  - regex: POST
+false_positives:
+- Web applications that use the same URL parameters as ReGeorg
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/web/webserver_generic/web_webshell_regeorg.yml.
+  References: https://community.rsa.com/community/products/netwitness/blog/2019/02/19/web-shells-and-netwitness-part-3,
+  https://github.com/sensepost/reGeorg'
+references:
+- https://community.rsa.com/community/products/netwitness/blog/2019/02/19/web-shells-and-netwitness-part-3
+- https://github.com/sensepost/reGeorg
+tags:
+- attack.persistence
+- attack.t1505.003
+_sigma_source: rules/web/webserver_generic/web_webshell_regeorg.yml
+_sigma_status: test
+_sigma_author: Cian Heasley
+_sigma_date: 2020-08-04

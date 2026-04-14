@@ -1,0 +1,32 @@
+id: SIGMA-LIN-NOHUP_EXECUTION
+title: Nohup Execution
+category: process
+subcategory: execution
+mitre_technique: T1059.004
+mitre_tactic: execution
+severity: medium
+confidence: low
+enabled: true
+description: Detects usage of nohup which could be leveraged by an attacker to keep
+  a process running or break out from restricted environments
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /nohup
+false_positives:
+- Administrators or installed processes that leverage nohup
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_nohup.yml.
+  References: https://gtfobins.github.io/gtfobins/nohup/, https://en.wikipedia.org/wiki/Nohup,
+  https://www.computerhope.com/unix/unohup.htm'
+references:
+- https://gtfobins.github.io/gtfobins/nohup/
+- https://en.wikipedia.org/wiki/Nohup
+- https://www.computerhope.com/unix/unohup.htm
+tags:
+- attack.execution
+- attack.t1059.004
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_nohup.yml
+_sigma_status: test
+_sigma_author: Christopher Peacock @SecurePeacock, SCYTHE @scythe_io
+_sigma_date: 2022-06-06

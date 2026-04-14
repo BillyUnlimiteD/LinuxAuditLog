@@ -1,0 +1,35 @@
+id: SIGMA-LIN-CREATION_OF_AN_USER
+title: Creation Of An User Account
+category: audit
+subcategory: detection
+mitre_technique: T1136.001
+mitre_tactic: persistence
+severity: medium
+confidence: low
+enabled: true
+description: Detects the creation of a new user account. Such accounts may be used
+  for persistence that do not require persistent remote access tools to be deployed
+  on the system.
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: SYSCALL
+  - regex: /useradd
+  - regex: ADD_USER
+false_positives:
+- Admin activity
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/syscall/lnx_auditd_create_account.yml.
+  References: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/security_guide/sec-understanding_audit_log_files,
+  https://access.redhat.com/articles/4409591#audit-record-types-2, https://www.youtube.com/watch?v=VmvY5SQm5-Y&ab_channel=M45C07'
+references:
+- https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/security_guide/sec-understanding_audit_log_files
+- https://access.redhat.com/articles/4409591#audit-record-types-2
+- https://www.youtube.com/watch?v=VmvY5SQm5-Y&ab_channel=M45C07
+tags:
+- attack.t1136.001
+- attack.persistence
+_sigma_source: rules/linux/auditd/syscall/lnx_auditd_create_account.yml
+_sigma_status: test
+_sigma_author: Marie Euler, Pawel Mazur
+_sigma_date: 2020-05-18

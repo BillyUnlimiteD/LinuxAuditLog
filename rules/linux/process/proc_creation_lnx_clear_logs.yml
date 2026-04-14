@@ -1,0 +1,32 @@
+id: SIGMA-LIN-CLEAR_LINUX_LOGS
+title: Clear Linux Logs
+category: process
+subcategory: detection
+mitre_technique: T1070.002
+mitre_tactic: ''
+severity: medium
+confidence: low
+enabled: true
+description: Detects attempts to clear logs on the system. Adversaries may clear system
+  logs to hide evidence of an intrusion
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /shred
+  - regex: /unlink
+  - regex: /var/log
+  - regex: /var/spool/mail
+false_positives:
+- Legitimate administration activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_clear_logs.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1070.002/T1070.002.md'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1070.002/T1070.002.md
+tags:
+- attack.defense-evasion
+- attack.t1070.002
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_clear_logs.yml
+_sigma_status: stable
+_sigma_author: Ömer Günal, oscd.community
+_sigma_date: 2020-10-07

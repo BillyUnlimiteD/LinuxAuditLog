@@ -1,0 +1,39 @@
+id: LIN-NET-002
+title: Suspicious Outbound Connection
+category: network
+subcategory: command_and_control
+mitre_technique: T1071.001
+mitre_tactic: command_and_control
+severity: high
+confidence: low
+enabled: true
+description: >
+  Detects indicators of suspicious outbound connections that may indicate
+  Command and Control (C2) activity, data exfiltration, or reverse shells.
+  Patterns include: connections to unusual ports, use of common C2 tools,
+  and network activity from unexpected processes.
+service: "*"
+detection:
+  type: pattern
+  patterns:
+    - regex: "(?:bash|sh|python|perl|ruby|php).*(?:/dev/tcp|/dev/udp)/(?P<dst_ip>[\\d.]+)/(?P<dst_port>\\d+)"
+    - regex: "\\bnc\\b.*(?P<dst_ip>[\\d.]+)\\s+(?P<dst_port>\\d+)|\\b(?:ncat|netcat)\\s+.*(?P<dst_ip2>[\\d.]+)\\s+(?P<dst_port2>\\d+)"
+    - regex: "wget.*(?P<url>https?://[\\d.]+(?::\\d+)?/[^\\s\"']+)"
+    - regex: "curl.*(?P<url>https?://[\\d.]+(?::\\d+)?/[^\\s\"']+)"
+false_positives:
+  - Legitimate software update processes
+  - Monitoring agents phoning home
+  - Authorized remote management tools
+recommendation: >
+  1. Identify the process and user initiating the connection.
+  2. Block the destination IP at the firewall if not recognized.
+  3. Capture network traffic for further analysis if possible.
+  4. Check if any data was transferred (size, duration).
+  5. Review installed packages and recent deployments for backdoors.
+references:
+  - "https://attack.mitre.org/techniques/T1071/001/"
+  - "https://attack.mitre.org/techniques/T1048/"
+tags:
+  - c2
+  - exfiltration
+  - network

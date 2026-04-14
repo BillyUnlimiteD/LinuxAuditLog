@@ -1,0 +1,33 @@
+id: SIGMA-LIN-PYTHON_SPAWNING_PRET
+title: Python Spawning Pretty TTY Via PTY Module
+category: process
+subcategory: detection
+mitre_technique: T1059
+mitre_tactic: execution
+severity: medium
+confidence: low
+enabled: true
+description: 'Detects a python process calling to the PTY module in order to spawn
+  a pretty tty which could be indicative of potential reverse shell activity.
+
+  '
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: import\ pty
+  - regex: 'from\ pty\ '
+  - regex: spawn
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_python_pty_spawn.yml.
+  References: https://www.volexity.com/blog/2022/06/02/zero-day-exploitation-of-atlassian-confluence/'
+references:
+- https://www.volexity.com/blog/2022/06/02/zero-day-exploitation-of-atlassian-confluence/
+tags:
+- attack.execution
+- attack.t1059
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_python_pty_spawn.yml
+_sigma_status: test
+_sigma_author: Nextron Systems
+_sigma_date: 2022-06-03

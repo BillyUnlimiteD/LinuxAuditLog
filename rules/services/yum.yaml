@@ -1,0 +1,49 @@
+id: SVC-YUM-001
+title: yum/dnf — Unauthorized or Suspicious Package Activity
+category: persistence
+subcategory: package_manager
+mitre_technique: T1072
+mitre_tactic: persistence
+severity: high
+confidence: medium
+enabled: true
+description: >
+  Detects suspicious activity in the yum/dnf package manager logs on
+  RHEL/CentOS/Fedora systems:
+  - Package installations outside maintenance windows (persistence via new software)
+  - Removal of security tools (audit, fail2ban, selinux-policy, aide)
+  - Repository configuration changes (supply-chain risk — untrusted repos)
+  - Kernel updates that may introduce a backdoored kernel module
+  - Package downgrades that may re-introduce patched vulnerabilities
+  Attackers with root access frequently install backdoors via package managers
+  or remove defensive tools to reduce detection capability.
+service: yum
+detection:
+  type: pattern
+  patterns:
+    - regex: "(?:Installed|Updated|Erased):\\s+(?P<pkg>[\\w._+-]+)"
+    - regex: "(?:Erase|Removed):\\s+(?P<pkg>(?:audit|aide|fail2ban|selinux|firewalld|iptables|clamav|rkhunter|chkrootkit)[\\w._+-]*)"
+    - regex: "(?:Installed|Updated):\\s+(?P<pkg>(?:kernel|kernel-core|kernel-modules)[\\w._+-]*)"
+    - regex: "repo.*(?:added|enabled|changed|modified).*(?P<repo>[\\w._/-]+)"
+    - regex: "(?:Downgrade|downgraded):\\s+(?P<pkg>[\\w._+-]+)"
+    - regex: "Transaction check error|(?:Error|FAILED).*(?:transaction|rpm|package)"
+false_positives:
+  - Authorized package installations during system maintenance
+  - Kernel updates as part of planned patching cycles
+  - Security tool installations by administrators
+recommendation: >
+  1. Correlate package install/remove events with change-management records.
+  2. Alert on removal of any security package (audit, aide, fail2ban, selinux-policy).
+  3. Kernel installs/updates should be validated against approved patch lists.
+  4. Any new repository added outside change management is high-risk — verify GPG key.
+  5. Review /etc/yum.repos.d/ and /etc/dnf/dnf.conf for unauthorized repository entries.
+  6. Consider using AIDE or equivalent to detect unauthorized binary modifications.
+references:
+  - "https://attack.mitre.org/techniques/T1072/"
+  - "https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/configuring_basic_system_settings/managing-software-packages_configuring-basic-system-settings"
+tags:
+  - yum
+  - dnf
+  - package_manager
+  - persistence
+  - supply_chain

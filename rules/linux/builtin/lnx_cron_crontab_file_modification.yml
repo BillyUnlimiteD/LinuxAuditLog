@@ -1,0 +1,30 @@
+id: SIGMA-LIN-MODIFYING_CRONTAB
+title: Modifying Crontab
+category: authentication
+subcategory: detection
+mitre_technique: T1053.003
+mitre_tactic: persistence
+severity: medium
+confidence: low
+enabled: true
+description: Detects suspicious modification of crontab file.
+service: cron
+detection:
+  type: pattern
+  patterns:
+  - regex: REPLACE
+false_positives:
+- Legitimate modification of crontab
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/builtin/cron/lnx_cron_crontab_file_modification.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1053.003/T1053.003.md'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1053.003/T1053.003.md
+tags:
+- attack.privilege-escalation
+- attack.execution
+- attack.persistence
+- attack.t1053.003
+_sigma_source: rules/linux/builtin/cron/lnx_cron_crontab_file_modification.yml
+_sigma_status: test
+_sigma_author: Pawel Mazur
+_sigma_date: 2022-04-16

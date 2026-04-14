@@ -1,0 +1,37 @@
+id: WEB-007
+title: Cross-Site Scripting (XSS) Attempt
+category: web
+subcategory: injection
+mitre_technique: T1190
+mitre_tactic: initial_access
+severity: medium
+confidence: medium
+enabled: true
+description: >
+  Detects Cross-Site Scripting (XSS) injection patterns in web access logs.
+  While reflected XSS execution occurs in the user's browser, server logs can
+  capture the injection attempt. Stored XSS may cause lasting impact if the
+  payload is persisted. This rule also covers DOM-based XSS URL fragments.
+service: "*"
+detection:
+  type: pattern
+  patterns:
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>[^\"]*(?:<script|%3cscript|%3Cscript|\\bjavascript:|\\bonerror=|\\bonload=|\\balert\\(|\\bconfirm\\(|\\bprompt\\(|\\bdocument\\.cookie|\\bXSS)[^\"]*)\""
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>[^\"]*(?:%3Cscript%3E|%3Cimg|%3Csvg|\\bonmouseover=|\\bonfocus=|\\beval\\()[^\"]*)\""
+false_positives:
+  - Security scanners performing authorized assessments
+  - Legitimate searches containing script-related technical terms
+recommendation: >
+  1. Verify whether the payload was reflected in the response (check HTTP status and size).
+  2. Inspect stored data (database, files) for persisted XSS payloads.
+  3. Implement Content Security Policy (CSP) headers.
+  4. Ensure output encoding is applied to all user-controlled data in responses.
+  5. Use HTTPOnly and Secure flags on session cookies.
+references:
+  - "https://owasp.org/www-community/attacks/xss/"
+  - "https://portswigger.net/web-security/cross-site-scripting"
+tags:
+  - xss
+  - injection
+  - web
+  - owasp_a03

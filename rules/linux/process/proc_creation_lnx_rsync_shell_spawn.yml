@@ -1,0 +1,46 @@
+id: SIGMA-LIN-SUSPICIOUS_INVOCATIO
+title: Suspicious Invocation of Shell via Rsync
+category: process
+subcategory: execution
+mitre_technique: T1059
+mitre_tactic: execution
+severity: high
+confidence: low
+enabled: true
+description: 'Detects the execution of a shell as sub process of "rsync" without the
+  expected command line flag "-e" being used, which could be an indication of exploitation
+  as described in CVE-2024-12084. This behavior is commonly associated with attempts
+  to execute arbitrary commands or escalate privileges, potentially leading to unauthorized
+  access or further exploitation.
+
+  '
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /rsync
+  - regex: /rsyncd
+  - regex: /ash
+  - regex: /bash
+  - regex: /csh
+  - regex: /dash
+  - regex: /ksh
+  - regex: /tcsh
+  - regex: /zsh
+  - regex: '\ \-e\ '
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_rsync_shell_spawn.yml.
+  References: https://sysdig.com/blog/detecting-and-mitigating-cve-2024-12084-rsync-remote-code-execution/,
+  https://gist.github.com/Neo23x0/a20436375a1e26524931dd8ea1a3af10'
+references:
+- https://sysdig.com/blog/detecting-and-mitigating-cve-2024-12084-rsync-remote-code-execution/
+- https://gist.github.com/Neo23x0/a20436375a1e26524931dd8ea1a3af10
+tags:
+- attack.execution
+- attack.t1059
+- attack.t1203
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_rsync_shell_spawn.yml
+_sigma_status: experimental
+_sigma_author: Florian Roth
+_sigma_date: 2025-01-18

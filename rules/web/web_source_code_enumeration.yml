@@ -1,0 +1,31 @@
+id: SIGMA-WEB-SOURCE_CODE_ENUMERAT
+title: Source Code Enumeration Detection by Keyword
+category: web
+subcategory: detection
+mitre_technique: T1083
+mitre_tactic: discovery
+severity: medium
+confidence: low
+enabled: true
+description: Detects source code enumeration that use GET requests by keyword searches
+  in URL strings
+service: '*'
+detection:
+  type: pattern
+  patterns:
+  - regex: \.git/
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/web/webserver_generic/web_source_code_enumeration.yml.
+  References: https://pentester.land/tutorials/2018/10/25/source-code-disclosure-via-exposed-git-folder.html,
+  https://medium.com/@logicbomb_1/bugbounty-how-i-was-able-to-download-the-source-code-of-indias-largest-telecom-service-52cf5c5640a1'
+references:
+- https://pentester.land/tutorials/2018/10/25/source-code-disclosure-via-exposed-git-folder.html
+- https://medium.com/@logicbomb_1/bugbounty-how-i-was-able-to-download-the-source-code-of-indias-largest-telecom-service-52cf5c5640a1
+tags:
+- attack.discovery
+- attack.t1083
+_sigma_source: rules/web/webserver_generic/web_source_code_enumeration.yml
+_sigma_status: test
+_sigma_author: James Ahearn
+_sigma_date: 2019-06-08

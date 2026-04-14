@@ -1,0 +1,41 @@
+id: SIGMA-LIN-CONTAINER_RESIDENCE
+title: Container Residence Discovery Via Proc Virtual FS
+category: process
+subcategory: detection
+mitre_technique: T1082
+mitre_tactic: discovery
+severity: low
+confidence: low
+enabled: true
+description: Detects potential container discovery via listing of certain kernel features
+  in the "/proc" virtual filesystem
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /cat
+  - regex: grep
+  - regex: /head
+  - regex: /less
+  - regex: /more
+  - regex: /tail
+  - regex: /proc/2/
+  - regex: /proc/
+  - regex: /cgroup
+  - regex: /sched
+false_positives:
+- Legitimate system administrator usage of these commands
+- Some container tools or deployments may use these techniques natively to determine
+  how they proceed with execution, and will need to be filtered
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_susp_container_residence_discovery.yml.
+  References: https://blog.skyplabs.net/posts/container-detection/, https://stackoverflow.com/questions/20010199/how-to-determine-if-a-process-runs-inside-lxc-docker'
+references:
+- https://blog.skyplabs.net/posts/container-detection/
+- https://stackoverflow.com/questions/20010199/how-to-determine-if-a-process-runs-inside-lxc-docker
+tags:
+- attack.discovery
+- attack.t1082
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_susp_container_residence_discovery.yml
+_sigma_status: test
+_sigma_author: Seth Hanford
+_sigma_date: 2023-08-23

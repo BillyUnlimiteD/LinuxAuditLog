@@ -1,0 +1,47 @@
+id: LIN-AUTH-009
+title: Sudoers File Enumeration or Privilege Discovery
+category: discovery
+subcategory: permission_discovery
+mitre_technique: T1069.001
+mitre_tactic: discovery
+severity: high
+confidence: high
+enabled: true
+description: >
+  Detects attempts by users to enumerate their own sudo privileges or access
+  sudoers configuration files. This is commonly performed by attackers after
+  gaining initial access to understand what escalation paths are available.
+  Observed in this environment: 'gserrano' (UID 1001) ran 'sudo sudoers' twice
+  on 2025-05-19 (both denied), indicating deliberate privilege discovery.
+  Patterns include: sudo -l (list own rights), direct access to /etc/sudoers,
+  cat/less of sudoers.d files, and sudo commands that target sudoers itself.
+service: "*"
+detection:
+  type: pattern
+  patterns:
+    - regex: "sudo.*-l\\b|sudo.*--list"
+    - regex: "USER_CMD.*cmd=\"?sudoers\"?"
+    - regex: "sudo: (?P<user>\\S+) :.*COMMAND=.*(?:sudoers|visudo|sudoedit)"
+    - regex: "open.*\"/etc/sudoers(?:\\.d/[^\"]+)?\".*EACCES|Permission denied.*sudoers"
+    - regex: "audit.*USER_CMD.*cmd=(?:cat|less|more|head|strings|grep).*sudoer"
+false_positives:
+  - System administrators legitimately running 'sudo -l' to verify their own privileges
+  - Automation tools querying sudo capabilities during deployment
+recommendation: >
+  1. Review all commands the user ran during the session — privilege discovery
+     precedes escalation in most attack chains.
+  2. Check if any CVE or SUID escalation was attempted after discovery.
+  3. Verify the user's sudo configuration: sudo -l -U <user>
+  4. Restrict /etc/sudoers and /etc/sudoers.d/ to read-only by root (chmod 440).
+  5. Consider enabling sudo audit with 'Defaults log_input,log_output' in sudoers.
+  6. Cross-reference with subsequent brute-force attempts (may follow failed discovery).
+references:
+  - "https://attack.mitre.org/techniques/T1069/001/"
+  - "https://attack.mitre.org/techniques/T1548/003/"
+  - "https://www.sudo.ws/docs/man/sudoers.man/"
+tags:
+  - sudoers
+  - discovery
+  - privilege_enumeration
+  - sudo
+  - permission_discovery

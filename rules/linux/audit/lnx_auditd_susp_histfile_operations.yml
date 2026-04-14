@@ -1,0 +1,35 @@
+id: SIGMA-LIN-SUSPICIOUS_HISTORY_F
+title: Suspicious History File Operations - Linux
+category: audit
+subcategory: detection
+mitre_technique: T1552.003
+mitre_tactic: ''
+severity: medium
+confidence: low
+enabled: true
+description: Detects commandline operations on shell history files
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: EXECVE
+  - regex: \.bash_history
+  - regex: \.zsh_history
+  - regex: \.zhistory
+  - regex: \.history
+  - regex: \.sh_history
+  - regex: fish_history
+false_positives:
+- Legitimate administrative activity
+- Legitimate software, cleaning hist file
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/execve/lnx_auditd_susp_histfile_operations.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1552.003/T1552.003.md'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1552.003/T1552.003.md
+tags:
+- attack.credential-access
+- attack.t1552.003
+_sigma_source: rules/linux/auditd/execve/lnx_auditd_susp_histfile_operations.yml
+_sigma_status: test
+_sigma_author: Mikhail Larin, oscd.community
+_sigma_date: 2020-10-17

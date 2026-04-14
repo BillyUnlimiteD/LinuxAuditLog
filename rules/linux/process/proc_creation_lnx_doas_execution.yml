@@ -1,0 +1,31 @@
+id: SIGMA-LIN-LINUX_DOAS_TOOL_EXEC
+title: Linux Doas Tool Execution
+category: process
+subcategory: execution
+mitre_technique: T1548
+mitre_tactic: ''
+severity: low
+confidence: low
+enabled: true
+description: Detects the doas tool execution in linux host platform. This utility
+  tool allow standard users to perform tasks as root, the same way sudo does.
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /doas
+false_positives:
+- Unlikely
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_doas_execution.yml.
+  References: https://research.splunk.com/endpoint/linux_doas_tool_execution/, https://www.makeuseof.com/how-to-install-and-use-doas/'
+references:
+- https://research.splunk.com/endpoint/linux_doas_tool_execution/
+- https://www.makeuseof.com/how-to-install-and-use-doas/
+tags:
+- attack.defense-evasion
+- attack.privilege-escalation
+- attack.t1548
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_doas_execution.yml
+_sigma_status: stable
+_sigma_author: Sittikorn S, Teoderick Contreras
+_sigma_date: 2022-01-20

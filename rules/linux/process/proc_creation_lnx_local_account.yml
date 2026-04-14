@@ -1,0 +1,42 @@
+id: SIGMA-LIN-LOCAL_SYSTEM_ACCOUNT
+title: Local System Accounts Discovery - Linux
+category: process
+subcategory: detection
+mitre_technique: T1087.001
+mitre_tactic: discovery
+severity: low
+confidence: low
+enabled: true
+description: Detects enumeration of local system accounts. This information can help
+  adversaries determine which local accounts exist on a system to aid in follow-on
+  behavior.
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /lastlog
+  - regex: '''x:0:'''
+  - regex: /cat
+  - regex: /head
+  - regex: /more
+  - regex: /nano
+  - regex: /tail
+  - regex: /vim
+  - regex: /less
+  - regex: /emacs
+false_positives:
+- Legitimate administration activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_local_account.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1087.001/T1087.001.md,
+  https://my.f5.com/manage/s/article/K589, https://man.freebsd.org/cgi/man.cgi?pwd_mkdb'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1087.001/T1087.001.md
+- https://my.f5.com/manage/s/article/K589
+- https://man.freebsd.org/cgi/man.cgi?pwd_mkdb
+tags:
+- attack.discovery
+- attack.t1087.001
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_local_account.yml
+_sigma_status: test
+_sigma_author: Alejandro Ortuno, oscd.community, CheraghiMilad
+_sigma_date: 2020-10-08

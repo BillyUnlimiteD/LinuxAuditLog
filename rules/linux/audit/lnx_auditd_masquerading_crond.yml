@@ -1,0 +1,34 @@
+id: SIGMA-LIN-MASQUERADING_AS_LINU
+title: Masquerading as Linux Crond Process
+category: audit
+subcategory: detection
+mitre_technique: T1036.003
+mitre_tactic: ''
+severity: medium
+confidence: low
+enabled: true
+description: 'Masquerading occurs when the name or location of an executable, legitimate
+  or malicious, is manipulated or abused for the sake of evading defenses and observation.
+
+  Several different variations of this technique have been observed.
+
+  '
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: execve
+  - regex: /bin/sh
+  - regex: /crond
+false_positives: []
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/execve/lnx_auditd_masquerading_crond.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/8a82e9b66a5b4f4bc5b91089e9f24e0544f20ad7/atomics/T1036.003/T1036.003.md#atomic-test-2---masquerading-as-linux-crond-process'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/8a82e9b66a5b4f4bc5b91089e9f24e0544f20ad7/atomics/T1036.003/T1036.003.md#atomic-test-2---masquerading-as-linux-crond-process
+tags:
+- attack.defense-evasion
+- attack.t1036.003
+_sigma_source: rules/linux/auditd/execve/lnx_auditd_masquerading_crond.yml
+_sigma_status: test
+_sigma_author: Timur Zinniatullin, oscd.community
+_sigma_date: 2019-10-21

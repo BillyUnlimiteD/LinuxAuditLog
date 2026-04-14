@@ -1,0 +1,44 @@
+id: SIGMA-LIN-BPFDOOR_ABNORMAL_PRO
+title: BPFDoor Abnormal Process ID or Lock File Accessed
+category: audit
+subcategory: detection
+mitre_technique: T1106
+mitre_tactic: execution
+severity: high
+confidence: low
+enabled: true
+description: detects BPFDoor .lock and .pid files access in temporary file storage
+  facility
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: PATH
+  - regex: /var/run/aepmonend\.pid
+  - regex: /var/run/auditd\.lock
+  - regex: /var/run/cma\.lock
+  - regex: /var/run/console\-kit\.pid
+  - regex: /var/run/consolekit\.pid
+  - regex: /var/run/daemon\.pid
+  - regex: /var/run/hald\-addon\.pid
+  - regex: /var/run/hald\-smartd\.pid
+  - regex: /var/run/haldrund\.pid
+false_positives:
+- Unlikely
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/path/lnx_auditd_bpfdoor_file_accessed.yml.
+  References: https://www.sandflysecurity.com/blog/bpfdoor-an-evasive-linux-backdoor-technical-analysis/,
+  https://www.elastic.co/security-labs/a-peek-behind-the-bpfdoor, https://www.rapid7.com/blog/post/tr-bpfdoor-telecom-networks-sleeper-cells-threat-research-report/,
+  https://github.com/rapid7/Rapid7-Labs/blob/741c7196ec12a0a56b63463d1fd726ff14d3a97a/BPFDoor/rapid7_detect_bpfdoor.sh'
+references:
+- https://www.sandflysecurity.com/blog/bpfdoor-an-evasive-linux-backdoor-technical-analysis/
+- https://www.elastic.co/security-labs/a-peek-behind-the-bpfdoor
+- https://www.rapid7.com/blog/post/tr-bpfdoor-telecom-networks-sleeper-cells-threat-research-report/
+- https://github.com/rapid7/Rapid7-Labs/blob/741c7196ec12a0a56b63463d1fd726ff14d3a97a/BPFDoor/rapid7_detect_bpfdoor.sh
+tags:
+- attack.execution
+- attack.t1106
+- attack.t1059
+_sigma_source: rules/linux/auditd/path/lnx_auditd_bpfdoor_file_accessed.yml
+_sigma_status: test
+_sigma_author: Rafal Piasecki
+_sigma_date: 2022-08-10

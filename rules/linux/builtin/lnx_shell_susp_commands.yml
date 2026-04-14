@@ -1,0 +1,43 @@
+id: SIGMA-LIN-SUSPICIOUS_ACTIVITY
+title: Suspicious Activity in Shell Commands
+category: authentication
+subcategory: execution
+mitre_technique: T1059.004
+mitre_tactic: execution
+severity: high
+confidence: low
+enabled: true
+description: Detects suspicious shell commands used in various exploit codes (see
+  references)
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: wget\ .*\ \-\ http.*\ \|\ perl
+  - regex: wget\ .*\ \-\ http.*\ \|\ sh
+  - regex: wget\ .*\ \-\ http.*\ \|\ bash
+  - regex: python\ \-m\ SimpleHTTPServer
+  - regex: \-m\ http\.server
+  - regex: import\ pty;\ pty\.spawn.*
+  - regex: socat\ exec:.*
+  - regex: socat\ \-O\ /tmp/.*
+  - regex: socat\ tcp\-connect.*
+  - regex: .*echo\ binary\ >>.*
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/builtin/lnx_shell_susp_commands.yml.
+  References: https://web.archive.org/web/20170319121015/http://www.threatgeek.com/2017/03/widespread-exploitation-attempts-using-cve-2017-5638.html,
+  https://github.com/rapid7/metasploit-framework/blob/eb6535009f5fdafa954525687f09294918b5398d/modules/exploits/multi/http/struts_code_exec_exception_delegator.rb,
+  http://pastebin.com/FtygZ1cg, https://artkond.com/2017/03/23/pivoting-guide/'
+references:
+- https://web.archive.org/web/20170319121015/http://www.threatgeek.com/2017/03/widespread-exploitation-attempts-using-cve-2017-5638.html
+- https://github.com/rapid7/metasploit-framework/blob/eb6535009f5fdafa954525687f09294918b5398d/modules/exploits/multi/http/struts_code_exec_exception_delegator.rb
+- http://pastebin.com/FtygZ1cg
+- https://artkond.com/2017/03/23/pivoting-guide/
+tags:
+- attack.execution
+- attack.t1059.004
+_sigma_source: rules/linux/builtin/lnx_shell_susp_commands.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems)
+_sigma_date: 2017-08-21

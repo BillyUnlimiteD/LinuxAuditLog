@@ -1,0 +1,31 @@
+id: SIGMA-LIN-PERSISTENCE_VIA_SUDO
+title: Persistence Via Sudoers Files
+category: generic
+subcategory: detection
+mitre_technique: T1053.003
+mitre_tactic: persistence
+severity: medium
+confidence: low
+enabled: true
+description: Detects creation of sudoers file or files in "sudoers.d" directory which
+  can be used a potential method to persiste privileges for a specific user.
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /etc/sudoers\.d/
+false_positives:
+- Creation of legitimate files in sudoers.d folder part of administrator work
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/file_event/file_event_lnx_persistence_sudoers_files.yml.
+  References: https://github.com/h3xduck/TripleCross/blob/1f1c3e0958af8ad9f6ebe10ab442e75de33e91de/apps/deployer.sh'
+references:
+- https://github.com/h3xduck/TripleCross/blob/1f1c3e0958af8ad9f6ebe10ab442e75de33e91de/apps/deployer.sh
+tags:
+- attack.privilege-escalation
+- attack.execution
+- attack.persistence
+- attack.t1053.003
+_sigma_source: rules/linux/file_event/file_event_lnx_persistence_sudoers_files.yml
+_sigma_status: test
+_sigma_author: Nasreddine Bencherchali (Nextron Systems)
+_sigma_date: 2022-07-05

@@ -1,0 +1,31 @@
+id: SIGMA-LIN-FILE_TIME_ATTRIBUTE
+title: File Time Attribute Change - Linux
+category: audit
+subcategory: detection
+mitre_technique: T1070.006
+mitre_tactic: ''
+severity: medium
+confidence: low
+enabled: true
+description: Detect file time attribute change to hide new or changes to existing
+  files.
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: EXECVE
+  - regex: touch
+  - regex: \-acmr
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/execve/lnx_auditd_change_file_time_attr.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1070.006/T1070.006.md'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1070.006/T1070.006.md
+tags:
+- attack.defense-evasion
+- attack.t1070.006
+_sigma_source: rules/linux/auditd/execve/lnx_auditd_change_file_time_attr.yml
+_sigma_status: test
+_sigma_author: Igor Fits, oscd.community
+_sigma_date: 2020-10-15

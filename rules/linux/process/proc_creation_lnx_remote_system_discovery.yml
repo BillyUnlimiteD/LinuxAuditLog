@@ -1,0 +1,37 @@
+id: SIGMA-LIN-LINUX_REMOTE_SYSTEM
+title: Linux Remote System Discovery
+category: process
+subcategory: detection
+mitre_technique: T1018
+mitre_tactic: discovery
+severity: low
+confidence: low
+enabled: true
+description: Detects the enumeration of other remote systems.
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /arp
+  - regex: /ping
+  - regex: \ 10\.
+  - regex: \ 192\.168\.
+  - regex: \ 172\.16\.
+  - regex: \ 172\.17\.
+  - regex: \ 172\.18\.
+  - regex: \ 172\.19\.
+  - regex: \ 172\.20\.
+  - regex: \ 172\.21\.
+false_positives:
+- Legitimate administration activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_remote_system_discovery.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1018/T1018.md'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1018/T1018.md
+tags:
+- attack.discovery
+- attack.t1018
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_remote_system_discovery.yml
+_sigma_status: test
+_sigma_author: Alejandro Ortuno, oscd.community
+_sigma_date: 2020-10-22

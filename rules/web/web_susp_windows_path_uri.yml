@@ -1,0 +1,35 @@
+id: SIGMA-WEB-SUSPICIOUS_WINDOWS_S
+title: Suspicious Windows Strings In URI
+category: web
+subcategory: detection
+mitre_technique: T1505.003
+mitre_tactic: exfiltration
+severity: high
+confidence: low
+enabled: true
+description: Detects suspicious Windows strings in URI which could indicate possible
+  exfiltration or webshell communication
+service: '*'
+detection:
+  type: pattern
+  patterns:
+  - regex: =C:/Users
+  - regex: =C:/Program%20Files
+  - regex: =C:/Windows
+  - regex: =C%3A%5CUsers
+  - regex: =C%3A%5CProgram%20Files
+  - regex: =C%3A%5CWindows
+false_positives:
+- Legitimate application and websites that use windows paths in their URL
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/web/webserver_generic/web_susp_windows_path_uri.yml.
+  References: https://thedfirreport.com/2022/06/06/will-the-real-msiexec-please-stand-up-exploit-leads-to-data-exfiltration/'
+references:
+- https://thedfirreport.com/2022/06/06/will-the-real-msiexec-please-stand-up-exploit-leads-to-data-exfiltration/
+tags:
+- attack.persistence
+- attack.exfiltration
+- attack.t1505.003
+_sigma_source: rules/web/webserver_generic/web_susp_windows_path_uri.yml
+_sigma_status: test
+_sigma_author: Nasreddine Bencherchali (Nextron Systems)
+_sigma_date: 2022-06-06

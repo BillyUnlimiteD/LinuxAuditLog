@@ -1,0 +1,48 @@
+id: SIGMA-LIN-PUA___TRUFFLEHOG_EXE
+title: PUA - TruffleHog Execution - Linux
+category: process
+subcategory: execution
+mitre_technique: T1083
+mitre_tactic: discovery
+severity: medium
+confidence: low
+enabled: true
+description: 'Detects execution of TruffleHog, a tool used to search for secrets in
+  different platforms like Git, Jira, Slack, SharePoint, etc. that could be used maliciously.
+
+  While it is a legitimate tool, intended for use in CI pipelines and security assessments,
+
+  It was observed in the Shai-Hulud malware campaign targeting npm packages to steal
+  sensitive information.
+
+  '
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /trufflehog
+  - regex: '\ docker\ \-\-image\ '
+  - regex: '\ Git\ '
+  - regex: '\ GitHub\ '
+  - regex: '\ Jira\ '
+  - regex: '\ Slack\ '
+  - regex: '\ Confluence\ '
+  - regex: '\ SharePoint\ '
+  - regex: '\ s3\ '
+  - regex: '\ gcs\ '
+false_positives:
+- Legitimate use of TruffleHog by security teams or developers.
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_pua_trufflehog.yml.
+  References: https://github.com/trufflesecurity/trufflehog, https://www.getsafety.com/blog-posts/shai-hulud-npm-attack'
+references:
+- https://github.com/trufflesecurity/trufflehog
+- https://www.getsafety.com/blog-posts/shai-hulud-npm-attack
+tags:
+- attack.discovery
+- attack.credential-access
+- attack.t1083
+- attack.t1552.001
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_pua_trufflehog.yml
+_sigma_status: experimental
+_sigma_author: Swachchhanda Shrawan Poudel (Nextron Systems)
+_sigma_date: 2025-09-24

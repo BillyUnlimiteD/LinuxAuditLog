@@ -1,0 +1,36 @@
+id: SIGMA-WEB-POTENTIAL_HELLO_WORL
+title: Potential Hello-World Scraper Botnet Activity
+category: web
+subcategory: detection
+mitre_technique: T1595
+mitre_tactic: reconnaissance
+severity: medium
+confidence: low
+enabled: true
+description: 'Detects network traffic potentially associated with a scraper botnet
+  variant that uses the "Hello-World/1.0" user-agent string.
+
+  '
+service: '*'
+detection:
+  type: pattern
+  patterns:
+  - regex: Hello\-World/1\.0
+false_positives:
+- Legitimate network monitoring or vulnerability scanning tools that may use this
+  generic user agent.
+- Internal development or testing scripts. Consider filtering by source IP if this
+  is expected from certain systems.
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/web/proxy_generic/proxy_hello_world_user_agent.yml.
+  References: https://www.greynoise.io/blog/new-scraper-botnet-concentrated-in-taiwan,
+  https://viz.greynoise.io/tags/hello-world-scraper-botnet?days=30'
+references:
+- https://www.greynoise.io/blog/new-scraper-botnet-concentrated-in-taiwan
+- https://viz.greynoise.io/tags/hello-world-scraper-botnet?days=30
+tags:
+- attack.reconnaissance
+- attack.t1595
+_sigma_source: rules/web/proxy_generic/proxy_hello_world_user_agent.yml
+_sigma_status: experimental
+_sigma_author: Joseph A. M.
+_sigma_date: 2025-08-02

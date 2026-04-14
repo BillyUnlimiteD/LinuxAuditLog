@@ -1,0 +1,42 @@
+id: SIGMA-LIN-UNIX_SHELL_CONFIGURA
+title: Unix Shell Configuration Modification
+category: audit
+subcategory: execution
+mitre_technique: T1546.004
+mitre_tactic: persistence
+severity: medium
+confidence: low
+enabled: true
+description: Detect unix shell configuration modification. Adversaries may establish
+  persistence through executing malicious commands triggered when a new shell is opened.
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: PATH
+  - regex: /etc/shells
+  - regex: /etc/profile
+  - regex: /etc/profile\.d/.*
+  - regex: /etc/bash\.bashrc
+  - regex: /etc/bashrc
+  - regex: /etc/zsh/zprofile
+  - regex: /etc/zsh/zshrc
+  - regex: /etc/zsh/zlogin
+  - regex: /etc/zsh/zlogout
+false_positives:
+- Admin or User activity are expected to generate some false positives
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/path/lnx_auditd_unix_shell_configuration_modification.yml.
+  References: https://objective-see.org/blog/blog_0x68.html, https://web.archive.org/web/20221204161143/https://www.glitch-cat.com/p/green-lambert-and-attack,
+  https://www.anomali.com/blog/pulling-linux-rabbit-rabbot-malware-out-of-a-hat'
+references:
+- https://objective-see.org/blog/blog_0x68.html
+- https://web.archive.org/web/20221204161143/https://www.glitch-cat.com/p/green-lambert-and-attack
+- https://www.anomali.com/blog/pulling-linux-rabbit-rabbot-malware-out-of-a-hat
+tags:
+- attack.privilege-escalation
+- attack.persistence
+- attack.t1546.004
+_sigma_source: rules/linux/auditd/path/lnx_auditd_unix_shell_configuration_modification.yml
+_sigma_status: test
+_sigma_author: Peter Matkovski, IAI
+_sigma_date: 2023-03-06

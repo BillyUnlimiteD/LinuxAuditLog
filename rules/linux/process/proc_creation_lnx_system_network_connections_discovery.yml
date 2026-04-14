@@ -1,0 +1,33 @@
+id: SIGMA-LIN-SYSTEM_NETWORK_CONNE
+title: System Network Connections Discovery - Linux
+category: process
+subcategory: detection
+mitre_technique: T1049
+mitre_tactic: discovery
+severity: low
+confidence: low
+enabled: true
+description: Detects usage of system utilities to discover system network connections
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /who
+  - regex: /last
+  - regex: /lsof
+  - regex: /netstat
+  - regex: /usr/bin/landscape\-sysinfo
+  - regex: /who
+false_positives:
+- Legitimate activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_system_network_connections_discovery.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1049/T1049.md'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1049/T1049.md
+tags:
+- attack.discovery
+- attack.t1049
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_system_network_connections_discovery.yml
+_sigma_status: test
+_sigma_author: Daniil Yugoslavskiy, oscd.community
+_sigma_date: 2020-10-19

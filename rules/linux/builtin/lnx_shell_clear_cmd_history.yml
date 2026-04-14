@@ -1,0 +1,47 @@
+id: SIGMA-LIN-LINUX_COMMAND_HISTOR
+title: Linux Command History Tampering
+category: authentication
+subcategory: execution
+mitre_technique: T1070.003
+mitre_tactic: ''
+severity: high
+confidence: low
+enabled: true
+description: 'Detects commands that try to clear or tamper with the Linux command
+  history.
+
+  This technique is used by threat actors in order to evade defenses and execute commands
+  without them being recorded in files such as "bash_history" or "zsh_history".
+
+  '
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: cat\ /dev/null\ >.*sh_history
+  - regex: cat\ /dev/zero\ >.*sh_history
+  - regex: chattr\ \+i.*sh_history
+  - regex: echo\ ""\ >.*sh_history
+  - regex: empty_bash_history
+  - regex: export\ HISTFILESIZE=0
+  - regex: history\ \-c
+  - regex: history\ \-w
+  - regex: ln\ \-sf\ /dev/null\ .*sh_history
+  - regex: ln\ \-sf\ /dev/zero\ .*sh_history
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/builtin/lnx_shell_clear_cmd_history.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1070.003/T1070.003.md,
+  https://www.hackers-arise.com/post/2016/06/20/covering-your-bash-shell-tracks-antiforensics,
+  https://www.cadosecurity.com/spinning-yarn-a-new-linux-malware-campaign-targets-docker-apache-hadoop-redis-and-confluence/'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1070.003/T1070.003.md
+- https://www.hackers-arise.com/post/2016/06/20/covering-your-bash-shell-tracks-antiforensics
+- https://www.cadosecurity.com/spinning-yarn-a-new-linux-malware-campaign-targets-docker-apache-hadoop-redis-and-confluence/
+tags:
+- attack.defense-evasion
+- attack.t1070.003
+_sigma_source: rules/linux/builtin/lnx_shell_clear_cmd_history.yml
+_sigma_status: test
+_sigma_author: Patrick Bareiss
+_sigma_date: 2019-03-24

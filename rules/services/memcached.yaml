@@ -1,0 +1,49 @@
+id: SVC-MEMCACHED-001
+title: Memcached — Unauthorized Access or Abuse
+category: network
+subcategory: cache
+mitre_technique: T1046
+mitre_tactic: discovery
+severity: high
+confidence: medium
+enabled: true
+description: >
+  Detects suspicious activity against the Memcached in-memory cache daemon.
+  Memcached has no authentication by default and is a frequent target for:
+  - UDP amplification DDoS (port 11211/udp — CVE-2018-1000115)
+  - Data exfiltration via unauthenticated key enumeration
+  - Unauthorized flushes that destroy cached sessions or application state
+  - Exposure to the public internet (SHODAN-visible instances)
+  Patterns cover startup/shutdown anomalies, SASL auth failures (if enabled),
+  and connection errors from unexpected sources.
+service: memcached
+detection:
+  type: pattern
+  patterns:
+    - regex: "memcached.*failed to listen on (?P<addr>[\\d.:]+)|memcached.*bind.*failed"
+    - regex: "memcached.*SASL auth.*failed|memcached.*authentication.*error"
+    - regex: "memcached.*new auto-negotiation|memcached.*SASL.*disabled"
+    - regex: "memcached.*Can't bind to (?P<addr>[\\d.:]+):11211|memcached.*address already in use"
+    - regex: "memcached.*signal (?P<sig>\\d+).*exiting|memcached.*Exiting on error"
+    - regex: "(?:kernel|firewall).*DPT=11211|(?:ufw|iptables).*BLOCK.*11211"
+false_positives:
+  - Expected restarts during maintenance or deployment
+  - Legitimate SASL authentication if enabled
+recommendation: >
+  1. Bind memcached to localhost (127.0.0.1) only — never expose port 11211 externally.
+  2. Disable UDP protocol (-U 0) to prevent amplification attacks.
+  3. Enable SASL authentication if sharing the instance between applications.
+  4. Use firewall rules to block external access to port 11211.
+  5. Check with 'ss -lnup | grep 11211' whether memcached is exposed externally.
+  6. Verify CVE-2018-1000115 is not exploitable in this environment (UDP DDoS amplification).
+references:
+  - "https://attack.mitre.org/techniques/T1046/"
+  - "https://nvd.nist.gov/vuln/detail/CVE-2018-1000115"
+  - "https://memcached.org/blog/encrypt-memcached/"
+  - "https://www.cloudflare.com/learning/ddos/memcached-ddos-attack/"
+tags:
+  - memcached
+  - cache
+  - udp_amplification
+  - unauthenticated
+  - cve

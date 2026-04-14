@@ -1,0 +1,29 @@
+id: SIGMA-LIN-REMOVE_IMMUTABLE_FIL
+title: Remove Immutable File Attribute
+category: process
+subcategory: detection
+mitre_technique: T1222.002
+mitre_tactic: ''
+severity: medium
+confidence: low
+enabled: true
+description: Detects usage of the 'chattr' utility to remove immutable file attribute.
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /chattr
+  - regex: '\ \-i\ '
+false_positives:
+- Administrator interacting with immutable files (e.g. for instance backups).
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_chattr_immutable_removal.yml.
+  References: https://www.trendmicro.com/en_us/research/22/i/how-malicious-actors-abuse-native-linux-tools-in-their-attacks.html'
+references:
+- https://www.trendmicro.com/en_us/research/22/i/how-malicious-actors-abuse-native-linux-tools-in-their-attacks.html
+tags:
+- attack.defense-evasion
+- attack.t1222.002
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_chattr_immutable_removal.yml
+_sigma_status: test
+_sigma_author: Nasreddine Bencherchali (Nextron Systems)
+_sigma_date: 2022-09-15

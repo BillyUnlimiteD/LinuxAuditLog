@@ -1,0 +1,37 @@
+id: SVC-HALD-001
+title: HAL daemon hardware abstraction layer events
+category: service
+subcategory: hald
+mitre_technique: T1543.003
+mitre_tactic: persistence
+severity: low
+confidence: medium
+enabled: true
+description: Detects HAL (Hardware Abstraction Layer) daemon events including device detection, hotplug events, and potential hardware-related security issues.
+service: hald
+detection:
+  type: pattern
+  patterns:
+    - regex: 'hald.*:.*Device added'
+    - regex: 'hald.*:.*Device removed'
+    - regex: 'hald.*:.*Failed to initialize'
+    - regex: 'hald.*:.*Permission denied'
+    - regex: 'hald.*:.*Unable to connect to system bus'
+    - regex: 'hald.*:.*Hotplug event'
+false_positives:
+  - Normal hardware device connections and disconnections
+  - Expected HAL initialization messages during boot
+recommendation: >
+  1. Review hardware device events for unauthorized USB or peripheral connections.
+  2. Ensure HAL is not running with excessive privileges.
+  3. Consider replacing HAL with udev if possible, as HAL is deprecated.
+  4. Monitor for unusual device permission issues.
+references:
+  - https://www.freedesktop.org/wiki/Software/hal/
+  - https://attack.mitre.org/techniques/T1543/003/
+tags:
+  - hald
+  - hardware
+  - hal
+  - audit
+  - device

@@ -1,0 +1,33 @@
+id: LIN-AUTH-006
+title: Successful SSH Login (Informational)
+category: authentication
+subcategory: access
+mitre_technique: T1078.003
+mitre_tactic: initial_access
+severity: info
+confidence: high
+enabled: true
+description: >
+  Records all successful SSH authentications for baseline and correlation purposes.
+  When combined with brute force findings, a successful login following multiple
+  failures from the same IP is a strong indicator of credential compromise.
+  This rule generates informational findings for review.
+service: sshd
+detection:
+  type: pattern
+  patterns:
+    - regex: "Accepted (?P<method>password|publickey|keyboard-interactive) for (?P<user>\\S+) from (?P<src_ip>[\\d.]+) port (?P<port>\\d+)"
+    - regex: "session opened for user (?P<user>\\S+) by.*(?P<src_ip>[\\d.]+)?"
+false_positives:
+  - All legitimate SSH sessions
+recommendation: >
+  1. Correlate with brute force findings — a success after failures indicates compromise.
+  2. Verify that all successful logins are from authorized IP addresses.
+  3. Review the commands executed during each session if auditd is enabled.
+  4. Check for unusual login times (off-hours access).
+references:
+  - "https://attack.mitre.org/techniques/T1078/003/"
+tags:
+  - ssh
+  - authentication
+  - baseline

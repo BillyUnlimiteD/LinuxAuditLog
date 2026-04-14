@@ -1,0 +1,49 @@
+id: LIN-PROC-007
+title: Git Sensitive Data Exposure or Repository Reconnaissance
+category: collection
+subcategory: repository_access
+mitre_technique: T1213
+mitre_tactic: collection
+severity: medium
+confidence: medium
+enabled: true
+description: >
+  Detects patterns suggesting an attacker is harvesting sensitive data from
+  git repositories: searching commit history for secrets, cloning internal
+  repositories to external hosts, using git to enumerate credentials committed
+  by mistake, or bulk-dumping repository contents. Tools like trufflehog,
+  git-secrets, gitleaks are used both defensively and offensively.
+service: "*"
+detection:
+  type: pattern
+  patterns:
+    - regex: "git.*log.*(?:-p|--patch|--all).*(?:password|secret|token|key|api_key|credential)"
+    - regex: "git.*grep.*(?:password|passwd|secret|token|api[_-]?key|private[_-]?key|BEGIN.*PRIVATE)"
+    - regex: "trufflehog|gitleaks|git-secrets|gitrob|repo-supervisor"
+    - regex: "git.*(?:stash|diff|show).*(?:HEAD~\\d+|[a-f0-9]{40})"
+    - regex: "git\\s+clone.*(?:--mirror|--bare).*(?P<url>\\S+)"
+    - regex: "\\.git/(?:FETCH_HEAD|ORIG_HEAD|config|packed-refs).*(?:cat|read|curl|wget)"
+    - regex: "git\\s+bundle\\s+create.*(?P<bundle>\\S+\\.bundle)"
+false_positives:
+  - Security teams running authorized secret scanning (trufflehog, gitleaks)
+  - DevOps running git log for deployment audits
+  - Bare clones for CI/CD mirror servers
+recommendation: >
+  1. Run authorized secret scanning immediately: gitleaks detect --source .
+  2. If secrets were committed, rotate them — git history is permanent even after removal.
+  3. Use BFG Repo Cleaner or git-filter-repo to purge sensitive data from history.
+  4. Implement pre-commit hooks to prevent secret commits:
+     pip install pre-commit && pre-commit install
+  5. Review who has clone access to internal repositories.
+  6. Monitor for large git bundle files or bare clones sent to external hosts.
+references:
+  - "https://attack.mitre.org/techniques/T1213/"
+  - "https://attack.mitre.org/techniques/T1552/003/"
+  - "https://github.com/gitleaks/gitleaks"
+  - "https://rtyley.github.io/bfg-repo-cleaner/"
+tags:
+  - git
+  - collection
+  - secrets
+  - repository
+  - data_exposure

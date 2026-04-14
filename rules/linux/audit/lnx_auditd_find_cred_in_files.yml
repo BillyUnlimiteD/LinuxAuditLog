@@ -1,0 +1,30 @@
+id: SIGMA-LIN-CREDENTIALS_IN_FILES
+title: Credentials In Files - Linux
+category: audit
+subcategory: detection
+mitre_technique: T1552.001
+mitre_tactic: ''
+severity: high
+confidence: low
+enabled: true
+description: Detecting attempts to extract passwords with grep
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: EXECVE
+  - regex: grep
+  - regex: password
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/execve/lnx_auditd_find_cred_in_files.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1552.001/T1552.001.md'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1552.001/T1552.001.md
+tags:
+- attack.credential-access
+- attack.t1552.001
+_sigma_source: rules/linux/auditd/execve/lnx_auditd_find_cred_in_files.yml
+_sigma_status: test
+_sigma_author: Igor Fits, oscd.community
+_sigma_date: 2020-10-15

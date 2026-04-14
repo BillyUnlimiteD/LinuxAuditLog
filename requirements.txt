@@ -1,0 +1,21 @@
+# LinuxAuditLog — Runtime dependencies
+# Install with: pip install -r requirements.txt
+
+# Stage A — Remote acquisition
+asyncssh>=2.14.0          # SSH/SFTP async client
+
+# Stage B — Analysis
+duckdb>=0.10.0            # SQL correlation engine (optional, graceful fallback)
+
+# Reporting
+jinja2>=3.1.0             # Markdown report templating
+
+# Rules
+pyyaml>=6.0               # YAML rule engine + rule file parsing
+
+# Scripts (update_rules.py)
+requests>=2.31.0          # SigmaHQ community rules download
+
+# PDF generation (xhtml2pdf fallback when pandoc is not available)
+markdown>=3.4.0           # Markdown -> HTML conversion
+xhtml2pdf>=0.2.16         # HTML -> PDF (pure Python, sin dependencias nativas)

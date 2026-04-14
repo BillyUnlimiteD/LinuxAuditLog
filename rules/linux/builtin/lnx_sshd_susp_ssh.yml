@@ -1,0 +1,40 @@
+id: SIGMA-LIN-SUSPICIOUS_OPENSSH_D
+title: Suspicious OpenSSH Daemon Error
+category: authentication
+subcategory: detection
+mitre_technique: T1190
+mitre_tactic: ''
+severity: medium
+confidence: low
+enabled: true
+description: Detects suspicious SSH / SSHD error messages that indicate a fatal or
+  suspicious error that could be caused by exploiting attempts
+service: sshd
+detection:
+  type: pattern
+  patterns:
+  - regex: unexpected\ internal\ error
+  - regex: unknown\ or\ unsupported\ key\ type
+  - regex: invalid\ certificate\ signing\ key
+  - regex: invalid\ elliptic\ curve\ value
+  - regex: incorrect\ signature
+  - regex: error\ in\ libcrypto
+  - regex: unexpected\ bytes\ remain\ after\ decoding
+  - regex: fatal:\ buffer_get_string:\ bad\ string
+  - regex: Local:\ crc32\ compensation\ attack
+  - regex: bad\ client\ public\ DH\ value
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/builtin/sshd/lnx_sshd_susp_ssh.yml.
+  References: https://github.com/openssh/openssh-portable/blob/c483a5c0fb8e8b8915fad85c5f6113386a4341ca/ssherr.c,
+  https://github.com/ossec/ossec-hids/blob/1ecffb1b884607cb12e619f9ab3c04f530801083/etc/rules/sshd_rules.xml'
+references:
+- https://github.com/openssh/openssh-portable/blob/c483a5c0fb8e8b8915fad85c5f6113386a4341ca/ssherr.c
+- https://github.com/ossec/ossec-hids/blob/1ecffb1b884607cb12e619f9ab3c04f530801083/etc/rules/sshd_rules.xml
+tags:
+- attack.initial-access
+- attack.t1190
+_sigma_source: rules/linux/builtin/sshd/lnx_sshd_susp_ssh.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems)
+_sigma_date: 2017-06-30

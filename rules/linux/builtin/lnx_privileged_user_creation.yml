@@ -1,0 +1,38 @@
+id: SIGMA-LIN-PRIVILEGED_USER_HAS
+title: Privileged User Has Been Created
+category: authentication
+subcategory: privilege_escalation
+mitre_technique: T1136.001
+mitre_tactic: persistence
+severity: high
+confidence: low
+enabled: true
+description: Detects the addition of a new user to a privileged group such as "root"
+  or "sudo"
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: new\ user
+  - regex: GID=0,
+  - regex: UID=0,
+  - regex: GID=10,
+  - regex: GID=27,
+false_positives:
+- Administrative activity
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/builtin/lnx_privileged_user_creation.yml.
+  References: https://digital.nhs.uk/cyber-alerts/2018/cc-2825, https://linux.die.net/man/8/useradd,
+  https://github.com/redcanaryco/atomic-red-team/blob/25acadc0b43a07125a8a5b599b28bbc1a91ffb06/atomics/T1136.001/T1136.001.md#atomic-test-5---create-a-new-user-in-linux-with-root-uid-and-gid'
+references:
+- https://digital.nhs.uk/cyber-alerts/2018/cc-2825
+- https://linux.die.net/man/8/useradd
+- https://github.com/redcanaryco/atomic-red-team/blob/25acadc0b43a07125a8a5b599b28bbc1a91ffb06/atomics/T1136.001/T1136.001.md#atomic-test-5---create-a-new-user-in-linux-with-root-uid-and-gid
+tags:
+- attack.privilege-escalation
+- attack.persistence
+- attack.t1136.001
+- attack.t1098
+_sigma_source: rules/linux/builtin/lnx_privileged_user_creation.yml
+_sigma_status: test
+_sigma_author: Pawel Mazur
+_sigma_date: 2022-12-21

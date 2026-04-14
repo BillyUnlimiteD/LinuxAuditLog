@@ -1,0 +1,31 @@
+id: SIGMA-LIN-STEGANOGRAPHY_UNZIP
+title: Steganography Unzip Hidden Information From Picture File
+category: audit
+subcategory: detection
+mitre_technique: T1027.003
+mitre_tactic: ''
+severity: low
+confidence: low
+enabled: true
+description: Detects extracting of zip file from image file
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: EXECVE
+  - regex: unzip
+  - regex: \.jpg
+  - regex: \.png
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/execve/lnx_auditd_unzip_hidden_zip_files_steganography.yml.
+  References: https://zerotoroot.me/steganography-hiding-a-zip-in-a-jpeg-file/'
+references:
+- https://zerotoroot.me/steganography-hiding-a-zip-in-a-jpeg-file/
+tags:
+- attack.defense-evasion
+- attack.t1027.003
+_sigma_source: rules/linux/auditd/execve/lnx_auditd_unzip_hidden_zip_files_steganography.yml
+_sigma_status: test
+_sigma_author: Pawel Mazur
+_sigma_date: 2021-09-09

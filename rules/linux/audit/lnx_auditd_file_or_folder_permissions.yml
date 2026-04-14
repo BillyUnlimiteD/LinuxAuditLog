@@ -1,0 +1,30 @@
+id: SIGMA-LIN-FILE_OR_FOLDER_PERMI
+title: File or Folder Permissions Change
+category: audit
+subcategory: detection
+mitre_technique: T1222.002
+mitre_tactic: ''
+severity: low
+confidence: low
+enabled: true
+description: Detects file and folder permission changes.
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: EXECVE
+  - regex: chmod
+  - regex: chown
+false_positives:
+- User interacting with files permissions (normal/daily behaviour).
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/execve/lnx_auditd_file_or_folder_permissions.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1222.002/T1222.002.md'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1222.002/T1222.002.md
+tags:
+- attack.defense-evasion
+- attack.t1222.002
+_sigma_source: rules/linux/auditd/execve/lnx_auditd_file_or_folder_permissions.yml
+_sigma_status: test
+_sigma_author: Jakob Weinzettl, oscd.community
+_sigma_date: 2019-09-23

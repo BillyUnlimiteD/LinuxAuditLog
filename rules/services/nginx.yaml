@@ -1,0 +1,44 @@
+id: SVC-NGINX-001
+title: Nginx Anomalous Activity
+category: web
+subcategory: nginx
+mitre_technique: T1190
+mitre_tactic: initial_access
+severity: medium
+confidence: medium
+enabled: true
+description: >
+  Detects anomalous patterns in Nginx access and error logs including:
+  unusually large response bodies (potential data exfiltration), 4xx/5xx spikes,
+  access to sensitive Nginx internals, configuration file exposure, and
+  buffer overflow attempts via oversized headers or request bodies.
+  Also covers Nginx-specific misconfigurations being exploited.
+service: nginx
+detection:
+  type: pattern
+  patterns:
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>/(?:nginx_status|server-status|\\.nginx|\\.htpasswd|nginx\\.conf)[^\"]*)\""
+    - regex: "(?P<src_ip>[\\d.]+).*\" (?P<status>5\\d{2}) (?P<size>\\d{6,})"
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST|PUT) (?P<uri>[^\"]{2048,})\""
+    - regex: "\\[error\\].*(?P<msg>open\\(\\) failed.*No such file|upstream timed out|upstream sent invalid header|failed \\(104: Connection reset\\))"
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>[^\"]*(?:/\\.git/|/\\.env|/\\.htaccess|/config\\.php|/wp-config\\.php|/database\\.yml)[^\"]*)\""
+    - regex: "(?P<src_ip>[\\d.]+).*\" (?P<status>40[034]) .* (?P<size>\\d+) .* (?:nikto|sqlmap|dirbuster|gobuster|nuclei|masscan|zgrab|scanner)"
+false_positives:
+  - Legitimate large file downloads (videos, backups)
+  - Monitoring agents accessing /nginx_status with proper access control
+  - Developers accessing config files from trusted IPs
+recommendation: >
+  1. Restrict access to /nginx_status with IP allowlisting in Nginx config.
+  2. Return 444 (close connection) for sensitive path patterns.
+  3. Set client_max_body_size and client_header_buffer_size to reasonable limits.
+  4. Enable rate limiting (limit_req_zone) for sensitive endpoints.
+  5. Review error log for repeated upstream failures (may indicate backend attacks).
+  6. Ensure .git, .env, .htaccess are blocked: location ~ /\. { deny all; }
+references:
+  - "https://nginx.org/en/docs/http/ngx_http_limit_req_module.html"
+  - "https://attack.mitre.org/techniques/T1190/"
+  - "https://www.nginx.com/blog/mitigating-ddos-attacks-with-nginx-and-nginx-plus/"
+tags:
+  - nginx
+  - web
+  - configuration_exposure

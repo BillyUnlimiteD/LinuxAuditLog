@@ -1,0 +1,30 @@
+id: SIGMA-LIN-SPLIT_A_FILE_INTO_PI
+title: Split A File Into Pieces - Linux
+category: audit
+subcategory: detection
+mitre_technique: T1030
+mitre_tactic: exfiltration
+severity: low
+confidence: low
+enabled: true
+description: Detection use of the command "split" to split files into parts and possible
+  transfer.
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: SYSCALL
+  - regex: split
+false_positives:
+- Legitimate administrative activity
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/syscall/lnx_auditd_split_file_into_pieces.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1030/T1030.md'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1030/T1030.md
+tags:
+- attack.exfiltration
+- attack.t1030
+_sigma_source: rules/linux/auditd/syscall/lnx_auditd_split_file_into_pieces.yml
+_sigma_status: test
+_sigma_author: Igor Fits, oscd.community
+_sigma_date: 2020-10-15

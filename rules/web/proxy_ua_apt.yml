@@ -1,0 +1,43 @@
+id: SIGMA-WEB-APT_USER_AGENT
+title: APT User Agent
+category: web
+subcategory: detection
+mitre_technique: T1071.001
+mitre_tactic: ''
+severity: high
+confidence: low
+enabled: true
+description: Detects suspicious user agent strings used in APT malware in proxy logs
+service: '*'
+detection:
+  type: pattern
+  patterns:
+  - regex: SJZJ\ \(compatible;\ MSIE\ 6\.0;\ Win32\)
+  - regex: Mozilla/5\.0\ \(Windows\ NT\ 6\.;\ WOW64;\ rv:20\.0\)\ Gecko/20100101\
+      Firefox/20\.0
+  - regex: User\-Agent:\ Mozilla/4\.0\ \(compatible;\ MSIE\ 8\.0;\ Windows\ NT\ 6\.1;\
+      Trident/4\.0;\ SLCC
+  - regex: Mozilla/4\.0\ \(compatible;\ MSIE\ 7\.4;\ Win32;32\-bit\)
+  - regex: webclient
+  - regex: Mozilla/5\.0\ \(Windows;\ U;\ Windows\ NT\ 5\.1;\ zh\-EN;\ rv:1\.7\.12\)\
+      Gecko/200
+  - regex: Mozilla/4\.0\ \(compatible;\ MSI\ 6\.0;
+  - regex: Mozilla/5\.0\ \(Windows\ NT\ 6\.3;\ WOW64;\ rv:28\.0\)\ Gecko/20100101\
+      Firefox/28\.0
+  - regex: Mozilla/5\.0\ \(Windows\ NT\ 6\.2;\ WOW64;\ rv:20\.0\)\ Gecko/20100101\
+      Firefox/
+  - regex: Mozilla/5\.0\ \(Windows\ NT\ 6\.;\ WOW64;\ rv:20\.0\)\ Gecko/20100101\
+      Firefox/2
+false_positives:
+- Old browsers
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/web/proxy_generic/proxy_ua_apt.yml.
+  References: Internal Research'
+references:
+- Internal Research
+tags:
+- attack.command-and-control
+- attack.t1071.001
+_sigma_source: rules/web/proxy_generic/proxy_ua_apt.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems), Markus Neis
+_sigma_date: 2019-11-12

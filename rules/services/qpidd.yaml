@@ -1,0 +1,36 @@
+id: SVC-QPIDD-001
+title: Qpid daemon messaging service activity and errors
+category: service
+subcategory: qpidd
+mitre_technique: T1071
+mitre_tactic: command_and_control
+severity: medium
+confidence: medium
+enabled: true
+description: Detects Qpid daemon (qpidd) activity including connection attempts, authentication failures, and service errors that may indicate unauthorized messaging or C2 activity.
+service: qpidd
+detection:
+  type: pattern
+  patterns:
+    - regex: 'qpidd.*:.*Connection from.*established'
+    - regex: 'qpidd.*:.*Connection denied'
+    - regex: 'qpidd.*:.*Authentication failed'
+    - regex: 'qpidd.*:.*Broker.*error'
+    - regex: 'qpidd.*:.*Failed to bind to port'
+    - regex: 'qpidd.*:.*SASL authentication failed'
+false_positives:
+  - Normal messaging traffic in environments using Qpid for legitimate purposes
+  - Expected connection failures during network issues
+recommendation: >
+  1. Review Qpid connection logs for unauthorized IP addresses or unusual connection patterns.
+  2. Ensure Qpid is configured with proper authentication and access controls.
+  3. Monitor for unusual message queues or topics being accessed.
+  4. Disable Qpid if not required for the system's functionality.
+references:
+  - https://qpid.apache.org/
+  - https://attack.mitre.org/techniques/T1071/
+tags:
+  - qpidd
+  - messaging
+  - audit
+  - service_error

@@ -1,0 +1,32 @@
+id: SIGMA-LIN-WEBSHELL_REMOTE_COMM
+title: Webshell Remote Command Execution
+category: audit
+subcategory: execution
+mitre_technique: T1505.003
+mitre_tactic: persistence
+severity: critical
+confidence: low
+enabled: true
+description: Detects possible command execution by web application/web shell
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: SYSCALL
+  - regex: execve
+  - regex: execveat
+false_positives:
+- Admin activity
+- Crazy web applications
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/syscall/lnx_auditd_web_rce.yml.
+  References: Personal Experience of the Author, https://www.vaadata.com/blog/what-is-command-injection-exploitations-and-security-best-practices/'
+references:
+- Personal Experience of the Author
+- https://www.vaadata.com/blog/what-is-command-injection-exploitations-and-security-best-practices/
+tags:
+- attack.persistence
+- attack.t1505.003
+_sigma_source: rules/linux/auditd/syscall/lnx_auditd_web_rce.yml
+_sigma_status: test
+_sigma_author: Ilyas Ochkov, Beyu Denis, oscd.community
+_sigma_date: 2019-10-12

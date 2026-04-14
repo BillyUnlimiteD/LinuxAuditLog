@@ -1,0 +1,37 @@
+id: SVC-CHRONYD-001
+title: Chronyd — Anomalous NTP Activity
+category: system
+subcategory: time_sync
+mitre_technique: T1565.001
+mitre_tactic: impact
+severity: medium
+confidence: medium
+enabled: true
+description: >
+  Detects suspicious patterns in the chrony NTP daemon: unauthorized time jumps,
+  source changes, configuration tampering, and signs of NTP-based attacks.
+  Attackers may manipulate system time to evade log correlation or expire
+  certificates.
+service: chronyd
+detection:
+  type: pattern
+  patterns:
+    - regex: "chronyd.*Could not open temporary file|chronyd.*Failed to.*config"
+    - regex: "chronyd.*System clock wrong by (?P<secs>-?[5-9]\\d{2,}|[5-9]\\d{2,})\\."
+    - regex: "chronyd.*Source (?P<src_ip>[\\d.]+) replaced|chronyd.*No sources"
+    - regex: "chronyd.*forward jump detected|chronyd.*Backward time jump"
+    - regex: "chronyd.*Unauthorised|chronyd.*authentication failed"
+false_positives:
+  - Large time corrections after system restart or hibernation
+  - NTP source changes during normal network reconfiguration
+recommendation: >
+  1. Restrict chrony config to root-only write access.
+  2. Monitor for unexpected time jumps > 60s outside maintenance windows.
+  3. Ensure NTP sources are authoritative and trusted.
+references:
+  - "https://attack.mitre.org/techniques/T1565/001/"
+  - "https://chrony-project.org/doc/4.3/chrony.conf.html"
+tags:
+  - chronyd
+  - ntp
+  - time_manipulation

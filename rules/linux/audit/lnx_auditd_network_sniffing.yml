@@ -1,0 +1,39 @@
+id: SIGMA-LIN-NETWORK_SNIFFING___L
+title: Network Sniffing - Linux
+category: network
+subcategory: detection
+mitre_technique: T1040
+mitre_tactic: discovery
+severity: low
+confidence: low
+enabled: true
+description: 'Network sniffing refers to using the network interface on a system to
+  monitor or capture information sent over a wired or wireless connection.
+
+  An adversary may place a network interface into promiscuous mode to passively access
+  data in transit over the network, or use span ports to capture a larger amount of
+  data.
+
+  '
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: execve
+  - regex: tcpdump
+  - regex: execve
+  - regex: tshark
+false_positives:
+- Legitimate administrator or user uses network sniffing tool for legitimate reasons.
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/execve/lnx_auditd_network_sniffing.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1040/T1040.md'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1040/T1040.md
+tags:
+- attack.credential-access
+- attack.discovery
+- attack.t1040
+_sigma_source: rules/linux/auditd/execve/lnx_auditd_network_sniffing.yml
+_sigma_status: test
+_sigma_author: Timur Zinniatullin, oscd.community
+_sigma_date: 2019-10-21

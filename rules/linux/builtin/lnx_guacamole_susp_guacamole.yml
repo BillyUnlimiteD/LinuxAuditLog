@@ -1,0 +1,28 @@
+id: SIGMA-LIN-GUACAMOLE_TWO_USERS
+title: Guacamole Two Users Sharing Session Anomaly
+category: authentication
+subcategory: detection
+mitre_technique: T1212
+mitre_tactic: ''
+severity: high
+confidence: low
+enabled: true
+description: Detects suspicious session with two users present
+service: guacamole
+detection:
+  type: pattern
+  patterns:
+  - regex: \(2\ users\ now\ present\)
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/builtin/guacamole/lnx_guacamole_susp_guacamole.yml.
+  References: https://research.checkpoint.com/2020/apache-guacamole-rce/'
+references:
+- https://research.checkpoint.com/2020/apache-guacamole-rce/
+tags:
+- attack.credential-access
+- attack.t1212
+_sigma_source: rules/linux/builtin/guacamole/lnx_guacamole_susp_guacamole.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems)
+_sigma_date: 2020-07-03

@@ -1,0 +1,40 @@
+id: SIGMA-WEB-RAW_PASTE_SERVICE_AC
+title: Raw Paste Service Access
+category: web
+subcategory: detection
+mitre_technique: T1071.001
+mitre_tactic: ''
+severity: high
+confidence: low
+enabled: true
+description: Detects direct access to raw pastes in different paste services often
+  used by malware in their second stages to download malicious code in encrypted or
+  encoded form
+service: '*'
+detection:
+  type: pattern
+  patterns:
+  - regex: \.paste\.ee/r/
+  - regex: \.pastebin\.com/raw/
+  - regex: \.hastebin\.com/raw/
+  - regex: \.ghostbin\.co/paste/.*/raw/
+  - regex: pastetext\.net/
+  - regex: pastebin\.pl/
+  - regex: paste\.ee/
+false_positives:
+- User activity (e.g. developer that shared and copied code snippets and used the
+  raw link instead of just copy & paste)
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/web/proxy_generic/proxy_raw_paste_service_access.yml.
+  References: https://www.virustotal.com/gui/domain/paste.ee/relations'
+references:
+- https://www.virustotal.com/gui/domain/paste.ee/relations
+tags:
+- attack.command-and-control
+- attack.t1071.001
+- attack.t1102.001
+- attack.t1102.003
+- attack.defense-evasion
+_sigma_source: rules/web/proxy_generic/proxy_raw_paste_service_access.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems)
+_sigma_date: 2019-12-05

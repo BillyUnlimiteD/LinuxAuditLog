@@ -1,0 +1,38 @@
+id: SIGMA-LIN-SECURITY_SOFTWARE_DI
+title: Security Software Discovery - Linux
+category: process
+subcategory: detection
+mitre_technique: T1518.001
+mitre_tactic: discovery
+severity: low
+confidence: low
+enabled: true
+description: Detects usage of system utilities (only grep and egrep for now) to discover
+  security software discovery
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /grep
+  - regex: /egrep
+  - regex: nessusd
+  - regex: td\-agent
+  - regex: packetbeat
+  - regex: filebeat
+  - regex: auditbeat
+  - regex: osqueryd
+  - regex: cbagentd
+  - regex: falcond
+false_positives:
+- Legitimate activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_security_software_discovery.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1518.001/T1518.001.md'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1518.001/T1518.001.md
+tags:
+- attack.discovery
+- attack.t1518.001
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_security_software_discovery.yml
+_sigma_status: test
+_sigma_author: Daniil Yugoslavskiy, oscd.community
+_sigma_date: 2020-10-19

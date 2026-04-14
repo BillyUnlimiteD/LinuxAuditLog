@@ -1,0 +1,30 @@
+id: SIGMA-LIN-CURL_USAGE_ON_LINUX
+title: Curl Usage on Linux
+category: process
+subcategory: detection
+mitre_technique: T1105
+mitre_tactic: ''
+severity: low
+confidence: low
+enabled: true
+description: Detects a curl process start on linux, which indicates a file download
+  from a remote location or a simple web request to a remote server
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /curl
+false_positives:
+- Scripts created by developers and admins
+- Administrative activity
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_curl_usage.yml.
+  References: https://www.trendmicro.com/en_us/research/22/i/how-malicious-actors-abuse-native-linux-tools-in-their-attacks.html'
+references:
+- https://www.trendmicro.com/en_us/research/22/i/how-malicious-actors-abuse-native-linux-tools-in-their-attacks.html
+tags:
+- attack.command-and-control
+- attack.t1105
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_curl_usage.yml
+_sigma_status: test
+_sigma_author: Nasreddine Bencherchali (Nextron Systems)
+_sigma_date: 2022-09-15

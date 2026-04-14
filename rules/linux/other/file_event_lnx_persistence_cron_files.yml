@@ -1,0 +1,39 @@
+id: SIGMA-LIN-PERSISTENCE_VIA_CRON
+title: Persistence Via Cron Files
+category: generic
+subcategory: detection
+mitre_technique: T1053.003
+mitre_tactic: persistence
+severity: medium
+confidence: low
+enabled: true
+description: Detects creation of cron file or files in Cron directories which could
+  indicates potential persistence.
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /etc/cron\.d/
+  - regex: /etc/cron\.daily/
+  - regex: /etc/cron\.hourly/
+  - regex: /etc/cron\.monthly/
+  - regex: /etc/cron\.weekly/
+  - regex: /var/spool/cron/crontabs/
+  - regex: /etc/cron\.allow
+  - regex: /etc/cron\.deny
+  - regex: /etc/crontab
+false_positives:
+- Any legitimate cron file.
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/file_event/file_event_lnx_persistence_cron_files.yml.
+  References: https://github.com/microsoft/MSTIC-Sysmon/blob/f1477c0512b0747c1455283069c21faec758e29d/linux/configs/attack-based/persistence/T1053.003_Cron_Activity.xml'
+references:
+- https://github.com/microsoft/MSTIC-Sysmon/blob/f1477c0512b0747c1455283069c21faec758e29d/linux/configs/attack-based/persistence/T1053.003_Cron_Activity.xml
+tags:
+- attack.privilege-escalation
+- attack.execution
+- attack.persistence
+- attack.t1053.003
+_sigma_source: rules/linux/file_event/file_event_lnx_persistence_cron_files.yml
+_sigma_status: test
+_sigma_author: Roberto Rodriguez (Cyb3rWard0g), OTR (Open Threat Research), MSTIC
+_sigma_date: 2021-10-15

@@ -1,0 +1,31 @@
+id: SIGMA-LIN-POTENTIAL_XTERM_REVE
+title: Potential Xterm Reverse Shell
+category: process
+subcategory: execution
+mitre_technique: T1059
+mitre_tactic: execution
+severity: medium
+confidence: low
+enabled: true
+description: Detects usage of "xterm" as a potential reverse shell tunnel
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: xterm
+  - regex: \-display
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_xterm_reverse_shell.yml.
+  References: https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet,
+  https://www.revshells.com/'
+references:
+- https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet
+- https://www.revshells.com/
+tags:
+- attack.execution
+- attack.t1059
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_xterm_reverse_shell.yml
+_sigma_status: test
+_sigma_author: '@d4ns4n_'
+_sigma_date: 2023-04-24

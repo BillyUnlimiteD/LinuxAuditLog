@@ -1,0 +1,35 @@
+id: SIGMA-LIN-SYSTEM_SHUTDOWN_REBO
+title: System Shutdown/Reboot - Linux
+category: audit
+subcategory: detection
+mitre_technique: T1529
+mitre_tactic: impact
+severity: info
+confidence: low
+enabled: true
+description: Adversaries may shutdown/reboot systems to interrupt access to, or aid
+  in the destruction of, those systems.
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: EXECVE
+  - regex: shutdown
+  - regex: reboot
+  - regex: halt
+  - regex: poweroff
+  - regex: init
+  - regex: telinit
+false_positives:
+- Legitimate administrative activity
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/execve/lnx_auditd_system_shutdown_reboot.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1529/T1529.md'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1529/T1529.md
+tags:
+- attack.impact
+- attack.t1529
+_sigma_source: rules/linux/auditd/execve/lnx_auditd_system_shutdown_reboot.yml
+_sigma_status: test
+_sigma_author: Igor Fits, oscd.community
+_sigma_date: 2020-10-15

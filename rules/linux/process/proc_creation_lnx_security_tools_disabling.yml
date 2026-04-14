@@ -1,0 +1,37 @@
+id: SIGMA-LIN-DISABLING_SECURITY_T
+title: Disabling Security Tools
+category: process
+subcategory: detection
+mitre_technique: T1562.004
+mitre_tactic: ''
+severity: medium
+confidence: low
+enabled: true
+description: Detects disabling security tools
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /service
+  - regex: iptables
+  - regex: stop
+  - regex: /service
+  - regex: ip6tables
+  - regex: stop
+  - regex: /chkconfig
+  - regex: iptables
+  - regex: stop
+  - regex: /chkconfig
+false_positives:
+- Legitimate administration activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_security_tools_disabling.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.004/T1562.004.md'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.004/T1562.004.md
+tags:
+- attack.defense-evasion
+- attack.t1562.004
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_security_tools_disabling.yml
+_sigma_status: test
+_sigma_author: Ömer Günal, Alejandro Ortuno, oscd.community
+_sigma_date: 2020-06-17

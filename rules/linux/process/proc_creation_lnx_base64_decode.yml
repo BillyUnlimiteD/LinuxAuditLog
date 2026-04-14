@@ -1,0 +1,28 @@
+id: SIGMA-LIN-DECODE_BASE___ENCODE
+title: Decode Base64 Encoded Text
+category: process
+subcategory: detection
+mitre_technique: T1027
+mitre_tactic: ''
+severity: low
+confidence: low
+enabled: true
+description: Detects usage of base64 utility to decode arbitrary base64-encoded text
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /base64
+false_positives:
+- Legitimate activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_base64_decode.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1027/T1027.md'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1027/T1027.md
+tags:
+- attack.defense-evasion
+- attack.t1027
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_base64_decode.yml
+_sigma_status: test
+_sigma_author: Daniil Yugoslavskiy, oscd.community
+_sigma_date: 2020-10-19

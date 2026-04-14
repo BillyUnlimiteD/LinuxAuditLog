@@ -1,0 +1,50 @@
+id: SVC-CLAMAV-001
+title: ClamAV — Antivirus Detection or Configuration Abuse
+category: defense_evasion
+subcategory: antivirus
+mitre_technique: T1562.001
+mitre_tactic: defense_evasion
+severity: high
+confidence: high
+enabled: true
+description: >
+  Detects suspicious events from the ClamAV antivirus suite (clamd daemon and
+  freshclam signature updater):
+  - Malware detections in scanned files (FOUND events)
+  - ClamAV service being stopped or disabled (defense evasion)
+  - freshclam update failures that leave signatures stale (blind spot creation)
+  - Scan errors on critical directories suggesting tampering
+  - Configuration changes to clamd.conf or freshclam.conf
+  Attackers may disable ClamAV, poison its database, or exploit scan paths to
+  evade detection.  Malware detections are high-fidelity indicators of compromise.
+service: clamd
+detection:
+  type: pattern
+  patterns:
+    - regex: "(?P<path>[^:]+): (?P<sig>[A-Za-z0-9._-]+) FOUND"
+    - regex: "clamd.*(?:stopped|terminated|killed|disabled|Exiting)"
+    - regex: "freshclam.*(?:ERROR|failed|Can't|Unable).*(?:download|update|connect|database)"
+    - regex: "freshclam.*Your ClamAV installation is OUTDATED"
+    - regex: "clamd.*(?:Access denied|Permission denied|lstat\\(\\).*failed).*(?P<path>/[\\w/.-]+)"
+    - regex: "clamd.*(?:config|conf).*(?:changed|modified|reloaded|reload)"
+    - regex: "freshclam.*Received signal.*Terminating"
+false_positives:
+  - Malware detections in quarantined samples kept for research
+  - freshclam update errors during planned network outages
+  - ClamAV restarts during system maintenance
+recommendation: >
+  1. Any FOUND event requires immediate investigation — identify the affected file and scope.
+  2. Investigate ClamAV shutdowns outside maintenance windows as potential defense evasion.
+  3. If freshclam repeatedly fails, signatures become stale — investigate connectivity and fix.
+  4. Ensure clamd.conf restricts ScanPath to known directories only.
+  5. Verify /etc/clamav/ config files have not been modified by unauthorized users.
+  6. Consider enabling ClamAV's OnAccessScan for real-time file system monitoring.
+references:
+  - "https://attack.mitre.org/techniques/T1562/001/"
+  - "https://docs.clamav.net/manual/Usage/Scanning.html"
+  - "https://docs.clamav.net/manual/Installing/Installing-from-Package-Managers.html"
+tags:
+  - clamav
+  - antivirus
+  - malware_detection
+  - defense_evasion

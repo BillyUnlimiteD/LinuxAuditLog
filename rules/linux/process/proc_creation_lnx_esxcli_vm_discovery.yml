@@ -1,0 +1,40 @@
+id: SIGMA-LIN-ESXI_VM_LIST_DISCOVE
+title: ESXi VM List Discovery Via ESXCLI
+category: process
+subcategory: detection
+mitre_technique: T1033
+mitre_tactic: execution
+severity: medium
+confidence: low
+enabled: true
+description: Detects execution of the "esxcli" command with the "vm" flag in order
+  to retrieve information about the installed VMs.
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /esxcli
+  - regex: vm\ process
+  - regex: \ list
+false_positives:
+- Legitimate administration activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_esxcli_vm_discovery.yml.
+  References: https://www.crowdstrike.com/blog/hypervisor-jackpotting-ecrime-actors-increase-targeting-of-esxi-servers/,
+  https://developer.broadcom.com/xapis/esxcli-command-reference/7.0.0/namespace/esxcli_vm.html,
+  https://www.secuinfra.com/en/techtalk/hide-your-hypervisor-analysis-of-esxiargs-ransomware/,
+  https://www.trendmicro.com/en_us/research/22/e/new-linux-based-ransomware-cheerscrypt-targets-exsi-devices.html'
+references:
+- https://www.crowdstrike.com/blog/hypervisor-jackpotting-ecrime-actors-increase-targeting-of-esxi-servers/
+- https://developer.broadcom.com/xapis/esxcli-command-reference/7.0.0/namespace/esxcli_vm.html
+- https://www.secuinfra.com/en/techtalk/hide-your-hypervisor-analysis-of-esxiargs-ransomware/
+- https://www.trendmicro.com/en_us/research/22/e/new-linux-based-ransomware-cheerscrypt-targets-exsi-devices.html
+tags:
+- attack.discovery
+- attack.execution
+- attack.t1033
+- attack.t1007
+- attack.t1059.012
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_esxcli_vm_discovery.yml
+_sigma_status: test
+_sigma_author: Cedric Maurugeon
+_sigma_date: 2023-09-04

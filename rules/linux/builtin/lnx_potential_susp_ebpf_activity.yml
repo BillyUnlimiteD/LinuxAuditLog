@@ -1,0 +1,30 @@
+id: SIGMA-LIN-POTENTIAL_SUSPICIOUS
+title: Potential Suspicious BPF Activity - Linux
+category: authentication
+subcategory: detection
+mitre_technique: ''
+mitre_tactic: persistence
+severity: high
+confidence: low
+enabled: true
+description: Detects the presence of "bpf_probe_write_user" BPF helper-generated warning
+  messages. Which could be a sign of suspicious eBPF activity on the system.
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: bpf_probe_write_user
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/builtin/lnx_potential_susp_ebpf_activity.yml.
+  References: https://redcanary.com/blog/ebpf-malware/, https://man7.org/linux/man-pages/man7/bpf-helpers.7.html'
+references:
+- https://redcanary.com/blog/ebpf-malware/
+- https://man7.org/linux/man-pages/man7/bpf-helpers.7.html
+tags:
+- attack.persistence
+- attack.defense-evasion
+_sigma_source: rules/linux/builtin/lnx_potential_susp_ebpf_activity.yml
+_sigma_status: test
+_sigma_author: Red Canary (idea), Nasreddine Bencherchali
+_sigma_date: 2023-01-25

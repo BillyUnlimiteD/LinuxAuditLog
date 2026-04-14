@@ -1,0 +1,28 @@
+id: SIGMA-LIN-TRIPLE_CROSS_EBPF_RO
+title: Triple Cross eBPF Rootkit Default LockFile
+category: generic
+subcategory: detection
+mitre_technique: ''
+mitre_tactic: ''
+severity: high
+confidence: low
+enabled: true
+description: Detects the creation of the file "rootlog" which is used by the TripleCross
+  rootkit as a way to check if the backdoor is already running.
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /tmp/rootlog
+false_positives:
+- Unlikely
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/file_event/file_event_lnx_triple_cross_rootkit_lock_file.yml.
+  References: https://github.com/h3xduck/TripleCross/blob/1f1c3e0958af8ad9f6ebe10ab442e75de33e91de/src/helpers/execve_hijack.c#L33'
+references:
+- https://github.com/h3xduck/TripleCross/blob/1f1c3e0958af8ad9f6ebe10ab442e75de33e91de/src/helpers/execve_hijack.c#L33
+tags:
+- attack.defense-evasion
+_sigma_source: rules/linux/file_event/file_event_lnx_triple_cross_rootkit_lock_file.yml
+_sigma_status: test
+_sigma_author: Nasreddine Bencherchali (Nextron Systems)
+_sigma_date: 2022-07-05

@@ -1,0 +1,35 @@
+id: SIGMA-LIN-SUSPICIOUS_JAVA_CHIL
+title: Suspicious Java Children Processes
+category: process
+subcategory: detection
+mitre_technique: T1059
+mitre_tactic: execution
+severity: high
+confidence: low
+enabled: true
+description: Detects java process spawning suspicious children
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /java
+  - regex: /bin/sh
+  - regex: bash
+  - regex: dash
+  - regex: fish
+  - regex: curl
+  - regex: wget
+  - regex: python
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_susp_java_children.yml.
+  References: https://www.tecmint.com/different-types-of-linux-shells/'
+references:
+- https://www.tecmint.com/different-types-of-linux-shells/
+tags:
+- attack.execution
+- attack.t1059
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_susp_java_children.yml
+_sigma_status: test
+_sigma_author: Nasreddine Bencherchali (Nextron Systems)
+_sigma_date: 2022-06-03

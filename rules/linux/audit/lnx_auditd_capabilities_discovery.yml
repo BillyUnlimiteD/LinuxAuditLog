@@ -1,0 +1,37 @@
+id: SIGMA-LIN-LINUX_CAPABILITIES_D
+title: Linux Capabilities Discovery
+category: audit
+subcategory: detection
+mitre_technique: T1083
+mitre_tactic: discovery
+severity: low
+confidence: low
+enabled: true
+description: Detects attempts to discover the files with setuid/setgid capability
+  on them. That would allow adversary to escalate their privileges.
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: EXECVE
+  - regex: getcap
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/execve/lnx_auditd_capabilities_discovery.yml.
+  References: https://man7.org/linux/man-pages/man8/getcap.8.html, https://www.hackingarticles.in/linux-privilege-escalation-using-capabilities/,
+  https://mn3m.info/posts/suid-vs-capabilities/, https://int0x33.medium.com/day-44-linux-capabilities-privilege-escalation-via-openssl-with-selinux-enabled-and-enforced-74d2bec02099'
+references:
+- https://man7.org/linux/man-pages/man8/getcap.8.html
+- https://www.hackingarticles.in/linux-privilege-escalation-using-capabilities/
+- https://mn3m.info/posts/suid-vs-capabilities/
+- https://int0x33.medium.com/day-44-linux-capabilities-privilege-escalation-via-openssl-with-selinux-enabled-and-enforced-74d2bec02099
+tags:
+- attack.discovery
+- attack.defense-evasion
+- attack.privilege-escalation
+- attack.t1083
+- attack.t1548
+_sigma_source: rules/linux/auditd/execve/lnx_auditd_capabilities_discovery.yml
+_sigma_status: test
+_sigma_author: Pawel Mazur
+_sigma_date: 2021-11-28

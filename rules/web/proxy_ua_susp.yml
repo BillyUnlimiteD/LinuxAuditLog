@@ -1,0 +1,37 @@
+id: SIGMA-WEB-SUSPICIOUS_USER_AGEN
+title: Suspicious User Agent
+category: web
+subcategory: detection
+mitre_technique: T1071.001
+mitre_tactic: ''
+severity: high
+confidence: low
+enabled: true
+description: Detects suspicious malformed user agent strings in proxy logs
+service: '*'
+detection:
+  type: pattern
+  patterns:
+  - regex: user\-agent
+  - regex: 'Mozilla/3\.0\ '
+  - regex: 'Mozilla/2\.0\ '
+  - regex: 'Mozilla/1\.0\ '
+  - regex: 'Mozilla\ '
+  - regex: \ Mozilla/
+  - regex: Mozila/
+  - regex: Mozilla/4\.0\ \(compatible;\ MSIE\ 6\.0;\ MS\ Web\ Services\ Client\ Protocol
+  - regex: '\ \(compatible;MSIE\ '
+  - regex: '\.0;Windows\ NT\ '
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/web/proxy_generic/proxy_ua_susp.yml.
+  References: https://github.com/fastly/waf_testbed/blob/8bfc406551f3045e418cbaad7596cff8da331dfc/templates/default/scanners-user-agents.data.erb'
+references:
+- https://github.com/fastly/waf_testbed/blob/8bfc406551f3045e418cbaad7596cff8da331dfc/templates/default/scanners-user-agents.data.erb
+tags:
+- attack.command-and-control
+- attack.t1071.001
+_sigma_source: rules/web/proxy_generic/proxy_ua_susp.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems)
+_sigma_date: 2017-07-08

@@ -1,0 +1,58 @@
+id: SVC-PHPFPM-001
+title: PHP-FPM Suspicious Execution
+category: web
+subcategory: php-fpm
+mitre_technique: T1059.004
+mitre_tactic: execution
+severity: high
+confidence: medium
+enabled: true
+description: >
+  Detects suspicious activity in PHP-FPM (FastCGI Process Manager) error logs
+  including: PHP fatal errors indicating exploitation attempts, file inclusion
+  errors suggesting LFI/RFI probes, code execution via eval() or system calls,
+  unexpected child process spawns, memory exhaustion attacks, and PHP deserialization
+  exploits. PHP-FPM pools running as privileged users (root, www-data with sudo)
+  are particularly high-risk. Also covers Remi SCL versioned deployments on
+  CentOS/RHEL (php56-php-fpm, php70-php-fpm, etc.).
+service: php-fpm
+detection:
+  type: pattern
+  patterns:
+    - regex: "(?P<msg>PHP Fatal error:.*(?:Call to undefined function|require_once|include_once).*(?P<file>/[^:]+))"
+    - regex: "(?P<msg>PHP Warning:.*(?:include|require)\\((?P<path>[^)]+)\\).*failed to open stream)"
+    - regex: "(?P<msg>PHP Fatal error:.*Allowed memory size of \\d+ bytes exhausted)"
+    - regex: "(?P<msg>PHP Parse error:.*in (?P<file>/[^:]+) on line \\d+)"
+    - regex: "NOTICE: (?P<msg>child \\d+ said into stderr:.*(?:exec|system|shell_exec|passthru|popen|proc_open))"
+    - regex: "(?P<msg>child \\d+ exited on signal \\d+|child \\d+ killed by signal)"
+    - regex: "NOTICE: (?P<msg>fpm is running, pid \\d+|Reloading in progress)"
+    - regex: "(?P<msg>(?:eval|assert|base64_decode|str_rot13|gzinflate|gzuncompress)\\()"
+    - regex: "(?P<msg>open_basedir restriction in effect|Unable to open primary script.*No such file)"
+    - regex: "(?P<msg>zend_mm_heap corrupted|Segmentation fault)"
+false_positives:
+  - Legitimate PHP errors from buggy application code
+  - Memory limit hits during heavy batch processing
+  - PHP version mismatches during deployments
+  - Child restarts during graceful reload
+recommendation: >
+  1. Check error log for recurring file paths — repeated include() failures may indicate LFI scanning.
+  2. Disable dangerous PHP functions in php.ini: disable_functions = exec,system,shell_exec,passthru,proc_open,popen
+  3. Set open_basedir to restrict PHP file access to web root only.
+  4. Enable PHP-FPM chroot per pool for multi-tenant environments.
+  5. Ensure PHP-FPM pools run as dedicated low-privilege users (not root or www-data with sudo).
+  6. Review PHP version — php56 is EOL (2018) and has known unpatched vulnerabilities.
+  7. Monitor for eval() / base64_decode() chaining — common webshell obfuscation.
+  8. Enable opcache.validate_timestamps=0 in production to detect unauthorized file changes.
+references:
+  - "https://attack.mitre.org/techniques/T1059/004/"
+  - "https://www.php.net/manual/en/features.commandline.webserver.php"
+  - "https://owasp.org/www-community/attacks/PHP_Object_Injection"
+  - "https://rpms.remirepo.net/wizard/"
+tags:
+  - php
+  - php-fpm
+  - web_execution
+  - lfi
+  - rfi
+  - code_injection
+  - eol_software

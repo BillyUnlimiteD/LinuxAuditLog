@@ -1,0 +1,31 @@
+id: SIGMA-WEB-NGINX_CORE_DUMP
+title: Nginx Core Dump
+category: web
+subcategory: detection
+mitre_technique: T1499.004
+mitre_tactic: impact
+severity: high
+confidence: low
+enabled: true
+description: Detects a core dump of a crashing Nginx worker process, which could be
+  a signal of a serious problem or exploitation attempts.
+service: nginx
+detection:
+  type: pattern
+  patterns:
+  - regex: exited\ on\ signal\ 6\ \(core\ dumped\)
+false_positives:
+- Serious issues with a configuration or plugin
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/web/product/nginx/web_nginx_core_dump.yml.
+  References: https://docs.nginx.com/nginx/admin-guide/monitoring/debugging/#enabling-core-dumps,
+  https://www.x41-dsec.de/lab/advisories/x41-2021-002-nginx-resolver-copy/'
+references:
+- https://docs.nginx.com/nginx/admin-guide/monitoring/debugging/#enabling-core-dumps
+- https://www.x41-dsec.de/lab/advisories/x41-2021-002-nginx-resolver-copy/
+tags:
+- attack.impact
+- attack.t1499.004
+_sigma_source: rules/web/product/nginx/web_nginx_core_dump.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems)
+_sigma_date: 2021-05-31

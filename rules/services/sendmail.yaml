@@ -1,0 +1,50 @@
+id: SVC-SENDMAIL-001
+title: Sendmail Suspicious Mail Activity
+category: mail
+subcategory: sendmail
+mitre_technique: T1078
+mitre_tactic: defense_evasion
+severity: medium
+confidence: medium
+enabled: true
+description: >
+  Detects suspicious activity in Sendmail logs including: relay abuse attempts,
+  authentication failures, suspicious sender domains, mass mailing patterns,
+  SMTP smuggling attempts, and exploitation of legacy Sendmail vulnerabilities.
+  Sendmail is a legacy MTA with known security issues — running it exposed to
+  the internet significantly increases attack surface.
+service: sendmail
+detection:
+  type: pattern
+  patterns:
+    - regex: "(?P<msg>ruleset=check_relay.*reject=(?P<reason>[^,]+).*relay=(?P<relay>[^,]+))"
+    - regex: "(?P<msg>relay=(?P<src>[^,]+).*reject=550)"
+    - regex: "(?P<msg>AUTH failure.*user=(?P<user>[^,]+).*relay=(?P<src>[^,]+))"
+    - regex: "(?P<msg>Losing \\S+: (?:file system full|queue too long))"
+    - regex: "(?P<msg>collect: premature EOM|read error from (?P<src>[\\d.]+))"
+    - regex: "(?P<msg>SYSERR.*setuid|SYSERR.*chdir|SYSERR.*execv)"
+    - regex: "(?P<msg>NOQUEUE: (?:reject|lost input channel).*from (?P<src>[^:]+):.*MAIL from (?P<sender><[^>]+>))"
+    - regex: "(?P<msg>too many open files|out of disk space|sendmail: cannot open)"
+    - regex: "(?P<msg>ruleset.*<(?P<sender>[^@>]+@(?:tempmail|mailinator|guerrillamail|10minutemail)[^>]*)>)"
+false_positives:
+  - Legitimate relay rejections from known spam sources
+  - Queue processing during high-load periods
+  - Authentication failures from misconfigured mail clients
+recommendation: >
+  1. Review relay rejections — repeated attempts from the same IP indicate abuse or misconfiguration.
+  2. Disable open relay: ensure 'FEATURE(dnsbl)' and relay restrictions are active in sendmail.cf.
+  3. Consider migrating from Sendmail to Postfix — Sendmail has a complex config and poor modern security.
+  4. Enable SMTP AUTH (SASL) and require TLS for authenticated connections.
+  5. Restrict Sendmail to listen on 127.0.0.1 only if no external mail relay is required.
+  6. Review /etc/mail/access for unexpected RELAY entries.
+  7. Check queue (/var/spool/mqueue) for suspicious queued messages.
+references:
+  - "https://attack.mitre.org/techniques/T1078/"
+  - "https://www.sendmail.org/~ca/email/doc8.12/op/node8.html"
+  - "https://www.cisa.gov/news-events/alerts/2023/05/01/asa-2023-003"
+tags:
+  - sendmail
+  - smtp
+  - mail
+  - relay_abuse
+  - authentication_failure

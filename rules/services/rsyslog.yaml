@@ -1,0 +1,37 @@
+id: SVC-RSYSLOG-001
+title: Rsyslog — Log Tampering or Configuration Abuse
+category: defense_evasion
+subcategory: log_tampering
+mitre_technique: T1562.002
+mitre_tactic: defense_evasion
+severity: high
+confidence: high
+enabled: true
+description: >
+  Detects tampering with the rsyslog logging subsystem: configuration changes,
+  forwarding to unexpected destinations, action queue errors that may indicate
+  log loss, and signs of an attacker attempting to suppress audit trails.
+service: rsyslog
+detection:
+  type: pattern
+  patterns:
+    - regex: "rsyslogd.*action.*suspended|rsyslogd.*queue.*full|rsyslogd.*lost \\d+ messages"
+    - regex: "rsyslogd.*omfwd.*no route to host|rsyslogd.*remote.*connection.*refused"
+    - regex: "rsyslogd.*config file.*changed|rsyslogd.*HUP signal|rsyslogd.*reload"
+    - regex: "rsyslogd.*imfile.*file.*not found|rsyslogd.*permission denied"
+    - regex: "rsyslogd.*error \\d+.*action.*forward"
+false_positives:
+  - Temporary network issues causing forwarding failures
+  - Planned rsyslog restarts during maintenance
+recommendation: >
+  1. Alert on unexpected rsyslog reloads outside change windows.
+  2. Monitor remote log forwarding destinations — unexpected targets may indicate exfiltration.
+  3. Verify queue-full events to detect log flooding attacks.
+  4. Check /etc/rsyslog.conf and /etc/rsyslog.d/ for unauthorized changes.
+references:
+  - "https://attack.mitre.org/techniques/T1562/002/"
+  - "https://www.rsyslog.com/doc/"
+tags:
+  - rsyslog
+  - log_tampering
+  - defense_evasion

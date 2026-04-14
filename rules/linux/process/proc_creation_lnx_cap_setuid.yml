@@ -1,0 +1,45 @@
+id: SIGMA-LIN-LINUX_SETUID_CAPABIL
+title: Linux Setuid Capability Set on a Binary via Setcap Utility
+category: process
+subcategory: detection
+mitre_technique: T1548
+mitre_tactic: persistence
+severity: low
+confidence: low
+enabled: true
+description: 'Detects the use of the ''setcap'' utility to set the ''setuid'' capability
+  (cap_setuid) on a binary file.
+
+  This capability allows a non privileged process to make arbitrary manipulations
+  of user IDs (UIDs), including setting its current UID to a value that would otherwise
+  be restricted (i.e. UID 0, the root user).
+
+  This behavior can be used by adversaries to backdoor a binary in order to escalate
+  privileges again in the future if needed.
+
+  '
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /setcap
+  - regex: cap_setuid
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_cap_setuid.yml.
+  References: https://man7.org/linux/man-pages/man8/setcap.8.html, https://dfir.ch/posts/linux_capabilities/,
+  https://juggernaut-sec.com/capabilities/#cap_setuid'
+references:
+- https://man7.org/linux/man-pages/man8/setcap.8.html
+- https://dfir.ch/posts/linux_capabilities/
+- https://juggernaut-sec.com/capabilities/#cap_setuid
+tags:
+- attack.privilege-escalation
+- attack.defense-evasion
+- attack.persistence
+- attack.t1548
+- attack.t1554
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_cap_setuid.yml
+_sigma_status: experimental
+_sigma_author: Luc Génaux
+_sigma_date: 2026-01-24

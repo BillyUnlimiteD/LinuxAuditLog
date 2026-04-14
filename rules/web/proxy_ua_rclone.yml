@@ -1,0 +1,31 @@
+id: SIGMA-WEB-RCLONE_ACTIVITY_VIA
+title: Rclone Activity via Proxy
+category: web
+subcategory: detection
+mitre_technique: T1567.002
+mitre_tactic: exfiltration
+severity: medium
+confidence: low
+enabled: true
+description: Detects the use of rclone, a command-line program to manage files on
+  cloud storage, via its default user-agent string
+service: '*'
+detection:
+  type: pattern
+  patterns:
+  - regex: rclone/v
+false_positives:
+- Valid requests with this exact user agent to that is used by legitimate scripts
+  or sysadmin operations
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/web/proxy_generic/proxy_ua_rclone.yml.
+  References: https://rclone.org/, https://www.kroll.com/en/insights/publications/cyber/new-m365-business-email-compromise-attacks-with-rclone'
+references:
+- https://rclone.org/
+- https://www.kroll.com/en/insights/publications/cyber/new-m365-business-email-compromise-attacks-with-rclone
+tags:
+- attack.exfiltration
+- attack.t1567.002
+_sigma_source: rules/web/proxy_generic/proxy_ua_rclone.yml
+_sigma_status: test
+_sigma_author: Janantha Marasinghe
+_sigma_date: 2022-10-18

@@ -1,0 +1,39 @@
+id: LIN-PROC-003
+title: Reverse Shell Indicators
+category: process
+subcategory: execution
+mitre_technique: T1059.004
+mitre_tactic: execution
+severity: critical
+confidence: medium
+enabled: true
+description: >
+  Detects indicators of reverse shell establishment, including bash TCP/UDP
+  redirections, common reverse shell one-liners, and interactive shell spawning
+  from service accounts. A reverse shell gives an attacker interactive command
+  execution bypassing inbound firewall rules.
+service: "*"
+detection:
+  type: pattern
+  patterns:
+    - regex: "bash.*(?:/dev/tcp/(?P<dst_ip>[\\d.]+)/(?P<dst_port>\\d+)|/dev/udp/(?P<dst_ip2>[\\d.]+)/(?P<dst_port2>\\d+))"
+    - regex: "(?:python|python3).*socket.*connect.*(?P<dst_ip>[\\d.]+).*(?P<dst_port>\\d{2,5})"
+    - regex: "(?:perl|ruby|php).*(?:fsockopen|socket|TCPSocket).*(?P<dst_ip>[\\d.]+).*(?P<dst_port>\\d{2,5})"
+    - regex: "mkfifo.*/tmp/.*(?:nc|ncat|netcat).*(?:-e|-c).*(?:bash|sh)"
+    - regex: "socat.*(?:tcp|tcp4|tcp6).*exec.*(?:bash|sh|zsh|ksh)"
+false_positives:
+  - Legitimate network programming examples
+  - Authorized red team activities
+recommendation: >
+  1. CRITICAL: Immediately isolate the system from the network.
+  2. Identify the outbound IP and port — block at firewall and investigate destination.
+  3. Capture memory if the process is still active.
+  4. Check /proc/<pid>/cmdline, /proc/<pid>/exe, /proc/<pid>/net/tcp.
+  5. Preserve all evidence before any remediation.
+references:
+  - "https://attack.mitre.org/techniques/T1059/004/"
+  - "https://attack.mitre.org/techniques/T1071/"
+tags:
+  - reverse_shell
+  - execution
+  - critical

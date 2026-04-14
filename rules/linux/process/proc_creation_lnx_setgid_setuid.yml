@@ -1,0 +1,32 @@
+id: SIGMA-LIN-SETUID_AND_SETGID
+title: Setuid and Setgid
+category: process
+subcategory: detection
+mitre_technique: T1548.001
+mitre_tactic: persistence
+severity: low
+confidence: low
+enabled: true
+description: Detects suspicious change of file privileges with chown and chmod commands
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: chown\ root
+  - regex: \ chmod\ u\+s
+  - regex: \ chmod\ g\+s
+false_positives:
+- Legitimate administration activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_setgid_setuid.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1548.001/T1548.001.md'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1548.001/T1548.001.md
+tags:
+- attack.defense-evasion
+- attack.persistence
+- attack.privilege-escalation
+- attack.t1548.001
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_setgid_setuid.yml
+_sigma_status: test
+_sigma_author: Ömer Günal
+_sigma_date: 2020-06-16

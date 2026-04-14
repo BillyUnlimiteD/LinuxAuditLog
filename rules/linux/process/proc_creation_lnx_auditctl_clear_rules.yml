@@ -1,0 +1,38 @@
+id: SIGMA-LIN-AUDIT_RULES_DELETED
+title: Audit Rules Deleted Via Auditctl
+category: process
+subcategory: detection
+mitre_technique: T1562.012
+mitre_tactic: ''
+severity: high
+confidence: low
+enabled: true
+description: 'Detects the execution of ''auditctl'' with the ''-D'' command line parameter,
+  which deletes all configured audit rules and watches on Linux systems.
+
+  This technique is commonly used by attackers to disable audit logging and cover
+  their tracks by removing monitoring capabilities.
+
+  Removal of audit rules can significantly impair detection of malicious activities
+  on the affected system.
+
+  '
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /auditctl
+false_positives:
+- An administrator troubleshooting. Investigate all attempts.
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_auditctl_clear_rules.yml.
+  References: https://www.atomicredteam.io/atomic-red-team/atomics/T1562.012, https://linux.die.net/man/8/auditct'
+references:
+- https://www.atomicredteam.io/atomic-red-team/atomics/T1562.012
+- https://linux.die.net/man/8/auditct
+tags:
+- attack.defense-evasion
+- attack.t1562.012
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_auditctl_clear_rules.yml
+_sigma_status: experimental
+_sigma_author: Mohamed LAKRI
+_sigma_date: 2025-10-17

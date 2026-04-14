@@ -1,0 +1,31 @@
+id: SIGMA-LIN-SUSPICIOUS_CURL_CHAN
+title: Suspicious Curl Change User Agents - Linux
+category: process
+subcategory: detection
+mitre_technique: T1071.001
+mitre_tactic: ''
+severity: medium
+confidence: low
+enabled: true
+description: Detects a suspicious curl process start on linux with set useragent options
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /curl
+  - regex: '\ \-A\ '
+  - regex: '\ \-\-user\-agent\ '
+false_positives:
+- Scripts created by developers and admins
+- Administrative activity
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_susp_curl_useragent.yml.
+  References: https://curl.se/docs/manpage.html'
+references:
+- https://curl.se/docs/manpage.html
+tags:
+- attack.command-and-control
+- attack.t1071.001
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_susp_curl_useragent.yml
+_sigma_status: test
+_sigma_author: Nasreddine Bencherchali (Nextron Systems)
+_sigma_date: 2022-09-15

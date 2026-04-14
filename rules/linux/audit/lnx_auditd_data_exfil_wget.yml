@@ -1,0 +1,36 @@
+id: SIGMA-LIN-DATA_EXFILTRATION_WI
+title: Data Exfiltration with Wget
+category: audit
+subcategory: detection
+mitre_technique: T1048.003
+mitre_tactic: exfiltration
+severity: medium
+confidence: low
+enabled: true
+description: 'Detects attempts to post the file with the usage of wget utility.
+
+  The adversary can bypass the permission restriction with the misconfigured sudo
+  permission for wget utility which could allow them to read files like /etc/shadow.
+
+  '
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: EXECVE
+  - regex: wget
+  - regex: \-\-post\-file=
+false_positives:
+- Legitimate usage of wget utility to post a file
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/execve/lnx_auditd_data_exfil_wget.yml.
+  References: https://linux.die.net/man/1/wget, https://gtfobins.github.io/gtfobins/wget/'
+references:
+- https://linux.die.net/man/1/wget
+- https://gtfobins.github.io/gtfobins/wget/
+tags:
+- attack.exfiltration
+- attack.t1048.003
+_sigma_source: rules/linux/auditd/execve/lnx_auditd_data_exfil_wget.yml
+_sigma_status: test
+_sigma_author: Pawel Mazur
+_sigma_date: 2021-11-18

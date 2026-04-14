@@ -1,0 +1,30 @@
+id: SIGMA-WEB-WINDOWS_WEBDAV_USER
+title: Windows WebDAV User Agent
+category: web
+subcategory: detection
+mitre_technique: T1071.001
+mitre_tactic: ''
+severity: high
+confidence: low
+enabled: true
+description: Detects WebDav DownloadCradle
+service: '*'
+detection:
+  type: pattern
+  patterns:
+  - regex: Microsoft\-WebDAV\-MiniRedir/
+false_positives:
+- Administrative scripts that download files from the Internet
+- Administrative scripts that retrieve certain website contents
+- Legitimate WebDAV administration
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/web/proxy_generic/proxy_downloadcradle_webdav.yml.
+  References: https://mgreen27.github.io/posts/2018/04/02/DownloadCradle.html'
+references:
+- https://mgreen27.github.io/posts/2018/04/02/DownloadCradle.html
+tags:
+- attack.command-and-control
+- attack.t1071.001
+_sigma_source: rules/web/proxy_generic/proxy_downloadcradle_webdav.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems)
+_sigma_date: 2018-04-06

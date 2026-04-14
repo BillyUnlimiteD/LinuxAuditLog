@@ -1,0 +1,34 @@
+id: SIGMA-LIN-USER_HAS_BEEN_DELETE
+title: User Has Been Deleted Via Userdel
+category: process
+subcategory: detection
+mitre_technique: T1531
+mitre_tactic: impact
+severity: medium
+confidence: low
+enabled: true
+description: Detects execution of the "userdel" binary. Which is used to delete a
+  user account and related files. This is sometimes abused by threat actors in order
+  to cover their tracks
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /userdel
+false_positives:
+- Legitimate administrator activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_userdel.yml.
+  References: https://linuxize.com/post/how-to-delete-group-in-linux/, https://www.cyberciti.biz/faq/linux-remove-user-command/,
+  https://www.cybrary.it/blog/0p3n/linux-commands-used-attackers/, https://linux.die.net/man/8/userdel'
+references:
+- https://linuxize.com/post/how-to-delete-group-in-linux/
+- https://www.cyberciti.biz/faq/linux-remove-user-command/
+- https://www.cybrary.it/blog/0p3n/linux-commands-used-attackers/
+- https://linux.die.net/man/8/userdel
+tags:
+- attack.impact
+- attack.t1531
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_userdel.yml
+_sigma_status: test
+_sigma_author: Tuan Le (NCSGroup)
+_sigma_date: 2022-12-26

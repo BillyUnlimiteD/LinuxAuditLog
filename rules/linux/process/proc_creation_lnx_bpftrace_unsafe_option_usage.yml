@@ -1,0 +1,30 @@
+id: SIGMA-LIN-BPFTRACE_UNSAFE_OPTI
+title: BPFtrace Unsafe Option Usage
+category: process
+subcategory: detection
+mitre_technique: T1059.004
+mitre_tactic: execution
+severity: medium
+confidence: low
+enabled: true
+description: Detects the usage of the unsafe bpftrace option
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: bpftrace
+  - regex: \-\-unsafe
+false_positives:
+- Legitimate usage of the unsafe option
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_bpftrace_unsafe_option_usage.yml.
+  References: https://embracethered.com/blog/posts/2021/offensive-bpf-bpftrace/, https://bpftrace.org/'
+references:
+- https://embracethered.com/blog/posts/2021/offensive-bpf-bpftrace/
+- https://bpftrace.org/
+tags:
+- attack.execution
+- attack.t1059.004
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_bpftrace_unsafe_option_usage.yml
+_sigma_status: test
+_sigma_author: Andreas Hunkeler (@Karneades)
+_sigma_date: 2022-02-11

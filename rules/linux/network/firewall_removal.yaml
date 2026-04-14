@@ -1,0 +1,48 @@
+id: LIN-NET-003
+title: Firewall Software Removal or Replacement
+category: defense_evasion
+subcategory: firewall_bypass
+mitre_technique: T1562.004
+mitre_tactic: defense_evasion
+severity: critical
+confidence: high
+enabled: true
+description: >
+  Detects removal of firewall packages (firewalld, nftables, iptables) via the
+  package manager. This eliminates all host-based traffic filtering, exposing
+  all listening services to the network. Observed in this environment: on
+  2025-01-20, 'adminsis' removed firewalld, nftables, iptables, ipset, and all
+  related libraries in a single transaction, then immediately installed Samba
+  — suggesting the firewall was removed to allow unrestricted SMB access.
+  Replacement with legacy 'iptables-services' may also indicate deliberate
+  weakening of dynamic firewall management.
+service: "*"
+detection:
+  type: pattern
+  patterns:
+    - regex: "SOFTWARE_UPDATE.*op=remove.*sw=\"(?:firewalld|nftables|iptables)-[^\"]+\""
+    - regex: "dnf.*(?:erase|remove|autoremove).*(?:firewalld|nftables|iptables)"
+    - regex: "rpm.*-e.*(?:firewalld|nftables|iptables)"
+    - regex: "systemctl.*(?:stop|disable|mask).*firewall"
+    - regex: "SUBDEBUG Erase: (?:firewalld|nftables|iptables)-\\S+"
+false_positives:
+  - Migration from firewalld to nftables (should be a replacement, not removal of both)
+  - Minimal container image builds that intentionally omit firewall software
+recommendation: >
+  1. Immediately verify the current firewall state: firewall-cmd --state OR
+     iptables -L -n (check if any rules exist).
+  2. Restore firewall service: dnf install firewalld && systemctl enable --now firewalld
+  3. Audit all services exposed since firewall removal: ss -tlnup
+  4. Review change management records — was this authorized?
+  5. Correlate with Samba or other service installs that followed the removal.
+  6. If the system is internet-facing, treat this as a critical incident.
+references:
+  - "https://attack.mitre.org/techniques/T1562/004/"
+  - "https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/configuring_and_managing_networking/using-and-configuring-firewalld_configuring-and-managing-networking"
+tags:
+  - firewall
+  - defense_evasion
+  - firewalld
+  - nftables
+  - iptables
+  - package_removal

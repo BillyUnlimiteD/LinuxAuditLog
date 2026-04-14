@@ -1,0 +1,44 @@
+id: SIGMA-LIN-SYSLOG_CLEARING_OR_R
+title: Syslog Clearing or Removal Via System Utilities
+category: process
+subcategory: detection
+mitre_technique: T1070.002
+mitre_tactic: ''
+severity: high
+confidence: low
+enabled: true
+description: 'Detects specific commands commonly used to remove or empty the syslog.
+  Which is a technique often used by attacker as a method to hide their tracks
+
+  '
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /var/log/syslog
+  - regex: '\ \-r\ '
+  - regex: '\ \-f\ '
+  - regex: '\ \-rf\ '
+  - regex: /var/log/syslog
+  - regex: /unlink
+  - regex: /truncate
+  - regex: /var/log/syslog
+  - regex: \-\-size
+  - regex: '/dev/null\ '
+false_positives:
+- Log rotation.
+- Maintenance.
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_clear_syslog.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1070.002/T1070.002.md,
+  https://www.virustotal.com/gui/file/54d60fd58d7fa3475fa123985bfc1594df26da25c1f5fbc7dfdba15876dd8ac5/behavior'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1070.002/T1070.002.md
+- https://www.virustotal.com/gui/file/54d60fd58d7fa3475fa123985bfc1594df26da25c1f5fbc7dfdba15876dd8ac5/behavior
+tags:
+- attack.defense-evasion
+- attack.t1070.002
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_clear_syslog.yml
+_sigma_status: test
+_sigma_author: Max Altgelt (Nextron Systems), Roberto Rodriguez (Cyb3rWard0g), OTR
+  (Open Threat Research), MSTIC
+_sigma_date: 2021-10-15

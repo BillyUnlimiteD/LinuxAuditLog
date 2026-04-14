@@ -1,0 +1,35 @@
+id: SIGMA-LIN-SERVICE_RELOAD_OR_ST
+title: Service Reload or Start - Linux
+category: audit
+subcategory: detection
+mitre_technique: T1543.002
+mitre_tactic: persistence
+severity: low
+confidence: low
+enabled: true
+description: Detects the start, reload or restart of a service.
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: EXECVE
+  - regex: systemctl
+  - regex: service
+  - regex: reload
+  - regex: start
+false_positives:
+- Installation of legitimate service.
+- Legitimate reconfiguration of service.
+- Command line contains daemon-reload.
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/execve/lnx_auditd_susp_service_reload_or_restart.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1543.002/T1543.002.md'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1543.002/T1543.002.md
+tags:
+- attack.privilege-escalation
+- attack.persistence
+- attack.t1543.002
+_sigma_source: rules/linux/auditd/execve/lnx_auditd_susp_service_reload_or_restart.yml
+_sigma_status: test
+_sigma_author: Jakob Weinzettl, oscd.community, CheraghiMilad
+_sigma_date: 2019-09-23

@@ -1,0 +1,51 @@
+id: SIGMA-LIN-POTENTIAL_ABUSE_OF_L
+title: Potential Abuse of Linux Magic System Request Key
+category: audit
+subcategory: detection
+mitre_technique: T1059.004
+mitre_tactic: impact
+severity: medium
+confidence: low
+enabled: true
+description: 'Detects the potential abuse of the Linux Magic SysRq (System Request)
+  key by adversaries with root or sufficient privileges
+
+  to silently manipulate or destabilize a system. By writing to /proc/sysrq-trigger,
+  they can crash the system, kill processes,
+
+  or disrupt forensic analysis—all while bypassing standard logging. Though intended
+  for recovery and debugging, SysRq can be
+
+  misused as a stealthy post-exploitation tool. It is controlled via /proc/sys/kernel/sysrq
+  or permanently through /etc/sysctl.conf.
+
+  '
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: PATH
+  - regex: /sysrq
+  - regex: /sysctl\.conf
+  - regex: /sysrq\-trigger
+false_positives:
+- Legitimate administrative activity
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/path/lnx_auditd_magic_system_request_key.yml.
+  References: https://www.kernel.org/doc/html/v4.10/_sources/admin-guide/sysrq.txt,
+  https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/4/html/reference_guide/s3-proc-sys-kernel,
+  https://www.splunk.com/en_us/blog/security/threat-update-awfulshred-script-wiper.html'
+references:
+- https://www.kernel.org/doc/html/v4.10/_sources/admin-guide/sysrq.txt
+- https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/4/html/reference_guide/s3-proc-sys-kernel
+- https://www.splunk.com/en_us/blog/security/threat-update-awfulshred-script-wiper.html
+tags:
+- attack.execution
+- attack.t1059.004
+- attack.impact
+- attack.t1529
+- attack.t1489
+- attack.t1499
+_sigma_source: rules/linux/auditd/path/lnx_auditd_magic_system_request_key.yml
+_sigma_status: experimental
+_sigma_author: Milad Cheraghi
+_sigma_date: 2025-05-23

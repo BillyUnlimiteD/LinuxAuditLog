@@ -1,0 +1,36 @@
+id: SIGMA-LIN-ESXI_ADMIN_PERMISSIO
+title: ESXi Admin Permission Assigned To Account Via ESXCLI
+category: process
+subcategory: detection
+mitre_technique: T1059.012
+mitre_tactic: execution
+severity: high
+confidence: low
+enabled: true
+description: Detects execution of the "esxcli" command with the "system" and "permission"
+  flags in order to assign admin permissions to an account.
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /esxcli
+  - regex: system
+  - regex: '\ permission\ '
+  - regex: \ set
+  - regex: Admin
+false_positives:
+- Legitimate administration activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_esxcli_permission_change_admin.yml.
+  References: https://developer.broadcom.com/xapis/esxcli-command-reference/7.0.0/namespace/esxcli_system.html'
+references:
+- https://developer.broadcom.com/xapis/esxcli-command-reference/7.0.0/namespace/esxcli_system.html
+tags:
+- attack.persistence
+- attack.execution
+- attack.privilege-escalation
+- attack.t1059.012
+- attack.t1098
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_esxcli_permission_change_admin.yml
+_sigma_status: test
+_sigma_author: Nasreddine Bencherchali (Nextron Systems)
+_sigma_date: 2023-09-04

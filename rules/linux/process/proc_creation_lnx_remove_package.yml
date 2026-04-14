@@ -1,0 +1,43 @@
+id: SIGMA-LIN-LINUX_PACKAGE_UNINST
+title: Linux Package Uninstall
+category: process
+subcategory: detection
+mitre_technique: T1070
+mitre_tactic: ''
+severity: low
+confidence: low
+enabled: true
+description: Detects linux package removal using builtin tools such as "yum", "apt",
+  "apt-get" or "dpkg".
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /yum
+  - regex: erase
+  - regex: remove
+  - regex: /apt
+  - regex: /apt\-get
+  - regex: remove
+  - regex: purge
+  - regex: /dpkg
+  - regex: '\-\-remove\ '
+  - regex: '\ \-r\ '
+false_positives:
+- Administrator or administrator scripts might delete packages for several reasons
+  (debugging, troubleshooting).
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_remove_package.yml.
+  References: https://sysdig.com/blog/mitre-defense-evasion-falco, https://www.tutorialspoint.com/how-to-install-a-software-on-linux-using-yum-command,
+  https://linuxhint.com/uninstall_yum_package/, https://linuxhint.com/uninstall-debian-packages/'
+references:
+- https://sysdig.com/blog/mitre-defense-evasion-falco
+- https://www.tutorialspoint.com/how-to-install-a-software-on-linux-using-yum-command
+- https://linuxhint.com/uninstall_yum_package/
+- https://linuxhint.com/uninstall-debian-packages/
+tags:
+- attack.defense-evasion
+- attack.t1070
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_remove_package.yml
+_sigma_status: test
+_sigma_author: Tuan Le (NCSGroup), Nasreddine Bencherchali (Nextron Systems)
+_sigma_date: 2023-03-09

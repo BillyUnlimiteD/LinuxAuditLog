@@ -1,0 +1,39 @@
+id: WEB-005
+title: Server-Side Request Forgery (SSRF) Attempt
+category: web
+subcategory: ssrf
+mitre_technique: T1190
+mitre_tactic: initial_access
+severity: high
+confidence: medium
+enabled: true
+description: >
+  Detects Server-Side Request Forgery (SSRF) attempts in web access logs.
+  Attackers use SSRF to make the server perform requests to internal services,
+  cloud metadata endpoints (169.254.169.254), or internal network resources.
+  SSRF can lead to credential theft, internal network access, or cloud account
+  compromise.
+service: "*"
+detection:
+  type: pattern
+  patterns:
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>[^\"]*(?:url=|redirect=|next=|target=|dest=|destination=|redir=|return=|return_url=|callback=)(?:https?://169\\.254\\.169\\.254|https?://127\\.|https?://0\\.0\\.0\\.0|https?://localhost|https?://10\\.|https?://192\\.168\\.|https?://172\\.1[6-9]\\.|https?://172\\.2\\d\\.|https?://172\\.3[01]\\.)[^\"]*)\""
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>[^\"]*(?:url|uri|path|src|href)(?:=|%3d)(?:file://|gopher://|dict://|sftp://|tftp://|ldap://)[^\"]*)\""
+false_positives:
+  - Legitimate redirects to internal services in trusted applications
+  - Monitoring probes checking internal endpoints
+recommendation: >
+  1. Determine if the server made an outbound request to the target (check egress logs).
+  2. For cloud metadata SSRF: check if IAM credentials were accessed.
+  3. Implement URL allowlisting for any feature that fetches URLs.
+  4. Block outbound requests to RFC 1918 addresses and link-local (169.254.x.x).
+  5. Rotate cloud credentials if metadata service was reached.
+references:
+  - "https://owasp.org/Top10/A10_2021-Server-Side_Request_Forgery_%28SSRF%29/"
+  - "https://attack.mitre.org/techniques/T1190/"
+  - "https://portswigger.net/web-security/ssrf"
+tags:
+  - ssrf
+  - web
+  - cloud
+  - owasp_a10

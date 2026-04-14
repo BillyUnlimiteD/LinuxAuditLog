@@ -1,0 +1,41 @@
+id: SIGMA-LIN-CLEAR_OR_DISABLE_KER
+title: Clear or Disable Kernel Ring Buffer Logs via Syslog Syscall
+category: audit
+subcategory: detection
+mitre_technique: T1070.002
+mitre_tactic: ''
+severity: medium
+confidence: low
+enabled: true
+description: 'Detects the use of the `syslog` syscall with action code 5 (SYSLOG_ACTION_CLEAR),
+
+  (4 is SYSLOG_ACTION_READ_CLEAR and 6 is SYSLOG_ACTION_CONSOLE_OFF) which clears
+  the kernel
+
+  ring buffer (dmesg logs). This can be used by attackers to hide traces after exploitation
+
+  or privilege escalation. A common technique is running `dmesg -c`, which triggers
+  this syscall internally.
+
+  '
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: SYSCALL
+  - regex: syslog
+false_positives:
+- System administrators or scripts that intentionally clear logs
+- Debugging scripts
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/syscall/lnx_auditd_clean_disable_dmesg_logs_via_syslog.yml.
+  References: https://man7.org/linux/man-pages/man2/syslog.2.html, https://man7.org/linux/man-pages/man1/dmesg.1.html'
+references:
+- https://man7.org/linux/man-pages/man2/syslog.2.html
+- https://man7.org/linux/man-pages/man1/dmesg.1.html
+tags:
+- attack.defense-evasion
+- attack.t1070.002
+_sigma_source: rules/linux/auditd/syscall/lnx_auditd_clean_disable_dmesg_logs_via_syslog.yml
+_sigma_status: experimental
+_sigma_author: Milad Cheraghi
+_sigma_date: 2025-05-27

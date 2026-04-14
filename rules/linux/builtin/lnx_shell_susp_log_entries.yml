@@ -1,0 +1,30 @@
+id: SIGMA-LIN-SUSPICIOUS_LOG_ENTRI
+title: Suspicious Log Entries
+category: authentication
+subcategory: detection
+mitre_technique: ''
+mitre_tactic: impact
+severity: medium
+confidence: low
+enabled: true
+description: Detects suspicious log entries in Linux log files
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: entered\ promiscuous\ mode
+  - regex: Deactivating\ service
+  - regex: Oversized\ packet\ received\ from
+  - regex: imuxsock\ begins\ to\ drop\ messages
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/builtin/lnx_shell_susp_log_entries.yml.
+  References: https://github.com/ossec/ossec-hids/blob/f6502012b7380208db81f82311ad4a1994d39905/etc/rules/syslog_rules.xml'
+references:
+- https://github.com/ossec/ossec-hids/blob/f6502012b7380208db81f82311ad4a1994d39905/etc/rules/syslog_rules.xml
+tags:
+- attack.impact
+_sigma_source: rules/linux/builtin/lnx_shell_susp_log_entries.yml
+_sigma_status: test
+_sigma_author: Florian Roth (Nextron Systems)
+_sigma_date: 2017-03-25

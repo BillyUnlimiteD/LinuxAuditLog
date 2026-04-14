@@ -1,0 +1,39 @@
+id: SIGMA-LIN-SUSPICIOUS_USE_OF__D
+title: Suspicious Use of /dev/tcp
+category: authentication
+subcategory: detection
+mitre_technique: ''
+mitre_tactic: reconnaissance
+severity: medium
+confidence: low
+enabled: true
+description: Detects suspicious command with /dev/tcp
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: cat\ </dev/tcp/
+  - regex: exec\ 3<>/dev/tcp/
+  - regex: echo\ >/dev/tcp/
+  - regex: bash\ \-i\ >\&\ /dev/tcp/
+  - regex: sh\ \-i\ >\&\ /dev/udp/
+  - regex: 0<\&196;exec\ 196<>/dev/tcp/
+  - regex: exec\ 5<>/dev/tcp/
+  - regex: \(sh\)0>/dev/tcp/
+  - regex: bash\ \-c\ 'bash\ \-i\ >\&\ /dev/tcp/
+  - regex: echo\ \-e\ '\#!/bin/bash\\nbash\ \-i\ >\&\ /dev/tcp/
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/builtin/lnx_susp_dev_tcp.yml.
+  References: https://www.andreafortuna.org/2021/03/06/some-useful-tips-about-dev-tcp/,
+  https://book.hacktricks.xyz/shells/shells/linux, https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1046/T1046.md#atomic-test-1---port-scan'
+references:
+- https://www.andreafortuna.org/2021/03/06/some-useful-tips-about-dev-tcp/
+- https://book.hacktricks.xyz/shells/shells/linux
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1046/T1046.md#atomic-test-1---port-scan
+tags:
+- attack.reconnaissance
+_sigma_source: rules/linux/builtin/lnx_susp_dev_tcp.yml
+_sigma_status: test
+_sigma_author: frack113
+_sigma_date: 2021-12-10

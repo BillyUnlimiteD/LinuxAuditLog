@@ -1,0 +1,38 @@
+id: SIGMA-LIN-SUSPICIOUS_PACKAGE_I
+title: Suspicious Package Installed - Linux
+category: process
+subcategory: detection
+mitre_technique: T1553.004
+mitre_tactic: ''
+severity: medium
+confidence: low
+enabled: true
+description: Detects installation of suspicious packages using system installation
+  utilities
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /apt
+  - regex: /apt\-get
+  - regex: install
+  - regex: /yum
+  - regex: localinstall
+  - regex: install
+  - regex: /rpm
+  - regex: /dpkg
+  - regex: \-\-install
+  - regex: nmap
+false_positives:
+- Legitimate administration activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_install_suspicious_packages.yml.
+  References: https://gist.githubusercontent.com/MichaelKoczwara/12faba9c061c12b5814b711166de8c2f/raw/e2068486692897b620c25fde1ea258c8218fe3d3/history.txt'
+references:
+- https://gist.githubusercontent.com/MichaelKoczwara/12faba9c061c12b5814b711166de8c2f/raw/e2068486692897b620c25fde1ea258c8218fe3d3/history.txt
+tags:
+- attack.defense-evasion
+- attack.t1553.004
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_install_suspicious_packages.yml
+_sigma_status: test
+_sigma_author: Nasreddine Bencherchali (Nextron Systems)
+_sigma_date: 2023-01-03

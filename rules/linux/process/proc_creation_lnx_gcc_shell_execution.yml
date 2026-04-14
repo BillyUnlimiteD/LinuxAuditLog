@@ -1,0 +1,45 @@
+id: SIGMA-LIN-SHELL_EXECUTION_GCC
+title: Shell Execution GCC  - Linux
+category: process
+subcategory: execution
+mitre_technique: T1083
+mitre_tactic: discovery
+severity: high
+confidence: low
+enabled: true
+description: 'Detects the use of the "gcc" utility to execute a shell. Such behavior
+  may be associated with privilege escalation, unauthorized command execution, or
+  to break out from restricted environments.
+
+  '
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /c89
+  - regex: /c99
+  - regex: /gcc
+  - regex: \-wrapper
+  - regex: /bin/bash,\-s
+  - regex: /bin/dash,\-s
+  - regex: /bin/fish,\-s
+  - regex: /bin/sh,\-s
+  - regex: /bin/zsh,\-s
+false_positives:
+- Unknown
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_gcc_shell_execution.yml.
+  References: https://gtfobins.github.io/gtfobins/gcc/#shell, https://gtfobins.github.io/gtfobins/c89/#shell,
+  https://gtfobins.github.io/gtfobins/c99/#shell, https://www.elastic.co/guide/en/security/current/linux-restricted-shell-breakout-via-linux-binary-s.html'
+references:
+- https://gtfobins.github.io/gtfobins/gcc/#shell
+- https://gtfobins.github.io/gtfobins/c89/#shell
+- https://gtfobins.github.io/gtfobins/c99/#shell
+- https://www.elastic.co/guide/en/security/current/linux-restricted-shell-breakout-via-linux-binary-s.html
+tags:
+- attack.discovery
+- attack.t1083
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_gcc_shell_execution.yml
+_sigma_status: test
+_sigma_author: Li Ling, Andy Parkidomo, Robert Rakowski, Blake Hartstein (Bloomberg
+  L.P.)
+_sigma_date: 2024-09-02

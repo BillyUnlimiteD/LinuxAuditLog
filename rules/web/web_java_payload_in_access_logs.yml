@@ -1,0 +1,44 @@
+id: SIGMA-WEB-JAVA_PAYLOAD_STRINGS
+title: Java Payload Strings
+category: web
+subcategory: detection
+mitre_technique: T1190
+mitre_tactic: ''
+severity: high
+confidence: low
+enabled: true
+description: Detects possible Java payloads in web access logs
+service: '*'
+detection:
+  type: pattern
+  patterns:
+  - regex: '%24%7B%28%23a%3D%40'
+  - regex: \$\{\(\#a=@
+  - regex: '%24%7B%40java'
+  - regex: \$\{@java
+  - regex: u0022java
+  - regex: '%2F%24%7B%23'
+  - regex: /\$\{\#
+  - regex: new\+java\.
+  - regex: getRuntime\(\)\.exec\(
+  - regex: getRuntime%28%29\.exec%28
+false_positives:
+- Legitimate apps
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/web/webserver_generic/web_java_payload_in_access_logs.yml.
+  References: https://www.rapid7.com/blog/post/2022/06/02/active-exploitation-of-confluence-cve-2022-26134/,
+  https://www.rapid7.com/blog/post/2021/09/02/active-exploitation-of-confluence-server-cve-2021-26084/,
+  https://github.com/httpvoid/writeups/blob/62d3751945289d088ccfdf4d0ffbf61598a2cd7d/Confluence-RCE.md,
+  https://twitter.com/httpvoid0x2f/status/1532924261035384832, https://medium.com/geekculture/text4shell-exploit-walkthrough-ebc02a01f035'
+references:
+- https://www.rapid7.com/blog/post/2022/06/02/active-exploitation-of-confluence-cve-2022-26134/
+- https://www.rapid7.com/blog/post/2021/09/02/active-exploitation-of-confluence-server-cve-2021-26084/
+- https://github.com/httpvoid/writeups/blob/62d3751945289d088ccfdf4d0ffbf61598a2cd7d/Confluence-RCE.md
+- https://twitter.com/httpvoid0x2f/status/1532924261035384832
+- https://medium.com/geekculture/text4shell-exploit-walkthrough-ebc02a01f035
+tags:
+- attack.initial-access
+- attack.t1190
+_sigma_source: rules/web/webserver_generic/web_java_payload_in_access_logs.yml
+_sigma_status: test
+_sigma_author: frack113, Harjot Singh, "@cyb3rjy0t" (update)
+_sigma_date: 2022-06-04

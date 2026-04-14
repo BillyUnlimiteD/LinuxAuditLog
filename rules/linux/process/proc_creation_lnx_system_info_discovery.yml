@@ -1,0 +1,34 @@
+id: SIGMA-LIN-SYSTEM_INFORMATION_D
+title: System Information Discovery
+category: process
+subcategory: detection
+mitre_technique: T1082
+mitre_tactic: discovery
+severity: info
+confidence: low
+enabled: true
+description: Detects system information discovery commands
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /uname
+  - regex: /hostname
+  - regex: /uptime
+  - regex: /lspci
+  - regex: /dmidecode
+  - regex: /lscpu
+  - regex: /lsmod
+false_positives:
+- Legitimate administration activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_system_info_discovery.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1082/T1082.md'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1082/T1082.md
+tags:
+- attack.discovery
+- attack.t1082
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_system_info_discovery.yml
+_sigma_status: stable
+_sigma_author: Ömer Günal, oscd.community
+_sigma_date: 2020-10-08

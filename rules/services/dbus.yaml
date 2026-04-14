@@ -1,0 +1,36 @@
+id: SVC-DBUS-001
+title: D-Bus — Suspicious IPC Activity
+category: system
+subcategory: ipc
+mitre_technique: T1559
+mitre_tactic: execution
+severity: high
+confidence: medium
+enabled: true
+description: >
+  Detects abuse of the D-Bus inter-process communication system: unauthorized
+  method calls, policy violations, and patterns associated with privilege
+  escalation via D-Bus (CVE-2021-3560 polkit bypass, systemd D-Bus exploits).
+service: dbus
+detection:
+  type: pattern
+  patterns:
+    - regex: "dbus.*Rejected|dbus.*policy denied|dbus.*not allowed"
+    - regex: "dbus-daemon.*\\[system\\].*Activated service.*failed"
+    - regex: "dbus.*org\\.freedesktop\\.PolicyKit1.*Error|dbus.*polkit.*failed"
+    - regex: "dbus.*SetUID|dbus.*unexpected.*privileged|dbus.*escalat"
+    - regex: "dbus-daemon.*Unable to set up system bus.*already running"
+false_positives:
+  - Legitimate application D-Bus policy denials during misconfiguration
+  - Service activation failures during normal startup
+recommendation: >
+  1. Review /etc/dbus-1/system.d/ policies for overly permissive rules.
+  2. Monitor for repeated policy denials from the same UID.
+  3. Investigate dbus activations for unexpected privileged services.
+references:
+  - "https://attack.mitre.org/techniques/T1559/"
+  - "https://www.freedesktop.org/wiki/Software/dbus/"
+tags:
+  - dbus
+  - ipc
+  - privilege_escalation

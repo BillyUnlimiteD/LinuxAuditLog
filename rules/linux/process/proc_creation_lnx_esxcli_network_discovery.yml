@@ -1,0 +1,37 @@
+id: SIGMA-LIN-ESXI_NETWORK_CONFIGU
+title: ESXi Network Configuration Discovery Via ESXCLI
+category: process
+subcategory: detection
+mitre_technique: T1033
+mitre_tactic: execution
+severity: medium
+confidence: low
+enabled: true
+description: Detects execution of the "esxcli" command with the "network" flag in
+  order to retrieve information about the network configuration.
+service: linux
+detection:
+  type: pattern
+  patterns:
+  - regex: /esxcli
+  - regex: network
+  - regex: \ get
+  - regex: \ list
+false_positives:
+- Legitimate administration activities
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/process_creation/proc_creation_lnx_esxcli_network_discovery.yml.
+  References: https://www.crowdstrike.com/blog/hypervisor-jackpotting-ecrime-actors-increase-targeting-of-esxi-servers/,
+  https://developer.broadcom.com/xapis/esxcli-command-reference/7.0.0/namespace/esxcli_network.html'
+references:
+- https://www.crowdstrike.com/blog/hypervisor-jackpotting-ecrime-actors-increase-targeting-of-esxi-servers/
+- https://developer.broadcom.com/xapis/esxcli-command-reference/7.0.0/namespace/esxcli_network.html
+tags:
+- attack.discovery
+- attack.execution
+- attack.t1033
+- attack.t1007
+- attack.t1059.012
+_sigma_source: rules/linux/process_creation/proc_creation_lnx_esxcli_network_discovery.yml
+_sigma_status: test
+_sigma_author: Cedric Maurugeon
+_sigma_date: 2023-09-04

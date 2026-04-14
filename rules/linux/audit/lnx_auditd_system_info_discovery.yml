@@ -1,0 +1,37 @@
+id: SIGMA-LIN-SYSTEM_INFORMATION_D
+title: System Information Discovery - Auditd
+category: audit
+subcategory: detection
+mitre_technique: T1082
+mitre_tactic: discovery
+severity: low
+confidence: low
+enabled: true
+description: Detects System Information Discovery commands
+service: auditd
+detection:
+  type: pattern
+  patterns:
+  - regex: PATH
+  - regex: /etc/lsb\-release
+  - regex: /etc/redhat\-release
+  - regex: /etc/issue
+  - regex: EXECVE
+  - regex: uname
+  - regex: uptime
+  - regex: lsmod
+  - regex: hostname
+  - regex: EXECVE
+false_positives:
+- Likely
+recommendation: 'Review the activity matching this rule. Original Sigma rule: rules/linux/auditd/lnx_auditd_system_info_discovery.yml.
+  References: https://github.com/redcanaryco/atomic-red-team/blob/f296668303c29d3f4c07e42bdd2b28d8dd6625f9/atomics/T1082/T1082.md'
+references:
+- https://github.com/redcanaryco/atomic-red-team/blob/f296668303c29d3f4c07e42bdd2b28d8dd6625f9/atomics/T1082/T1082.md
+tags:
+- attack.discovery
+- attack.t1082
+_sigma_source: rules/linux/auditd/lnx_auditd_system_info_discovery.yml
+_sigma_status: test
+_sigma_author: Pawel Mazur
+_sigma_date: 2021-09-03

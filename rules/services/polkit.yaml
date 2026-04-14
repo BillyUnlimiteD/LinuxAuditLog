@@ -1,0 +1,40 @@
+id: SVC-POLKIT-001
+title: Polkit — Privilege Authorization Abuse
+category: privilege_escalation
+subcategory: polkit
+mitre_technique: T1548.003
+mitre_tactic: privilege_escalation
+severity: critical
+confidence: high
+enabled: true
+description: >
+  Detects abuse of the polkit authorization framework for privilege escalation.
+  Covers CVE-2021-3560 (pkexec race condition), CVE-2021-4034 (pkexec local
+  privilege escalation), repeated authorization failures, and unusual polkit
+  action approvals that bypass normal access controls.
+service: polkit
+detection:
+  type: pattern
+  patterns:
+    - regex: "polkitd.*Operator.*NOT authorized|polkitd.*authorization.*rejected"
+    - regex: "polkitd.*Registered Authentication Agent.*uid=0|polkitd.*uid=0.*action"
+    - regex: "polkitd.*action.*org\\.freedesktop\\.(?:policykit|systemd1|login1).*ALLOW"
+    - regex: "pkexec.*(?P<user>\\w+).*(?P<cmd>.*) FAILED|pkexec.*authentication failure"
+    - regex: "polkitd.*temporary authorization.*(?P<action>[^\\s]+).*granted"
+false_positives:
+  - Legitimate administrative GUI actions (password dialogs)
+  - Authorized service installations
+recommendation: >
+  1. Ensure polkit is patched against CVE-2021-3560 and CVE-2021-4034.
+  2. Alert on polkit authorizations granted to non-admin UIDs.
+  3. Monitor for repeated polkit failures from the same UID (brute-force).
+  4. Review /etc/polkit-1/rules.d/ for overly permissive custom rules.
+references:
+  - "https://attack.mitre.org/techniques/T1548/003/"
+  - "https://nvd.nist.gov/vuln/detail/CVE-2021-4034"
+  - "https://nvd.nist.gov/vuln/detail/CVE-2021-3560"
+tags:
+  - polkit
+  - pkexec
+  - privilege_escalation
+  - cve
