@@ -7,7 +7,7 @@ mitre_tactic: persistence
 severity: medium
 confidence: medium
 enabled: true
-description: Detects ABRT oops handler events for kernel crashes and user space oops, which may indicate system instability or exploitation attempts.
+description: Detecta eventos del manejador de oops de ABRT para fallos del kernel y oops de espacio de usuario, que pueden indicar inestabilidad del sistema o intentos de explotación.
 service: abrt-oops
 detection:
   type: pattern
@@ -18,13 +18,13 @@ detection:
     - regex: 'abrt-oops.*: Failed to create problem directory'
     - regex: 'abrt-oops.*: Duplicate oops detected'
 false_positives:
-  - Normal kernel oops during testing or unstable hardware
-  - Expected crashes in development environments
+  - Fallos normales de oops del kernel durante pruebas o hardware inestable
+  - Fallos esperados en entornos de desarrollo
 recommendation: >
-  1. Review kernel oops reports for signs of exploitation or vulnerabilities.
-  2. Ensure ABRT is configured securely and not exposing sensitive crash data.
-  3. Monitor for repeated oops that may indicate persistent issues.
-  4. Update kernel and software to address known crash causes.
+  1. Revisar reportes de oops del kernel en busca de signos de explotación o vulnerabilidades.
+  2. Asegurar que ABRT esté configurado de forma segura y no exponga datos sensibles de fallos.
+  3. Monitorear oops repetidos que puedan indicar problemas persistentes.
+  4. Actualizar kernel y software para abordar causas conocidas de fallos.
 references:
   - https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/developer_guide/sect-abrt
   - https://attack.mitre.org/techniques/T1543/003/

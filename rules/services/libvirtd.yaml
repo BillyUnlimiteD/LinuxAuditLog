@@ -7,7 +7,7 @@ mitre_tactic: defense_evasion
 severity: medium
 confidence: medium
 enabled: true
-description: Detects libvirt daemon events including VM management, access control issues, and potential virtualization escape or abuse attempts.
+description: Detecta eventos del daemon libvirt incluyendo gestión de VMs, problemas de control de acceso e intentos potenciales de escape de virtualización o abuso.
 service: libvirtd
 detection:
   type: pattern
@@ -18,13 +18,13 @@ detection:
     - regex: 'libvirtd.*: Failed to start VM'
     - regex: 'libvirtd.*: Domain.*error'
 false_positives:
-  - Normal VM management operations
-  - Expected access denials in restricted environments
+  - Operaciones normales de gestión de VMs
+  - Denegaciones esperadas de acceso en entornos restringidos
 recommendation: >
-  1. Review libvirt access control and authentication failures.
-  2. Ensure libvirt is configured with proper permissions and network isolation.
-  3. Monitor for unauthorized VM creation or modification attempts.
-  4. Verify libvirt is not exposing host resources to VMs.
+  1. Revisar control de acceso de libvirt y fallos de autenticación.
+  2. Asegurar que libvirt esté configurado con permisos apropiados y aislamiento de red.
+  3. Monitorear intentos no autorizados de creación o modificación de VMs.
+  4. Verificar que libvirt no exponga recursos del host a las VMs.
 references:
   - https://libvirt.org/
   - https://attack.mitre.org/techniques/T1562/008/

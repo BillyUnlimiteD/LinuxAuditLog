@@ -7,7 +7,7 @@ mitre_tactic: command_and_control
 severity: medium
 confidence: medium
 enabled: true
-description: Detects Qpid daemon (qpidd) activity including connection attempts, authentication failures, and service errors that may indicate unauthorized messaging or C2 activity.
+description: Detecta actividad del daemon Qpid (qpidd) incluyendo intentos de conexión, fallos de autenticación y errores de servicio que puedan indicar mensajería no autorizada o actividad C2.
 service: qpidd
 detection:
   type: pattern
@@ -19,13 +19,13 @@ detection:
     - regex: 'qpidd.*:.*Failed to bind to port'
     - regex: 'qpidd.*:.*SASL authentication failed'
 false_positives:
-  - Normal messaging traffic in environments using Qpid for legitimate purposes
-  - Expected connection failures during network issues
+  - Tráfico normal de mensajería en entornos que usan Qpid para propósitos legítimos
+  - Fallos esperados de conexión durante problemas de red
 recommendation: >
-  1. Review Qpid connection logs for unauthorized IP addresses or unusual connection patterns.
-  2. Ensure Qpid is configured with proper authentication and access controls.
-  3. Monitor for unusual message queues or topics being accessed.
-  4. Disable Qpid if not required for the system's functionality.
+  1. Revisar logs de conexión de Qpid para direcciones IP no autorizadas o patrones de conexión inusuales.
+  2. Asegurar que Qpid esté configurado con autenticación apropiada y controles de acceso.
+  3. Monitorear colas de mensajes o tópicos inusuales siendo accedidos.
+  4. Deshabilitar Qpid si no es requerido para la funcionalidad del sistema.
 references:
   - https://qpid.apache.org/
   - https://attack.mitre.org/techniques/T1071/

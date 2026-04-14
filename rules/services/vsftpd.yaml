@@ -7,7 +7,7 @@ mitre_tactic: initial_access
 severity: medium
 confidence: medium
 enabled: true
-description: Detects vsftpd FTP server events including failed logins, anonymous connections, file transfers, and potential brute force attempts.
+description: Detecta eventos del servidor FTP vsftpd incluyendo logins fallidos, conexiones anónimas, transferencias de archivos y posibles intentos de fuerza bruta.
 service: vsftpd
 detection:
   type: pattern
@@ -20,14 +20,14 @@ detection:
     - regex: 'vsftpd.*: DELETE'
     - regex: 'vsftpd.*: Connection refused'
 false_positives:
-  - Normal FTP usage in legitimate environments
-  - Expected anonymous access if configured
+  - Uso normal de FTP en entornos legítimos
+  - Acceso anónimo esperado si está configurado
 recommendation: >
-  1. Review failed login attempts for brute force patterns.
-  2. Monitor anonymous FTP access for unauthorized file sharing.
-  3. Ensure vsftpd is configured with strong authentication and chroot.
-  4. Disable anonymous access if not required.
-  5. Log all FTP activities for forensic analysis.
+  1. Revisar intentos de login fallidos para patrones de fuerza bruta.
+  2. Monitorear acceso FTP anónimo para compartición no autorizada de archivos.
+  3. Asegurar que vsftpd esté configurado con autenticación fuerte y chroot.
+  4. Deshabilitar acceso anónimo si no es requerido.
+  5. Registrar todas las actividades FTP para análisis forense.
 references:
   - https://security.appspot.com/vsftpd.html
   - https://attack.mitre.org/techniques/T1078/

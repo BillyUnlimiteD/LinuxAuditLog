@@ -7,7 +7,7 @@ mitre_tactic: lateral_movement
 severity: medium
 confidence: medium
 enabled: true
-description: Detects RPC bind (port mapper) service events including registration failures, access control issues, and potential RPC service enumeration attempts.
+description: Detecta eventos del servicio RPC bind (mapeador de puertos) incluyendo fallos de registro, problemas de control de acceso y posibles intentos de enumeración de servicios RPC.
 service: rpcbind
 detection:
   type: pattern
@@ -18,13 +18,13 @@ detection:
     - regex: 'rpcbind.*: Cannot register service'
     - regex: 'rpcbind.*: Authentication failed'
 false_positives:
-  - Normal RPC service registrations
-  - Expected connection denials in firewalled environments
+  - Registros normales de servicios RPC
+  - Denegaciones esperadas de conexión en entornos con firewall
 recommendation: >
-  1. Review RPC bind connection attempts for unauthorized access.
-  2. Ensure rpcbind is firewalled and only accessible to trusted networks.
-  3. Monitor for RPC service enumeration attempts.
-  4. Consider disabling rpcbind if RPC services are not needed.
+  1. Revisar intentos de conexión RPC bind para acceso no autorizado.
+  2. Asegurar que rpcbind esté protegido por firewall y solo accesible a redes de confianza.
+  3. Monitorear intentos de enumeración de servicios RPC.
+  4. Considerar deshabilitar rpcbind si no se necesitan servicios RPC.
 references:
   - https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/system_administrators_guide/ch-tigervnc
   - https://attack.mitre.org/techniques/T1021/005/

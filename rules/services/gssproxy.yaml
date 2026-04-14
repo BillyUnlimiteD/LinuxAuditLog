@@ -7,7 +7,7 @@ mitre_tactic: defense_evasion
 severity: medium
 confidence: medium
 enabled: true
-description: Detects GSS-API proxy daemon events including authentication failures, credential issues, and potential Kerberos-related security problems.
+description: Detecta eventos del daemon proxy GSS-API incluyendo fallos de autenticación, problemas de credenciales y posibles problemas de seguridad relacionados con Kerberos.
 service: gssproxy
 detection:
   type: pattern
@@ -18,13 +18,13 @@ detection:
     - regex: 'gssproxy.*: Failed to acquire credentials'
     - regex: 'gssproxy.*: Principal not found'
 false_positives:
-  - Normal authentication failures during network issues
-  - Expected credential issues in misconfigured environments
+  - Fallos normales de autenticación durante problemas de red
+  - Problemas esperados de credenciales en entornos mal configurados
 recommendation: >
-  1. Review GSS-API authentication failures for unauthorized access attempts.
-  2. Ensure Kerberos configuration is secure and credentials are properly managed.
-  3. Monitor for unusual credential acquisition patterns.
-  4. Verify GSS proxy is not exposing sensitive authentication data.
+  1. Revisar fallos de autenticación GSS-API en busca de intentos de acceso no autorizado.
+  2. Asegurar que la configuración de Kerberos sea segura y las credenciales estén correctamente gestionadas.
+  3. Monitorear patrones inusuales de adquisición de credenciales.
+  4. Verificar que el proxy GSS no exponga datos sensibles de autenticación.
 references:
   - https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/system-level_authentication_guide/gss-proxy
   - https://attack.mitre.org/techniques/T1550/
