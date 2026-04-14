@@ -1,0 +1,35 @@
+id: SVC-ABRT_OOPS-001
+title: ABRT oops handler kernel crash reporting
+category: service
+subcategory: abrt-oops
+mitre_technique: T1543.003
+mitre_tactic: persistence
+severity: medium
+confidence: medium
+enabled: true
+description: Detects ABRT oops handler events for kernel crashes and user space oops, which may indicate system instability or exploitation attempts.
+service: abrt-oops
+detection:
+  type: pattern
+  patterns:
+    - regex: 'abrt-oops.*: Reported .* oopses'
+    - regex: 'abrt-oops.*: Kernel oops detected'
+    - regex: 'abrt-oops.*: User space oops detected'
+    - regex: 'abrt-oops.*: Failed to create problem directory'
+    - regex: 'abrt-oops.*: Duplicate oops detected'
+false_positives:
+  - Normal kernel oops during testing or unstable hardware
+  - Expected crashes in development environments
+recommendation: >
+  1. Review kernel oops reports for signs of exploitation or vulnerabilities.
+  2. Ensure ABRT is configured securely and not exposing sensitive crash data.
+  3. Monitor for repeated oops that may indicate persistent issues.
+  4. Update kernel and software to address known crash causes.
+references:
+  - https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/developer_guide/sect-abrt
+  - https://attack.mitre.org/techniques/T1543/003/
+tags:
+  - abrt-oops
+  - kernel
+  - crash
+  - audit

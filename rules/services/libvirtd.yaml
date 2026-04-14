@@ -1,0 +1,35 @@
+id: SVC-LIBVIRTD-001
+title: libvirt daemon virtualization management events
+category: service
+subcategory: libvirtd
+mitre_technique: T1562.008
+mitre_tactic: defense_evasion
+severity: medium
+confidence: medium
+enabled: true
+description: Detects libvirt daemon events including VM management, access control issues, and potential virtualization escape or abuse attempts.
+service: libvirtd
+detection:
+  type: pattern
+  patterns:
+    - regex: 'libvirtd.*: Access denied'
+    - regex: 'libvirtd.*: Authentication failed'
+    - regex: 'libvirtd.*: Permission denied'
+    - regex: 'libvirtd.*: Failed to start VM'
+    - regex: 'libvirtd.*: Domain.*error'
+false_positives:
+  - Normal VM management operations
+  - Expected access denials in restricted environments
+recommendation: >
+  1. Review libvirt access control and authentication failures.
+  2. Ensure libvirt is configured with proper permissions and network isolation.
+  3. Monitor for unauthorized VM creation or modification attempts.
+  4. Verify libvirt is not exposing host resources to VMs.
+references:
+  - https://libvirt.org/
+  - https://attack.mitre.org/techniques/T1562/008/
+tags:
+  - libvirtd
+  - virtualization
+  - vm
+  - audit

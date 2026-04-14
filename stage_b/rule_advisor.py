@@ -131,6 +131,10 @@ _SERVICE_RULES: dict[str, list[str]] = {
     "fcoemon": ["services/fcoemon.yaml"],
     "avahi-daemon": ["services/avahi-daemon.yaml"],
     "hald": ["services/hald.yaml"],
+    "abrt-oops": ["services/abrt-oops.yaml"],
+    "gssproxy": ["services/gssproxy.yaml"],
+    "libvirtd": ["services/libvirtd.yaml"],
+    "rpcbind": ["services/rpcbind.yaml"],
     # Infrastructure — no security rules applicable
     "lvm2-lvmetad": [],
     "sm-client": ["services/sendmail.yaml"],
