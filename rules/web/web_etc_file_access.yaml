@@ -1,0 +1,115 @@
+id: WEB-ETC-001
+title: Intento de Acceso a Archivos del Sistema (/etc/) vía Web
+category: web
+subcategory: path_traversal
+mitre_technique: T1083
+mitre_tactic: discovery
+severity: critical
+confidence: high
+enabled: true
+
+description: >
+  Detecta intentos de leer archivos del directorio /etc/ a través del servidor web,
+  ya sea por acceso directo (servidor mal configurado que sirve /etc/ como document root
+  o alias), o mediante path traversal / Local File Inclusion (LFI) con secuencias
+  ../../../etc/. Los archivos objetivo más críticos son /etc/passwd (lista de usuarios),
+  /etc/shadow (hashes de contraseñas — solo root), /etc/sudoers (configuración de
+  privilegios), /etc/ssh/sshd_config y claves SSH privadas (/etc/ssh/ssh_host_*_key),
+  certificados SSL (/etc/ssl/private/), y configuraciones de servicios con credenciales
+  embebidas (/etc/mysql/, /etc/nginx/, /etc/php/). La regla cubre rutas en texto plano,
+  URL-encoding simple (%2e%2e%2f), double-encoding (%252e), y parámetros de aplicación
+  que incluyen rutas /etc/ (vectores LFI frecuentes en PHP).
+
+service: "*"
+
+detection:
+  type: pattern
+  patterns:
+    # Acceso directo a /etc/passwd, /etc/shadow y archivos críticos de autenticación
+    - regex: "\"(?:GET|HEAD|POST) (?P<uri>[^\"]*(?:/etc/(?:passwd|shadow|master\\.passwd|group|gshadow|sudoers(?:\\.d/[^\"]*)?|security/[^\"]*)))[^\"]*\" (?P<status>\\d{3})"
+      _note: "Archivos de autenticación del sistema — shadow contiene hashes crackeables offline"
+    # Claves SSH del servidor y certificados SSL privados
+    - regex: "\"(?:GET|HEAD|POST) (?P<uri>[^\"]*(?:/etc/ssh/(?:ssh_host_[^\"]+_key|sshd_config|authorized_keys)|/etc/ssl/(?:private/[^\"]+|certs/[^\"]+\\.key)))[^\"]*\" (?P<status>\\d{3})"
+      _note: "Claves privadas SSH/SSL — permiten suplantación del servidor o descifrar tráfico capturado"
+    # Configuraciones de servicios con credenciales (/etc/mysql, /etc/redis, /etc/nginx, etc.)
+    - regex: "\"(?:GET|HEAD|POST) (?P<uri>[^\"]*(?:/etc/(?:mysql/[^\"]*|my\\.cnf|postgresql/[^\"]*|redis(?:\\.conf|/[^\"]*)|nginx/[^\"]*|apache2?/[^\"]*|httpd/[^\"]*|php(?:/[^\"]*|\\.ini)|vsftpd[^\"]*|postfix/[^\"]*|exim[^\"]*|dovecot[^\"]*)))[^\"]*\" (?P<status>\\d{3})"
+      _note: "Configuraciones de servicios — frecuentemente contienen contraseñas de BD y tokens de API"
+    # Cron, hosts, resolv — reconocimiento de infraestructura
+    - regex: "\"(?:GET|HEAD|POST) (?P<uri>[^\"]*(?:/etc/(?:crontab|cron\\.d/[^\"]*|cron\\.(?:daily|weekly|monthly|hourly)/[^\"]*|hosts(?:\\.(?:allow|deny))?|resolv\\.conf|hostname|fstab|mtab|environment|profile(?:\\.d/[^\"]*)?|rc\\.(?:local|d/[^\"]*))))[^\"]*\" (?P<status>\\d{3})"
+      _note: "Reconocimiento de infraestructura — revela topología de red, usuarios y tareas programadas"
+    # Path traversal hacia /etc/ en texto plano (../../../../etc/passwd)
+    - regex: "\"(?:GET|HEAD|POST) (?P<uri>[^\"]*(?:\\.\\./){2,}etc/[^\"]*)[^\"]*\" (?P<status>\\d{3})"
+      _note: "Path traversal clásico — intento de salir del web root hacia /etc/"
+    # Path traversal URL-encoded (%2e%2e%2f = ../) — una capa de encoding
+    - regex: "\"(?:GET|HEAD|POST) (?P<uri>[^\"]*(?:%2e%2e%2f|%2e%2e/|\\.\\./){2,}(?:etc|%65%74%63)/[^\"]*)[^\"]*\" (?P<status>\\d{3})"
+      _note: "Path traversal URL-encoded — herramientas como nikto y sqlmap codifican los puntos"
+    # Double URL-encoding (%252e%252e%252f = ../) — intento de evadir WAF
+    - regex: "\"(?:GET|HEAD|POST) (?P<uri>[^\"]*(?:%252e%252e%252f|%252e%252e/){2,}(?:etc|%2565%2574%2563)/[^\"]*)[^\"]*\" (?P<status>\\d{3})"
+      _note: "Double encoding — técnica de evasión de WAF que algunos servidores decodifican dos veces"
+    # LFI vía parámetros de aplicación: ?file=/etc/passwd, ?page=../../etc/shadow
+    - regex: "\"(?:GET|POST) (?P<uri>[^\"]*\\?(?:[^\"&=]+)=(?:\\.+/)*(?:/?)etc/(?:passwd|shadow|sudoers|hosts|[^\"&]+))[^\"]*\" (?P<status>\\d{3})"
+      _note: "LFI en parámetros PHP/Python — el valor del parámetro contiene ruta /etc/"
+    # Acceso genérico a cualquier ruta /etc/ no cubierta arriba
+    - regex: "\"(?:GET|HEAD|POST) (?P<uri>[^\"]*(?:^|/)etc/[^\"]{3,})[^\"]*\" (?P<status>2\\d{2})"
+      _note: "Acceso exitoso (2xx) a cualquier archivo bajo /etc/ — siempre debe investigarse"
+
+false_positives:
+  - Servidores que exponen intencionalmente /etc/motd o /etc/issue como página de bienvenida
+  - Paneles de administración legítimos que muestran configuraciones de sistema (acceso autenticado)
+  - Herramientas de monitoreo que acceden a métricas vía rutas que incluyen 'etc' en el nombre (no /etc/ del sistema)
+
+recommendation: >
+  ACCIÓN INMEDIATA — SEVERIDAD CRÍTICA:
+  1. Identificar si hubo descarga exitosa (HTTP 200/206):
+       grep -E '/etc/passwd|/etc/shadow|/etc/sudoers|\.\./' /var/log/nginx/access.log | grep ' 20[06] '
+       grep -E '/etc/passwd|/etc/shadow|/etc/sudoers|\.\./' /var/log/httpd/access_log | grep ' 20[06] '
+
+  2. Si /etc/shadow fue descargado (HTTP 200):
+       - COMPROMETER TOTAL: forzar cambio de contraseña a TODOS los usuarios del sistema
+       - Los hashes son crackeables offline con hashcat/john en horas o días
+       - Escalar inmediatamente al equipo de respuesta a incidentes
+
+  3. Si /etc/passwd fue descargado:
+       - Enumerar usuarios y verificar cuentas anómalas (UID 0 duplicado, shell /bin/bash inesperada)
+       - Revisar si hay usuarios creados recientemente: lastlog | grep -v Never
+
+  4. Si claves SSH privadas fueron descargadas:
+       - Revocar y regenerar TODOS los pares de claves SSH del servidor
+       - Actualizar authorized_keys en todos los sistemas que confiaban en esa clave
+       - Rotar certificados SSL/TLS si las claves privadas estaban expuestas
+
+  5. Bloquear path traversal en nginx:
+       # En nginx.conf dentro del bloque server:
+       if ($request_uri ~* "(\.\./|%2e%2e%2f|%252e%252e)") { return 403; }
+       # Nunca servir /etc/ como document root ni alias
+
+  6. Bloquear en Apache/httpd:
+       # En httpd.conf:
+       <Directory /etc> Require all denied </Directory>
+       RewriteEngine On
+       RewriteCond %{REQUEST_URI} (?:\.\.\/|%2e%2e%2f|%252e%252e) [NC]
+       RewriteRule .* - [F,L]
+
+  7. Auditar la configuración del servidor web para alias no intencionales:
+       nginx -T | grep -i alias
+       apachectl -D DUMP_CONFIG | grep -i alias
+
+  8. Implementar AppArmor/SELinux para confinar el proceso del servidor web
+     a su document root y directorios de log únicamente.
+
+references:
+  - "https://attack.mitre.org/techniques/T1083/"
+  - "https://owasp.org/www-community/attacks/Path_Traversal"
+  - "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/05-Authorization_Testing/01-Testing_Directory_Traversal_File_Include"
+  - "https://cwe.mitre.org/data/definitions/22.html"
+  - "https://portswigger.net/web-security/file-path-traversal"
+
+tags:
+  - path_traversal
+  - lfi
+  - etc_passwd
+  - credential_theft
+  - web
+  - critical
+  - t1083
+  - cwe22

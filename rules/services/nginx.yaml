@@ -40,6 +40,9 @@ detection:
     - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"(?:GET|POST|PUT) (?P<uri>[^\"]{2048,})\""
     # Errores de upstream y protocolo (posible backend attack)
     - regex: "\\[error\\].*(?P<msg>open\\(\\) failed.*No such file|upstream timed out|upstream sent invalid header|failed \\(104: Connection reset\\)|SSL_do_handshake\\(\\) failed)"
+    # Acceso a /etc/ — path traversal o servidor mal configurado
+    - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"(?:GET|HEAD|POST) (?P<uri>[^\"]*(?:/etc/(?:passwd|shadow|sudoers|ssh/[^\"]+|ssl/private/[^\"]+|mysql/[^\"]+|nginx/[^\"]+)|(?:\\.\\./|%2e%2e%2f|%252e%252e){2,}etc/))[^\"]*\" (?P<status>\\d{3})"
+      _note: "Acceso a /etc/ vía web — si es HTTP 200 es crítico: credenciales del sistema expuestas"
     # Herramientas de escaneo conocidas en User-Agent o path
     - regex: "(?P<src_ip>[\\d.]+)[^\"]*\" (?P<status>40[034]) [^\"]*\"(?:nikto|sqlmap|dirbuster|gobuster|nuclei|masscan|zgrab|nmap|wfuzz|feroxbuster|ffuf|git.dumper|dvcs.ripper)"
 false_positives:

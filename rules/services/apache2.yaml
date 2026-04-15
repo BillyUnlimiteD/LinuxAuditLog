@@ -39,6 +39,9 @@ detection:
     - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"(?:GET|POST) (?P<uri>[^\"]*(?:struts2?|strutsAction|action\\.do|\\?actionErrors|\\?debug=browser)[^\"]*)\" (?P<status>\\d{3})"
     # Explotación mod_cgi con inyección de comandos
     - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"(?:GET|POST) (?P<uri>[^\"]*cgi-bin/[^\"]*(?:\\?|%3F)[^\"]*(?:;|%3B|\\|))[^\"]* (?P<status>\\d{3})"
+    # Acceso a /etc/ — path traversal o servidor mal configurado
+    - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"(?:GET|HEAD|POST) (?P<uri>[^\"]*(?:/etc/(?:passwd|shadow|sudoers|ssh/[^\"]+|ssl/private/[^\"]+|mysql/[^\"]+|apache2?/[^\"]+)|(?:\\.\\./|%2e%2e%2f|%252e%252e){2,}etc/))[^\"]*\" (?P<status>\\d{3})"
+      _note: "Acceso a /etc/ en Apache — path traversal o alias mal configurado"
     # Errores críticos de Apache
     - regex: "\\[error\\].*(?P<msg>attempt to invoke directory as script|malformed header from script|suexec policy violation|Premature end of script headers)"
     # Herramientas de escaneo web en User-Agent

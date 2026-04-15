@@ -38,6 +38,9 @@ detection:
     - regex: "\\[warn\\].*(?P<msg>child process.*exited with status|server reached MaxRequestWorkers|worker threads remaining)"
     # CMS — fuerza bruta y explotación de plugins
     - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"(?:GET|POST) (?P<uri>[^\"]*(?:wp-login\\.php|xmlrpc\\.php|wp-admin/|administrator/|index\\.php\\?option=com_)[^\"]*)\" (?P<status>\\d{3})"
+    # Acceso a /etc/ — path traversal o servidor mal configurado (crítico en CentOS/RHEL)
+    - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"(?:GET|HEAD|POST) (?P<uri>[^\"]*(?:/etc/(?:passwd|shadow|sudoers|ssh/[^\"]+|ssl/private/[^\"]+|mysql/[^\"]+|httpd/[^\"]+)|(?:\\.\\./|%2e%2e%2f|%252e%252e){2,}etc/))[^\"]*\" (?P<status>\\d{3})"
+      _note: "Acceso a /etc/ en httpd/CentOS — SELinux debería bloquearlo, pero valida si está en modo permissive"
     # SELinux AVC denial para httpd (acceso a rutas no autorizadas)
     - regex: "AVC.*denied.*\\{.*\\}.*comm=\"httpd\".*path=\"(?P<path>[^\"]+)\""
     # Webshells y RFI en parámetros PHP
