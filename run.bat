@@ -36,7 +36,7 @@ SET "UV=%TOOLS_DIR%\uv.exe"
 
 echo.
 echo ======================================================
-echo   LinuxAuditLog v1.5.0 -- Forensic Acquisition Agent
+echo   LinuxAuditLog v1.6.0 -- Forensic Acquisition Agent
 echo ======================================================
 
 REM -- 1. Python ---------------------------------------------------------------

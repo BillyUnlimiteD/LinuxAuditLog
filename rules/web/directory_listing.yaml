@@ -1,0 +1,45 @@
+id: WEB-015
+title: Directory Listing Exposure / Sensitive File Discovery
+category: web
+subcategory: information_disclosure
+mitre_technique: T1083
+mitre_tactic: discovery
+severity: medium
+confidence: medium
+enabled: true
+description: >
+  Detects directory listing exposure and systematic sensitive file/directory discovery
+  in web server access logs. Directory listing (autoindex) reveals server file structure
+  and enables attackers to enumerate and download source code, configuration files,
+  backups, and secrets. Also detects access to well-known sensitive paths including
+  admin panels, phpMyAdmin, debug endpoints, monitoring dashboards, and CI/CD interfaces
+  that should not be publicly accessible. This maps to OWASP A05:2021 (Security Misconfiguration).
+service: "*"
+detection:
+  type: pattern
+  patterns:
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|HEAD) (?P<uri>/[^\"]*/?)[^\"]*\" 200 .*Index of /"
+    - regex: "(?P<src_ip>[\\d.]+).*\"GET (?P<uri>/(?:phpmyadmin|pma|adminer|phpmy|myadmin|mysql|dbadmin)[^\"]*)\""
+    - regex: "(?P<src_ip>[\\d.]+).*\"GET (?P<uri>/(?:jenkins|gitlab|grafana|kibana|sonarqube|portainer|traefik|rancher)[^\"]*)\""
+    - regex: "(?P<src_ip>[\\d.]+).*\"GET (?P<uri>/(?:admin|administrator|backend|cpanel|whm|plesk|webmin|cockpit)[^/\"]*/?)[^\"]*\" 200"
+    - regex: "(?P<src_ip>[\\d.]+).*\"GET (?P<uri>/(?:actuator|debug|console|swagger-ui|api-docs|openapi)[^\"]*)\""
+false_positives:
+  - Intentionally public admin interfaces on internal/development servers
+  - Monitoring systems checking endpoint availability
+  - Authorized security assessments
+recommendation: >
+  1. Disable directory listing in Apache (Options -Indexes) or Nginx (autoindex off).
+  2. Restrict access to admin interfaces by source IP at web server or firewall level.
+  3. Remove or password-protect phpMyAdmin, Adminer and similar database admin tools.
+  4. Disable or restrict Spring Boot Actuator, Swagger UI in production environments.
+  5. Return 404 (not 403) for sensitive paths to avoid confirming existence.
+references:
+  - "https://owasp.org/Top10/A05_2021-Security_Misconfiguration/"
+  - "https://attack.mitre.org/techniques/T1083/"
+  - "https://cheatsheetseries.owasp.org/cheatsheets/Error_Handling_Cheat_Sheet.html"
+tags:
+  - owasp
+  - directory-listing
+  - information-disclosure
+  - misconfiguration
+  - a05

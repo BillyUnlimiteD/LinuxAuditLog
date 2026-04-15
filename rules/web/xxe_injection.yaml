@@ -1,0 +1,42 @@
+id: WEB-008
+title: XML External Entity (XXE) Injection Attempt
+category: web
+subcategory: injection
+mitre_technique: T1190
+mitre_tactic: initial_access
+severity: high
+confidence: medium
+enabled: true
+description: >
+  Detects XML External Entity (XXE) injection patterns in web server access logs.
+  XXE attacks exploit XML parsers that process external entity references, allowing
+  attackers to read local files (/etc/passwd, SSH keys), perform SSRF, or cause
+  denial of service via billion-laughs attacks. Indicators include DOCTYPE/SYSTEM/ENTITY
+  keywords in URI parameters and common XXE payloads in encoded form.
+service: "*"
+detection:
+  type: pattern
+  patterns:
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST|PUT) (?P<uri>[^\"]*(?:DOCTYPE|%44%4F%43%54%59%50%45|SYSTEM|%53%59%53%54%45%4D|ENTITY|%45%4E%54%49%54%59)[^\"]*)\""
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:POST|PUT) [^\"]+\" (?:200|500) .*(?:DOCTYPE|SYSTEM|ENTITY)"
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:POST|PUT) (?P<uri>[^\"]*(?:%3C%21DOCTYPE|%3C%21ENTITY|<!DOCTYPE|<!ENTITY)[^\"]*)\""
+false_positives:
+  - Legitimate XML API requests with DOCTYPE declarations
+  - XML Schema validation tools used by developers
+  - SOAP services with complex XML structures
+recommendation: >
+  1. Check if the request reached an XML parser (HTTP 200 or 500 with XML error body).
+  2. Disable external entity processing in all XML parsers (set FEATURE_EXTERNAL_GENERAL_ENTITIES to false).
+  3. Use safer data formats (JSON) where XML is not strictly required.
+  4. Implement WAF rules to block DOCTYPE/SYSTEM patterns in request bodies.
+  5. Review application logs for file read attempts (/etc/passwd, /proc/self/environ).
+references:
+  - "https://owasp.org/www-community/vulnerabilities/XML_External_Entity_(XXE)_Processing"
+  - "https://attack.mitre.org/techniques/T1190/"
+  - "https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html"
+tags:
+  - owasp
+  - xxe
+  - xml
+  - injection
+  - a03

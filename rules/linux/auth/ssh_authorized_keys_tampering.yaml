@@ -1,0 +1,45 @@
+id: LIN-AUTH-010
+title: SSH Authorized Keys Tampering
+category: auth
+subcategory: persistence
+mitre_technique: T1098.004
+mitre_tactic: persistence
+severity: high
+confidence: high
+enabled: true
+description: >
+  Detects modification of SSH authorized_keys files, a common persistence technique
+  used after initial compromise. Attackers add their own public keys to
+  ~/.ssh/authorized_keys or /root/.ssh/authorized_keys to maintain backdoor access
+  that survives password changes, reboots, and detection of the original intrusion vector.
+  Indicators in audit logs include write/append operations to authorized_keys paths,
+  use of sed/tee/echo to modify key files, and chmod/chown changes on .ssh directories.
+service: "*"
+detection:
+  type: pattern
+  patterns:
+    - regex: "(?:authorized_keys|authorized_keys2).*(?:WRITE|write|CREATE|create|MODIFY|modify|open)"
+    - regex: "audit.*type=PATH.*name=\"[^\"]*\\.ssh/authorized_keys"
+    - regex: "(?:tee|echo|cat|printf|dd).*(?:authorized_keys|authorized_keys2)"
+    - regex: "(?:chmod|chown).*\\.ssh(?:/authorized_keys)?"
+    - regex: "type=SYSCALL.*comm=\"(?:ssh-keygen|tee|echo|sed)\".*(?:\\.ssh|authorized)"
+false_positives:
+  - Authorized configuration management tools (Ansible, Puppet, Chef) deploying SSH keys
+  - Administrators legitimately adding their own keys during setup
+  - Automated key rotation systems
+recommendation: >
+  1. Immediately review the content of all authorized_keys files on the system.
+  2. Compare current authorized_keys against a known-good baseline.
+  3. Revoke any unknown or unauthorized public keys.
+  4. Identify the process and user that made the modification.
+  5. Implement file integrity monitoring (AIDE, Tripwire) on ~/.ssh directories.
+  6. Consider using centralized SSH key management to prevent local key tampering.
+  7. Enable auditd rules for write access to .ssh/authorized_keys paths.
+references:
+  - "https://attack.mitre.org/techniques/T1098/004/"
+  - "https://www.ssh.com/academy/ssh/authorized-keys"
+tags:
+  - ssh
+  - persistence
+  - authorized_keys
+  - T1098.004

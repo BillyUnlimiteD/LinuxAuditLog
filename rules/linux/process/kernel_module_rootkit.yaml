@@ -1,0 +1,50 @@
+id: LIN-PROC-010
+title: Kernel Module Loading / Rootkit Indicators
+category: process
+subcategory: persistence
+mitre_technique: T1547.006
+mitre_tactic: persistence
+severity: critical
+confidence: medium
+enabled: true
+description: >
+  Detects suspicious kernel module loading and rootkit-related indicators. Kernel rootkits
+  load malicious modules to hide processes, files, network connections, and themselves
+  from user-space tools. Indicators include insmod/modprobe of unsigned or uncommon modules,
+  modification of /proc or /sys to hide artifacts, rmmod of security modules (auditd hooks),
+  and known rootkit module names. Kernel module persistence survives most user-space
+  forensic tools and requires specialized detection (rkhunter, chkrootkit, Volatility).
+service: "*"
+detection:
+  type: pattern
+  patterns:
+    - regex: "type=SYSCALL.*comm=\"(?:insmod|modprobe|kmod)\".*(?P<module>[^\\s]+\\.ko)"
+    - regex: "(?:insmod|modprobe)\\s+(?P<module>/(?:tmp|var/tmp|dev/shm|home)/[^\\s]+)"
+    - regex: "(?:rmmod|modprobe\\s+-r)\\s+(?:auditd?|selinux|apparmor|lsm|security)"
+    - regex: "(?P<indicator>kernel.*(?:taint|Oops|BUG:|Call Trace))"
+    - regex: "type=KERN.*(?:module|driver).*(?:unsigned|force|unsafe)"
+    - regex: "(?:rkhunter|chkrootkit).*(?:WARNING|INFECTED|SUSPICIOUS|possible rootkit)"
+false_positives:
+  - Administrators loading legitimate kernel modules for hardware drivers
+  - Virtual machine tools (VMware, VirtualBox guest additions) loading modules
+  - System updates installing new kernel modules
+  - Kernel debugging during development (taint flags expected)
+recommendation: >
+  CRITICAL — suspected rootkit requires out-of-band forensic analysis.
+  1. Do NOT trust any tools running on the potentially compromised system.
+  2. Take a memory dump using an external tool (LiME kernel module from trusted media).
+  3. Boot from a trusted live CD to inspect the filesystem without running the infected kernel.
+  4. Use Volatility or rekall on the memory dump to detect hidden processes/modules.
+  5. Run rkhunter --check and chkrootkit from trusted read-only media.
+  6. Compare loaded modules (lsmod) against a known-good baseline.
+  7. Consider full system reimaging as the only guaranteed remediation.
+references:
+  - "https://attack.mitre.org/techniques/T1547/006/"
+  - "https://github.com/504ensicsLabs/LiME"
+  - "https://www.volatilityfoundation.org/"
+  - "https://rkhunter.sourceforge.net/"
+tags:
+  - rootkit
+  - kernel_module
+  - persistence
+  - T1547.006

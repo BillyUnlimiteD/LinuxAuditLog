@@ -1,0 +1,47 @@
+id: WEB-009
+title: Insecure Deserialization Attack Attempt
+category: web
+subcategory: injection
+mitre_technique: T1190
+mitre_tactic: initial_access
+severity: critical
+confidence: medium
+enabled: true
+description: >
+  Detects insecure deserialization attack patterns in web server access logs.
+  Deserialization attacks exploit object deserialization in Java (ysoserial gadget chains),
+  PHP (unserialize() with magic methods), Python (pickle), and .NET to achieve Remote Code
+  Execution. Indicators include Java serialized object magic bytes (rO0), ysoserial payload
+  classes, PHP serialized object strings, and known exploit tool signatures in URI/headers.
+  This maps to OWASP A08:2021 (Software and Data Integrity Failures).
+service: "*"
+detection:
+  type: pattern
+  patterns:
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST|PUT) (?P<uri>[^\"]*(?:rO0AB|%72%4f%30%41%42|aced0005|%ac%ed%00%05)[^\"]*)\""
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:POST|PUT) (?P<uri>[^\"]+)\" \\d+ .*(?:ysoserial|CommonsCollections|com\\.sun\\.org\\.apache|java\\.rmi\\.server\\.UnicastRef)"
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>[^\"]*(?:O%3A|O:\\d+:|%4F%3A\\d+%3A|a%3A\\d+%3A)[^\"]*)\""
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:POST|PUT) (?P<uri>[^\"]+)\" \\d+ .*(?:__wakeup|__destruct|__toString|phpggc)"
+false_positives:
+  - Legitimate Java RMI traffic on internal services
+  - Session tokens that happen to start with base64-encoded Java serial header
+  - Internal microservices using Java serialization over HTTP (should be migrated)
+recommendation: >
+  1. Identify the target endpoint and whether deserialization occurs there.
+  2. Implement integrity checks (HMAC signing) on all serialized objects before deserialization.
+  3. Use allowlists to restrict which classes can be deserialized (Java: SerialKiller, NotSoSerial).
+  4. Prefer JSON/XML with schema validation over native serialization formats.
+  5. Update all libraries using affected deserialization code (Commons Collections, Spring, etc.).
+  6. Monitor for process spawning from web server processes post-request.
+references:
+  - "https://owasp.org/www-community/vulnerabilities/Deserialization_of_untrusted_data"
+  - "https://attack.mitre.org/techniques/T1190/"
+  - "https://github.com/frohoff/ysoserial"
+  - "https://cheatsheetseries.owasp.org/cheatsheets/Deserialization_Cheat_Sheet.html"
+tags:
+  - owasp
+  - deserialization
+  - java
+  - php
+  - rce
+  - a08

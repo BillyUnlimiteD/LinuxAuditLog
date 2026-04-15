@@ -1,0 +1,47 @@
+id: LIN-PROC-009
+title: Crypto Mining Activity
+category: process
+subcategory: impact
+mitre_technique: T1496
+mitre_tactic: impact
+severity: high
+confidence: medium
+enabled: true
+description: >
+  Detects cryptocurrency mining activity on Linux systems. Cryptomining malware is
+  frequently deployed after initial compromise to monetize access. Indicators include
+  execution of known mining binaries (xmrig, minerd, cpuminer, cgminer), connections
+  to mining pool ports (3333, 4444, 5555, 7777, 14444, 45560), stratum protocol
+  references in network logs, and suspicious process names disguised as system processes.
+  Mining often causes sustained high CPU load and may appear in cron jobs or systemd
+  services for persistence.
+service: "*"
+detection:
+  type: pattern
+  patterns:
+    - regex: "(?P<process>xmrig|minerd|cpuminer|cgminer|bfgminer|ethminer|t-rex|lolminer|nbminer|phoenixminer|gminer|teamredminer)"
+    - regex: "(?:stratum\\+(?:tcp|ssl)://|stratum://|pool\\.(?:minexmr|supportxmr|hashvault|xmrpool|moneroocean|nanopool|ethermine|2miners))"
+    - regex: "(?:connect|wget|curl).*:(?:3333|4444|5555|7777|14444|45560|8008|8080)(?:/|$)"
+    - regex: "(?:wget|curl|chmod).*(?:/tmp/|/dev/shm/|/var/tmp/).*(?:xmr|miner|mine|\.sh|\.elf)"
+    - regex: "(?:systemctl|crontab|at).*(?:xmrig|minerd|cpuminer|kworker[0-9]|kdevtmpfsi|kinsing)"
+    - regex: "type=EXECVE.*(?:xmrig|minerd|cpuminer|--pool|--coin|--algorithm|cryptonight)"
+false_positives:
+  - Authorized cryptocurrency mining operations (rare in corporate environments)
+  - Security researchers running mining tools in isolated environments
+  - Legitimate tools named similarly to mining software
+recommendation: >
+  1. Immediately terminate the mining process and identify its persistence mechanism.
+  2. Search for related files: find /tmp /var/tmp /dev/shm -name '*.sh' -o -name '*.elf'
+  3. Review crontabs (crontab -l for all users), systemd services, and rc.local for persistence.
+  4. Check for other compromise indicators — mining malware often accompanies backdoors.
+  5. Block known mining pool domains and ports at the firewall/DNS level.
+  6. Audit how the miner was installed: check bash history, auth logs for initial access.
+  7. Rebuild the system from a trusted image if compromise is confirmed.
+references:
+  - "https://attack.mitre.org/techniques/T1496/"
+  - "https://www.sans.org/reading-room/whitepapers/malicious/cryptocurrency-mining-malware-landscape-38859"
+tags:
+  - cryptomining
+  - impact
+  - xmrig
+  - T1496

@@ -1,4 +1,4 @@
-# LinuxAuditLog v1.5.0
+# LinuxAuditLog v1.6.0
 
 **Remote forensic acquisition and Linux security analysis agent**
 
@@ -503,6 +503,58 @@ rules/
 | Web rules | 5 new rules for web attack detection: .git repository theft, config file disclosure, backup enumeration, VCS metadata exposure, /etc/ access via LFI |
 | Config | `LANGUAGE` variable added to `config.py` and `.env.example` |
 
+### New rules (v1.6.0) — OWASP, Linux and services
+
+**Web (9 rules):**
+
+| ID | Title | MITRE | Severity |
+|---|---|---|---|
+| WEB-008 | XXE Injection Attempt | T1190 | high |
+| WEB-009 | Insecure Deserialization Attack Attempt | T1190 | critical |
+| WEB-010 | Log4Shell / Log4j RCE (CVE-2021-44228) | T1190 | critical |
+| WEB-011 | Shellshock CGI Attack (CVE-2014-6271) | T1190 | critical |
+| WEB-012 | Open Redirect / Unvalidated URL Redirect | T1204 | medium |
+| WEB-013 | HTTP Header Injection / CRLF Injection | T1190 | high |
+| WEB-014 | WordPress Attack Patterns (xmlrpc, wp-login) | T1110.001 | high |
+| WEB-015 | Directory Listing Exposure / Sensitive File Discovery | T1083 | medium |
+| WEB-016 | Dangerous HTTP Method Abuse (TRACE/PUT/WebDAV) | T1190 | medium |
+
+**Linux (6 rules):**
+
+| ID | Title | MITRE | Severity |
+|---|---|---|---|
+| LIN-AUTH-010 | SSH Authorized Keys Tampering | T1098.004 | high |
+| LIN-PROC-008 | Log Tampering / Audit Log Clearing | T1070.002 | critical |
+| LIN-PROC-009 | Crypto Mining Activity | T1496 | high |
+| LIN-PROC-010 | Kernel Module Loading / Rootkit Indicators | T1547.006 | critical |
+| LIN-NET-005 | DNS Tunneling / Data Exfiltration via DNS | T1048.003 | high |
+| LIN-NET-006 | Email Relay Abuse / SMTP Spam Sending | T1071.003 | high |
+
+**Services (5 rules):**
+
+| ID | Title | MITRE | Severity |
+|---|---|---|---|
+| SVC-REDIS-001 | Redis Unauthorized Access / RCE via CONFIG SET | T1190 | critical |
+| SVC-POSTGRES-001 | PostgreSQL Auth Failures / COPY PROGRAM RCE | T1190 | high |
+| SVC-TOMCAT-001 | Apache Tomcat Manager Brute Force / WAR RCE | T1190 | critical |
+| SVC-POSTFIX-001 | Postfix Mail Relay Abuse / SMTP Brute Force | T1071.003 | high |
+| SVC-FTP-001 | FTP Brute Force / Anonymous Login Abuse | T1110.001 | high |
+
+### OWASP Top 10 (2021) Coverage — v1.6.0
+
+| # | Category | Key rules | Status |
+|---|---|---|---|
+| A01 | Broken Access Control | path_traversal, lfi_rfi, web_etc_file_access, open_redirect | ✅ Covered |
+| A02 | Cryptographic Failures | redis (cleartext), postfix (plaintext SMTP), vsftpd (FTP) | Partial |
+| A03 | Injection | sqli, xss, rce, lfi_rfi, xxe_injection, http_header_injection | ✅ Covered |
+| A04 | Insecure Design | Not detectable in access logs | N/A |
+| A05 | Security Misconfiguration | web_scanning, git_exposure, directory_listing, http_method_abuse | ✅ Covered |
+| A06 | Vulnerable Components | log4shell, shellshock, yum | ✅ Covered |
+| A07 | Auth Failures | ssh_brute_force, failed_logins, wordpress_attacks, ftp_bruteforce | ✅ Covered |
+| A08 | Software Integrity / Deserialization | insecure_deserialization | ✅ Covered |
+| A09 | Logging Failures | log_tampering | ✅ Covered |
+| A10 | SSRF | ssrf | ✅ Covered |
+
 ---
 
 ## 10. Adding Custom Rules
@@ -764,6 +816,6 @@ All dependencies are open source (MIT, Apache 2.0 or BSD). No commercial license
 
 ---
 
-*LinuxAuditLog v1.5.0 — Linux remote forensic acquisition tool*
+*LinuxAuditLog v1.6.0 — Linux remote forensic acquisition tool*
 
 *Developed by Gonzalo Serrano in collaboration with [Claude Code](https://claude.ai/code) (Anthropic).*

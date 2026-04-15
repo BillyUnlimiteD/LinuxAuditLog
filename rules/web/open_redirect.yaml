@@ -1,0 +1,42 @@
+id: WEB-012
+title: Open Redirect / Unvalidated URL Redirect Attempt
+category: web
+subcategory: redirect
+mitre_technique: T1204
+mitre_tactic: initial_access
+severity: medium
+confidence: medium
+enabled: true
+description: >
+  Detects open redirect exploitation attempts in web server access logs. Open redirects
+  occur when an application accepts untrusted URLs via parameters (redirect, url, next,
+  return, goto, destination) and forwards the user to them without validation. Attackers
+  use trusted domain redirect chains for phishing, OAuth token theft, and SSRF amplification.
+  OWASP A01:2021 (Broken Access Control). Payloads may use protocol-relative URLs,
+  double slashes, and URL encoding to bypass naive filters.
+service: "*"
+detection:
+  type: pattern
+  patterns:
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>[^\"]*(?:redirect|return|next|goto|destination|redir|url|target|link|forward|continue|redirect_to|redirect_uri|back|returnUrl|returnURL|successUrl|cancelUrl)=(?:https?://|//|%2F%2F|%68%74%74%70)[^\"]*)\""
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>[^\"]*(?:redirect|next|url|goto)=(?:%2F%2F|%252F%252F|%2f%2f|///)[^\"]*)\""
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>[^\"]*(?:redirect|next|url|goto)=[^\"]*(?:evil|attacker|malware|phish)[^\"]*)\""
+false_positives:
+  - Legitimate OAuth 2.0 redirect_uri parameters pointing to registered external domains
+  - Single sign-on (SSO) flows with whitelisted return URLs
+  - Marketing campaign tracking links using redirect parameters
+recommendation: >
+  1. Implement a strict allowlist of permitted redirect destinations.
+  2. Never use user-controlled input directly as redirect targets.
+  3. Validate redirect URLs against a whitelist before processing; reject protocol-relative URLs.
+  4. Use indirect reference maps: map integers/tokens to allowed URLs server-side.
+  5. Set Content-Security-Policy and X-Frame-Options headers to limit exploitation impact.
+references:
+  - "https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html"
+  - "https://attack.mitre.org/techniques/T1204/"
+  - "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/11-Client-side_Testing/04-Testing_for_Client-side_URL_Redirect"
+tags:
+  - owasp
+  - redirect
+  - phishing
+  - a01

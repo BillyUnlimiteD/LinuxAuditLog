@@ -1,0 +1,49 @@
+id: SVC-POSTFIX-001
+title: Postfix Mail Relay Abuse / SMTP Brute Force
+category: service
+subcategory: postfix
+mitre_technique: T1071.003
+mitre_tactic: command_and_control
+severity: high
+confidence: medium
+enabled: true
+description: >
+  Detects Postfix mail server abuse including open relay exploitation, SASL authentication
+  brute force, spam campaign delivery, and unauthorized relay attempts. Compromised or
+  misconfigured Postfix servers are used for phishing campaigns, malware distribution,
+  and as SMTP proxies. Indicators include relay rejection spikes, high volumes of
+  authentication failures (SASL), repeated connections from single IPs, and deferred/bounced
+  message volume anomalies suggesting spam delivery attempts. Also detects attempts to
+  enumerate valid email addresses via VRFY/EXPN commands.
+service: postfix
+detection:
+  type: pattern
+  patterns:
+    - regex: "(?:postfix/smtpd).*(?:SASL LOGIN authentication failed|SASL PLAIN authentication failed|authentication failure).*(?P<client>[\\d.]+)"
+    - regex: "(?:postfix/smtpd).*(?:relay access denied|relay not permitted|mail for .* loops back to myself)"
+    - regex: "(?:postfix/smtpd).*(?:blocked using|listed by domain|RBL|DNSBL|Spamhaus|Barracuda|SORBS)"
+    - regex: "(?:postfix/smtpd).*(?:VRFY|EXPN).*(?:250|252|550)"
+    - regex: "(?:postfix/qmgr|postfix/smtp).*(?:status=deferred.*Connection refused|status=bounced.*User unknown).*(?P<count>\\d{3,})"
+false_positives:
+  - Legitimate bulk email delivery services sending high volumes of transactional email
+  - Mail server during migration with temporary relay configuration
+  - Anti-spam testing systems generating intentional authentication failures
+recommendation: >
+  1. Check mail queue for spam: postqueue -p | grep -c '^[A-Z0-9]' (count queued messages).
+  2. Review SASL auth failure source IPs: grep 'authentication failed' /var/log/mail.log | awk '{print $7}' | sort | uniq -c | sort -rn.
+  3. Configure Postfix relay restrictions properly (mynetworks, permit_sasl_authenticated only).
+  4. Disable VRFY and EXPN: add 'disable_vrfy_command = yes' to main.cf.
+  5. Implement rate limiting per client IP: smtpd_client_connection_rate_limit.
+  6. Enable Postfix SASL with fail2ban to auto-block brute force attempts.
+  7. Deploy SPF, DKIM, DMARC to prevent domain spoofing from compromised server.
+references:
+  - "https://attack.mitre.org/techniques/T1071/003/"
+  - "https://www.postfix.org/SMTPD_ACCESS_README.html"
+  - "https://www.postfix.org/SASL_README.html"
+tags:
+  - postfix
+  - smtp
+  - mail_relay
+  - brute_force
+  - spam
+  - T1071.003

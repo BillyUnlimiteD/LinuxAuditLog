@@ -1,0 +1,49 @@
+id: SVC-POSTGRES-001
+title: PostgreSQL Authentication Failures / COPY PROGRAM RCE Attempt
+category: service
+subcategory: postgresql
+mitre_technique: T1190
+mitre_tactic: initial_access
+severity: high
+confidence: medium
+enabled: true
+description: >
+  Detects PostgreSQL authentication failures, brute force attempts, and COPY TO/FROM PROGRAM
+  RCE exploitation. PostgreSQL's COPY TO PROGRAM / COPY FROM PROGRAM (pg 9.3+) allows
+  superusers to execute OS commands, making credential compromise equivalent to OS RCE.
+  Indicators include repeated authentication failures, pg_hba.conf rejection events,
+  connection from unexpected source IPs, use of pg_sleep for blind injection timing,
+  and COPY PROGRAM statements in query logs. Also detects attempts to read sensitive
+  files via COPY FROM '/etc/passwd' TO STDOUT.
+service: postgresql
+detection:
+  type: pattern
+  patterns:
+    - regex: "(?:postgres|postgresql).*(?:FATAL|ERROR).*(?:password authentication failed|authentication failed|role .* does not exist|no pg_hba\\.conf entry)"
+    - regex: "(?:postgres|postgresql).*(?:LOG|STATEMENT).*(?:COPY\\s+\\w+\\s+(?:FROM|TO)\\s+PROGRAM|pg_read_file|pg_ls_dir)"
+    - regex: "(?:postgres|postgresql).*(?:LOG|STATEMENT).*(?:COPY\\s+\\w+\\s+(?:FROM|TO)\\s+['\"]?/etc/)"
+    - regex: "(?:postgres|postgresql).*(?:LOG|STATEMENT).*(?:pg_sleep|SELECT\\s+sleep|WAITFOR\\s+DELAY)"
+    - regex: "(?:postgres|postgresql).*(?:FATAL).*(?:remaining connection slots are reserved|too many connections)"
+false_positives:
+  - Legitimate COPY FROM/TO operations on database files (not using PROGRAM keyword)
+  - Application connection pool initialization failures during startup
+  - Monitoring agents performing health checks with read-only credentials
+recommendation: >
+  1. Block the source IP that triggered authentication failures.
+  2. Review pg_hba.conf to ensure only trusted IPs have access.
+  3. Audit for COPY PROGRAM usage in pg_log — this should rarely appear in production.
+  4. Restrict SUPERUSER grants; use limited-privilege roles for applications.
+  5. Enable PostgreSQL audit logging (pgaudit extension) for DML/DDL and ROLE changes.
+  6. Ensure PostgreSQL port (5432) is not exposed to untrusted networks.
+  7. Use pg_dump regularly and verify backups to recover from potential data destruction.
+references:
+  - "https://attack.mitre.org/techniques/T1190/"
+  - "https://www.postgresql.org/docs/current/sql-copy.html"
+  - "https://book.hacktricks.xyz/network-services-pentesting/pentesting-postgresql"
+  - "https://github.com/pgaudit/pgaudit"
+tags:
+  - postgresql
+  - database
+  - rce
+  - brute_force
+  - T1190

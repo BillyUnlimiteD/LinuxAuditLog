@@ -1,0 +1,49 @@
+id: SVC-REDIS-001
+title: Redis Unauthorized Access / RCE via CONFIG SET
+category: service
+subcategory: redis
+mitre_technique: T1190
+mitre_tactic: initial_access
+severity: critical
+confidence: high
+enabled: true
+description: >
+  Detects unauthorized access to Redis and RCE attempts via CONFIG SET abuse. Redis
+  exposed without authentication is one of the most exploited vulnerabilities in Linux
+  servers. Attackers use Redis CONFIG SET to write SSH keys (dir /root/.ssh, dbfilename
+  authorized_keys), install cron jobs (dir /var/spool/cron), or drop webshells.
+  The attack requires only network access to port 6379 with no authentication.
+  CISA and multiple threat intelligence reports link unauthenticated Redis to
+  nation-state actors, cryptominers, and ransomware operators.
+service: redis
+detection:
+  type: pattern
+  patterns:
+    - regex: "(?:redis|redis-server).*(?:Unprotected Redis|without authentication|bind 0\\.0\\.0\\.0|Protected mode disabled)"
+    - regex: "(?:redis-server|redis).*(?:CONFIG SET dir|CONFIG SET dbfilename|CONFIG REWRITE)"
+    - regex: "(?:redis).*(?:ERR.*AUTH|WRONGPASS|NOAUTH Authentication required)"
+    - regex: "(?:redis-server).*(?:Connection from|Accepted)\\s+(?!127\\.0\\.0\\.1|::1|10\\.|172\\.1[6-9]\\.|172\\.2[0-9]\\.|172\\.3[01]\\.|192\\.168\\.)(?P<src_ip>[\\d.]+)"
+    - regex: "(?:redis-cli|redis-server).*(?:slaveof|replicaof).*(?P<master>[\\d.]+:\\d+)"
+false_positives:
+  - Legitimate Redis replication configuration between trusted servers
+  - Redis Sentinel monitoring connections from known IPs
+  - Authorized Redis Cluster formation
+recommendation: >
+  CRITICAL — unauthenticated Redis exposure is severe.
+  1. Immediately verify if Redis is bound to 0.0.0.0: netstat -tlnp | grep 6379.
+  2. Enable Redis password authentication: requirepass <strong_password> in redis.conf.
+  3. Bind Redis to localhost or internal interfaces only: bind 127.0.0.1 in redis.conf.
+  4. Check for unauthorized SSH keys, cron jobs, and webshells installed via CONFIG SET.
+  5. Enable Protected Mode in Redis configuration.
+  6. Use firewall rules to restrict Redis port (6379, 16379) to trusted IPs only.
+  7. Enable Redis ACL lists if using Redis 6.0+ for fine-grained access control.
+references:
+  - "https://attack.mitre.org/techniques/T1190/"
+  - "https://redis.io/docs/management/security/"
+  - "https://www.shodan.io/search?query=port%3A6379+product%3ARedis"
+  - "https://book.hacktricks.xyz/network-services-pentesting/6379-pentesting-redis"
+tags:
+  - redis
+  - unauthorized_access
+  - rce
+  - T1190

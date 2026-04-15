@@ -1,0 +1,46 @@
+id: LIN-NET-005
+title: DNS Tunneling / Data Exfiltration via DNS
+category: network
+subcategory: exfiltration
+mitre_technique: T1048.003
+mitre_tactic: exfiltration
+severity: high
+confidence: medium
+enabled: true
+description: >
+  Detects DNS tunneling and data exfiltration over DNS protocol in system logs.
+  DNS tunneling encodes data into DNS query/response labels to bypass network controls,
+  as DNS traffic is rarely filtered. Indicators include unusually long DNS query strings
+  (exfiltrated data encoded in subdomains), high volumes of DNS queries to a single domain,
+  known DNS tunneling tool signatures (iodine, dns2tcp, dnscat2, DNSExfiltrator),
+  and base64/hex-encoded subdomains that are characteristic of tunneled data.
+service: "*"
+detection:
+  type: pattern
+  patterns:
+    - regex: "(?:iodine|dns2tcp|dnscat|DNSExfiltrator|dnscapy|heyoka)(?:\\s|\\[)"
+    - regex: "(?:nslookup|dig|host)\\s+(?P<query>[a-zA-Z0-9+/]{40,}\\.[a-z]{2,})"
+    - regex: "named.*query.*(?P<subdomain>[a-zA-Z0-9]{32,}\\.[a-zA-Z0-9]{8,}\\.[a-z]{2,})"
+    - regex: "(?:systemd-resolved|dnsmasq|bind|unbound).*QUERY.*(?P<len>[a-zA-Z0-9._-]{60,})"
+    - regex: "type=SYSCALL.*(?:iodine|dns2tcp|dnscat|nstx)\\b"
+false_positives:
+  - CDN services with long domain names using multiple subdomain levels
+  - Let's Encrypt ACME DNS-01 challenge records (long random subdomains)
+  - Legitimate services using base64-encoded subdomains for load balancing
+  - Internal testing of DNS infrastructure
+recommendation: >
+  1. Capture and analyze DNS traffic to identify the tunnel endpoint domain.
+  2. Block the suspicious domain at DNS resolver and firewall levels.
+  3. Implement DNS response policy zones (RPZ) to restrict external DNS recursion.
+  4. Deploy DNS monitoring tools (Zeek/Bro, PassiveDNS) for baseline deviation detection.
+  5. Restrict outbound DNS to internal resolvers only; block direct external DNS from endpoints.
+  6. Review what data may have been exfiltrated based on query volume and timing.
+references:
+  - "https://attack.mitre.org/techniques/T1048/003/"
+  - "https://github.com/yarrick/iodine"
+  - "https://www.sans.org/reading-room/whitepapers/dns/detecting-dns-tunneling-34152"
+tags:
+  - dns_tunneling
+  - exfiltration
+  - covert_channel
+  - T1048.003

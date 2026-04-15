@@ -44,7 +44,7 @@ $cancelHandler = [System.ConsoleCancelEventHandler]{
 
 Write-Host ""
 Write-Host "======================================================" -ForegroundColor White
-Write-Host "  LinuxAuditLog v1.5.0 -- Forensic Acquisition Agent"   -ForegroundColor White
+Write-Host "  LinuxAuditLog v1.6.0 -- Forensic Acquisition Agent"   -ForegroundColor White
 Write-Host "======================================================" -ForegroundColor White
 
 # -- Leer rutas desde .env ----------------------------------------------------

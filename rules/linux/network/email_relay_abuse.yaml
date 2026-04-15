@@ -1,0 +1,52 @@
+id: LIN-NET-006
+title: Email Relay Abuse / SMTP Spam Sending
+category: network
+subcategory: exfiltration
+mitre_technique: T1071.003
+mitre_tactic: exfiltration
+severity: high
+confidence: medium
+enabled: true
+description: >
+  Detects email relay abuse and spam campaigns originating from the compromised system.
+  Attackers use compromised servers as spam relays to send phishing, malware distribution,
+  or spam emails — leveraging the server's reputation to bypass spam filters. Indicators
+  include high volumes of outbound SMTP connections, Postfix/sendmail relay rejection
+  spikes (indicating attempted open relay), SASL authentication brute force against
+  the mail server, and abnormal queue growth. Also detects direct SMTP connections
+  bypassing the mail server (common in botnet activity).
+service: "*"
+detection:
+  type: pattern
+  patterns:
+    - regex: "(?:postfix|sendmail|exim|qmail)/(?:smtp|qmgr|pickup).*(?:relay=(?!127\\.0\\.0\\.1|localhost|\\[127\\.)|status=sent.*to=<[^@]+@[^>]+>.*relay=)"
+    - regex: "(?:postfix|sendmail).*warning.*(?:relay access denied|relay not permitted|cannot relay|open relay|client host rejected)"
+    - regex: "(?:postfix|sendmail|dovecot).*(?:SASL LOGIN authentication failed|auth: (?:failed|error)).*user="
+    - regex: "(?:postfix/smtp|postfix/smtpd).*reject.*(?:550|554|421).*(?:spam|blocked|blacklist|RBL|DNSBL)"
+    - regex: "type=SYSCALL.*comm=\"(?:sendmail|postfix|exim|swaks|smtp-cli)\".*(?:25|465|587)\\b"
+  aggregation:
+    field: src_ip
+    count: 50
+    window_sec: 300
+false_positives:
+  - Legitimate bulk email systems (newsletters, transactional email) configured on the server
+  - Mail server testing with tools like swaks during setup
+  - High-volume legitimate notification systems
+recommendation: >
+  1. Check mail queue size: postqueue -p | tail (large queue = likely spam/relay abuse).
+  2. Review recent outbound emails: postqueue -p; postcat -q <queue_id>.
+  3. Identify the source process generating the emails (application, webshell, or direct).
+  4. If open relay is confirmed: restrict relay policy to authenticated users only.
+  5. Configure SPF, DKIM, and DMARC to reduce reputation damage from outbound spam.
+  6. Block outbound port 25 from application servers at the firewall (use submission port 587).
+  7. Subscribe to abuse.ch and similar feeds to proactively detect when the server is blacklisted.
+references:
+  - "https://attack.mitre.org/techniques/T1071/003/"
+  - "https://www.postfix.org/ANTI_UCE_README.html"
+  - "https://mxtoolbox.com/blacklists.aspx"
+tags:
+  - smtp
+  - spam
+  - relay
+  - exfiltration
+  - T1071.003

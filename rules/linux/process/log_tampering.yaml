@@ -1,0 +1,46 @@
+id: LIN-PROC-008
+title: Log Tampering / Audit Log Clearing
+category: process
+subcategory: defense_evasion
+mitre_technique: T1070.002
+mitre_tactic: defense_evasion
+severity: critical
+confidence: high
+enabled: true
+description: >
+  Detects attempts to tamper with, clear, or disable system logs and audit trails.
+  Log tampering is a critical indicator of post-compromise activity — attackers erase
+  evidence of their intrusion to evade detection and forensic analysis. Techniques include
+  redirecting log files to /dev/null, using truncate/shred on log files, stopping or
+  disabling rsyslog/journald/auditd, executing auditctl -e 0 to disable auditing,
+  and using dd or fallocate to overwrite log file contents.
+service: "*"
+detection:
+  type: pattern
+  patterns:
+    - regex: "(?P<cmd>(?:truncate|shred|wipe)\\s+(?:-[sz]\\s*0?\\s+)?['\"]?/(?:var/log|run/log)[^'\"\\s]+)"
+    - regex: "(?P<cmd>(?:echo|printf|dd|cat)\\s+[^|]*(?:/dev/null|>\\s*/dev/null)\\s*>\\s*['\"]?/var/log)"
+    - regex: "(?:systemctl|service)\\s+(?:stop|disable|mask)\\s+(?:rsyslog|syslog|auditd|journald|syslog-ng)"
+    - regex: "auditctl\\s+(?:-e\\s+0|-D\\b)"
+    - regex: "rm\\s+(?:-[rRf]+\\s+)?['\"]?/var/log/(?:auth|secure|syslog|messages|audit/audit)[^'\"\\s]*"
+    - regex: "type=EVENT_LISTENER.*(?:AUDIT_RULE_DEL|AUDIT_CONFIG_CHANGE).*(?:enabled=0|kill)"
+false_positives:
+  - Legitimate logrotate operations (always use logrotate, never manual truncation)
+  - System administrators compressing old logs before archival (use gzip, not truncate)
+  - Test/staging environments where log cleanup is scripted
+recommendation: >
+  CRITICAL — log tampering is a near-certain indicator of post-compromise activity.
+  1. Preserve all remaining log evidence immediately before any remediation.
+  2. Determine the time range covered by the tampering to understand the evidence gap.
+  3. Check secondary log sources: remote syslog servers, SIEM, cloud logging.
+  4. Initiate incident response — assume the system is fully compromised.
+  5. Implement remote/centralized logging so local tampering does not destroy all evidence.
+  6. Enable auditd with immutable rules (-e 2) so audit config cannot be changed without reboot.
+references:
+  - "https://attack.mitre.org/techniques/T1070/002/"
+  - "https://www.sans.org/reading-room/whitepapers/logging/detecting-log-tampering-37949"
+tags:
+  - defense_evasion
+  - log_tampering
+  - anti_forensics
+  - T1070.002

@@ -1,0 +1,43 @@
+id: WEB-011
+title: Shellshock CGI Attack Attempt (CVE-2014-6271)
+category: web
+subcategory: rce
+mitre_technique: T1190
+mitre_tactic: initial_access
+severity: critical
+confidence: high
+enabled: true
+description: >
+  Detects Shellshock exploitation attempts (CVE-2014-6271 / CVE-2014-7169) targeting
+  Bash CGI scripts via HTTP headers. The vulnerability allows attackers to append shell
+  commands after a function definition in environment variables (User-Agent, Referer,
+  Cookie, custom headers) that are passed to bash. Typical payloads include reverse
+  shells, /etc/passwd reads, and ping-backs to confirm exploitability. Any web server
+  passing HTTP headers to CGI scripts running bash is potentially vulnerable.
+service: "*"
+detection:
+  type: pattern
+  patterns:
+    - regex: "(?P<src_ip>[\\d.]+).*(?P<payload>\\(\\s*\\)\\s*\\{[^}]*\\}\\s*;)"
+    - regex: "(?P<src_ip>[\\d.]+).*(?P<payload>\\(\\)\\s*\\{\\s*:;\\s*\\}\\s*;\\s*(?:echo|/bin/bash|/bin/sh|wget|curl|nc |ncat|python|perl))"
+    - regex: "(?P<src_ip>[\\d.]+).*(?P<payload>%28%29%20%7B|%28%29%7B|\\(\\)%20\\{)"
+false_positives:
+  - Security scanners performing authorized Shellshock assessments
+  - Applications using literal parentheses/braces in User-Agent strings (rare)
+recommendation: >
+  CRITICAL — Shellshock is over 10 years old; any unpatched system is severely negligent.
+  1. Update bash immediately: apt-get update && apt-get upgrade bash (or yum update bash).
+  2. Disable CGI scripts if not required; prefer FastCGI or application server architectures.
+  3. Check for evidence of successful exploitation: new user accounts, cron jobs, SSH keys.
+  4. Review web server logs for HTTP 200 responses to requests containing () { :;};.
+  5. Inspect /tmp, /var/tmp, /dev/shm for dropped payloads or scripts.
+references:
+  - "https://nvd.nist.gov/vuln/detail/CVE-2014-6271"
+  - "https://attack.mitre.org/techniques/T1190/"
+  - "https://www.symantec.com/security_response/writeup.jsp?docid=2014-092615-0800-99"
+tags:
+  - shellshock
+  - cgi
+  - bash
+  - cve-2014-6271
+  - rce

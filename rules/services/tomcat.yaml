@@ -1,0 +1,52 @@
+id: SVC-TOMCAT-001
+title: Apache Tomcat Manager Brute Force / WAR Deployment RCE
+category: service
+subcategory: tomcat
+mitre_technique: T1190
+mitre_tactic: initial_access
+severity: critical
+confidence: high
+enabled: true
+description: >
+  Detects attacks against Apache Tomcat Manager and Host Manager interfaces. The Tomcat
+  Manager (/manager/html, /manager/text) allows deploying WAR files — if accessible with
+  default or weak credentials, this leads directly to Remote Code Execution via malicious
+  WAR webshell deployment. Indicators include repeated 401 responses to /manager/,
+  401→200 transitions (brute force success), POST requests to /manager/deploy or
+  /manager/text/deploy (WAR upload), and access from unexpected source IPs.
+  Msfconsole's tomcat_mgr_upload module is a common exploitation tool.
+service: "*"
+detection:
+  type: threshold
+  patterns:
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>/(?:manager|host-manager)/(?:html|text|status)[^\"]*)[^\"]*\" (?:401|403|200)"
+    - regex: "(?P<src_ip>[\\d.]+).*\"POST (?P<uri>/(?:manager|host-manager)/(?:text/)?deploy[^\"]*)[^\"]*\" (?:200|400)"
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>/(?:manager|host-manager)/[^\"]+)[^\"]*\" 200.*tomcat"
+  aggregation:
+    field: src_ip
+    count: 5
+    window_sec: 120
+false_positives:
+  - Legitimate CI/CD pipelines deploying applications via Tomcat Manager (should use key auth)
+  - Administrators accessing Manager from known IP addresses
+  - Monitoring tools checking Tomcat Manager status page
+recommendation: >
+  CRITICAL — successful Tomcat Manager access with WAR deployment = full RCE.
+  1. Immediately check if any WAR files were recently deployed: ls -la $CATALINA_HOME/webapps/.
+  2. Check for webshells: find $CATALINA_HOME/webapps -name '*.jsp' -newer /etc/hosts.
+  3. Restrict Manager access to localhost or trusted IPs in conf/context.xml:
+     <Valve className="org.apache.catalina.valves.RemoteAddrValve" allow="127\\.0\\.0\\.1|10\\..*"/>
+  4. Change default Manager credentials (admin/admin, tomcat/tomcat, tomcat/s3cret).
+  5. Remove Manager and Host-Manager webapps in production if not needed.
+  6. Implement rate limiting or fail2ban for /manager/ paths.
+references:
+  - "https://attack.mitre.org/techniques/T1190/"
+  - "https://tomcat.apache.org/tomcat-10.1-doc/manager-howto.html"
+  - "https://book.hacktricks.xyz/network-services-pentesting/pentesting-web/tomcat"
+tags:
+  - tomcat
+  - java
+  - war_upload
+  - rce
+  - brute_force
+  - T1190

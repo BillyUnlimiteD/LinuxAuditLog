@@ -1,0 +1,50 @@
+id: WEB-014
+title: WordPress Attack Patterns (xmlrpc, wp-login, wp-admin)
+category: web
+subcategory: brute_force
+mitre_technique: T1110.001
+mitre_tactic: credential_access
+severity: high
+confidence: high
+enabled: true
+description: >
+  Detects WordPress-specific attack patterns in web server access logs including:
+  XML-RPC amplification brute force (system.multicall), wp-login.php credential brute force,
+  wp-admin unauthorized access attempts, plugin/theme vulnerability scanning,
+  and WordPress version fingerprinting. WordPress powers ~43% of all websites and is
+  a prime target for automated attack campaigns. XML-RPC attacks are especially dangerous
+  as a single request can attempt thousands of passwords via system.multicall batching.
+service: "*"
+detection:
+  type: threshold
+  patterns:
+    - regex: "(?P<src_ip>[\\d.]+).*\"POST (?P<uri>/(?:[^/]+/)?wp-login\\.php)[^\"]*\" (?:200|302|401|403)"
+    - regex: "(?P<src_ip>[\\d.]+).*\"POST (?P<uri>/(?:[^/]+/)?xmlrpc\\.php)[^\"]*\" (?:200|403)"
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>/(?:[^/]+/)?wp-admin/[^\"]*)\""
+    - regex: "(?P<src_ip>[\\d.]+).*\"GET (?P<uri>/(?:[^/]+/)?wp-(?:content|includes|json)/[^\"]*(?:readme\\.html|license\\.txt|wp-config\\.php\\.bak|debug\\.log))[^\"]*\""
+  aggregation:
+    field: src_ip
+    count: 10
+    window_sec: 60
+false_positives:
+  - Legitimate WordPress admin activity from known IPs
+  - Security plugins performing integrity checks
+  - Automated backup tools accessing wp-content
+recommendation: >
+  1. Immediately block IPs with > 10 wp-login/xmlrpc requests in 60 seconds.
+  2. Disable XML-RPC if not needed: add to .htaccess or nginx config.
+  3. Implement rate limiting on wp-login.php (fail2ban WordPress filter available).
+  4. Enable two-factor authentication for all WordPress admin accounts.
+  5. Change default /wp-admin URL using a security plugin.
+  6. Block direct access to wp-config.php, debug.log, readme.html at web server level.
+  7. Keep WordPress core, themes and plugins updated to latest versions.
+references:
+  - "https://attack.mitre.org/techniques/T1110/001/"
+  - "https://www.wordfence.com/learn/wordpress-brute-force-attacks/"
+  - "https://owasp.org/www-project-web-security-testing-guide/"
+tags:
+  - wordpress
+  - brute_force
+  - xmlrpc
+  - cms
+  - credential_access

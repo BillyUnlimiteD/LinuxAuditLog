@@ -1,0 +1,50 @@
+id: SVC-FTP-001
+title: FTP Brute Force / Anonymous Login Abuse
+category: service
+subcategory: vsftpd
+mitre_technique: T1110.001
+mitre_tactic: credential_access
+severity: high
+confidence: high
+enabled: true
+description: >
+  Detects FTP brute force attacks and anonymous login abuse against vsftpd and similar
+  FTP servers. FTP transmits credentials in plaintext and is frequently targeted for
+  credential brute forcing. Anonymous FTP access without restrictions allows unauthorized
+  file upload (webshell delivery) and download. Indicators include repeated authentication
+  failures from the same IP within a short window, anonymous login followed by file
+  upload operations, and connections from unexpected geographic regions. FTP should be
+  replaced with SFTP in most environments.
+service: vsftpd
+detection:
+  type: threshold
+  patterns:
+    - regex: "(?:vsftpd|ftpd|proftpd|pure-ftpd).*(?:FAIL LOGIN|failed login|Login incorrect|530 Login incorrect|530 Permission denied).*(?P<src_ip>[\\d.]+)"
+    - regex: "(?:vsftpd|ftpd|proftpd|pure-ftpd).*(?:ANON|anonymous).*(?:UPLOAD|STOR|PUT|OK UPLOAD)"
+    - regex: "(?:vsftpd|ftpd).*(?:FAIL|failed).*user=(?P<user>\\S+).*(?P<src_ip>[\\d.]+)"
+  aggregation:
+    field: src_ip
+    count: 10
+    window_sec: 300
+false_positives:
+  - Legitimate FTP clients with misconfigured credentials during setup
+  - Authorized anonymous FTP servers for software distribution (intentional)
+  - Automated backup systems with expired FTP credentials
+recommendation: >
+  1. Block the attacking IP at firewall level after threshold breach.
+  2. If anonymous upload is enabled and not required: disable anon_upload_enable in vsftpd.conf.
+  3. Implement fail2ban with vsftpd filter to auto-ban after N failures.
+  4. Migrate from FTP to SFTP (SSH file transfer) — FTP sends credentials in plaintext.
+  5. Restrict FTP access to specific IP ranges using tcp_wrappers or firewall rules.
+  6. If anonymous FTP is intentional, restrict to download-only and a dedicated directory.
+  7. Enable SSL/TLS for FTP (FTPS) as minimum if migration to SFTP is not immediately possible.
+references:
+  - "https://attack.mitre.org/techniques/T1110/001/"
+  - "https://security.appspot.com/vsftpd.html"
+  - "https://www.sans.org/reading-room/whitepapers/authentication/password-policy-an-overview-best-practices-2082"
+tags:
+  - ftp
+  - vsftpd
+  - brute_force
+  - anonymous
+  - T1110.001

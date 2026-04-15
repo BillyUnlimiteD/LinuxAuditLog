@@ -1,0 +1,40 @@
+id: WEB-013
+title: HTTP Header Injection / CRLF Injection Attempt
+category: web
+subcategory: injection
+mitre_technique: T1190
+mitre_tactic: initial_access
+severity: high
+confidence: medium
+enabled: true
+description: >
+  Detects HTTP Header Injection and CRLF (Carriage Return Line Feed) injection attempts
+  in web server access logs. By injecting \r\n sequences into HTTP response headers,
+  attackers can perform HTTP response splitting, session fixation, XSS via injected headers,
+  cache poisoning, and redirect hijacking. The attack is triggered when user input is
+  reflected in HTTP response headers (Location, Set-Cookie, Content-Type) without sanitization.
+service: "*"
+detection:
+  type: pattern
+  patterns:
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>[^\"]*(?:%0d%0a|%0D%0A|%0a%0d|%0A%0D|%0d|%0a|%0D|%0A)[^\"]*(?:Set-Cookie|Location|Content-Type|HTTP/)[^\"]*)\""
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>[^\"]*(?:%250d%250a|%25%30%64%25%30%61|\\\\r\\\\n|\\\\n)[^\"]*)\""
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>[^\"]*(?:header|location|redirect)=[^\"]*(?:%0d|%0a|%0D|%0A)[^\"]*)\""
+false_positives:
+  - URL-encoded newlines in legitimate data fields (document content, text areas)
+  - API endpoints accepting multiline text that URL-encode the content
+recommendation: >
+  1. Sanitize all user input used in HTTP response headers — strip or reject CR/LF characters.
+  2. Use framework-provided header-setting APIs that automatically encode values.
+  3. Implement Content-Security-Policy to limit damage from injected headers.
+  4. Review the specific endpoint for response splitting or session fixation vulnerabilities.
+  5. Verify web server and reverse proxy configurations strip header injection attempts.
+references:
+  - "https://owasp.org/www-community/attacks/HTTP_Response_Splitting"
+  - "https://attack.mitre.org/techniques/T1190/"
+  - "https://portswigger.net/web-security/request-smuggling"
+tags:
+  - owasp
+  - crlf
+  - header-injection
+  - response-splitting

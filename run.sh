@@ -50,7 +50,7 @@ trap '_cleanup' INT TERM
 
 echo ""
 echo -e "${BOLD}======================================================${RESET}"
-echo -e "${BOLD}  LinuxAuditLog v1.5.0 -- Forensic Acquisition Agent${RESET}"
+echo -e "${BOLD}  LinuxAuditLog v1.6.0 -- Forensic Acquisition Agent${RESET}"
 echo -e "${BOLD}======================================================${RESET}"
 
 # -- Leer rutas desde .env ----------------------------------------------------

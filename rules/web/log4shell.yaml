@@ -1,0 +1,47 @@
+id: WEB-010
+title: Log4Shell / Log4j RCE Exploitation Attempt (CVE-2021-44228)
+category: web
+subcategory: rce
+mitre_technique: T1190
+mitre_tactic: initial_access
+severity: critical
+confidence: high
+enabled: true
+description: >
+  Detects Log4Shell exploitation attempts (CVE-2021-44228) targeting the Apache Log4j
+  library. The vulnerability allows unauthenticated RCE via JNDI lookup injection in any
+  logged string — including HTTP headers, User-Agent, Referer, X-Forwarded-For, username
+  fields, and URI parameters. The attacker controls a LDAP/RMI/DNS server that delivers
+  a malicious Java class upon lookup. All Log4j versions 2.0-beta9 to 2.14.1 are affected.
+  Obfuscated variants use nested lookups like ${${lower:j}ndi:} to bypass naive filters.
+service: "*"
+detection:
+  type: pattern
+  patterns:
+    - regex: "(?P<src_ip>[\\d.]+).*(?P<payload>\\$\\{jndi:(?:ldap|ldaps|rmi|dns|iiop|corba|nis|nds)://[^}]+\\})"
+    - regex: "(?P<src_ip>[\\d.]+).*(?P<payload>\\$\\{\\$\\{|\\$\\{::-j\\}|\\$\\{lower:j\\}|\\$\\{upper:j\\}|\\$\\{env:[^}]+\\})"
+    - regex: "(?P<src_ip>[\\d.]+).*(?P<payload>%24%7Bjndi%3A|%2524%257Bjndi%3A|\\$%7Bjndi:|jndi%3A%2F%2F)"
+    - regex: "(?P<src_ip>[\\d.]+).*(?:X-Forwarded-For|User-Agent|Referer|X-Api-Version|Accept-Language).*(?P<payload>\\$\\{jndi:|jndi%3A)"
+false_positives:
+  - Security scanners performing authorized Log4Shell assessments
+  - Internal monitoring tools testing for the vulnerability (should use internal IPs)
+recommendation: >
+  CRITICAL — treat as active exploitation attempt.
+  1. Immediately verify Log4j version on all Java applications (mvn dependency:tree | grep log4j).
+  2. Patch to Log4j >= 2.17.1 (Java 8), >= 2.12.4 (Java 7), >= 2.3.2 (Java 6).
+  3. Interim mitigations: set LOG4J_FORMAT_MSG_NO_LOOKUPS=true or remove JndiLookup class.
+  4. Block outbound LDAP/RMI traffic from application servers at the firewall.
+  5. Search all logs (including archived) for ${jndi: patterns — exploitation may predate detection.
+  6. Analyze DNS logs for outbound lookups to attacker-controlled domains.
+references:
+  - "https://nvd.nist.gov/vuln/detail/CVE-2021-44228"
+  - "https://attack.mitre.org/techniques/T1190/"
+  - "https://logging.apache.org/log4j/2.x/security.html"
+  - "https://www.lunasec.io/docs/blog/log4j-zero-day/"
+tags:
+  - log4shell
+  - log4j
+  - jndi
+  - cve-2021-44228
+  - rce
+  - critical

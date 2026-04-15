@@ -1,0 +1,46 @@
+id: WEB-016
+title: Dangerous HTTP Method Abuse (TRACE/PUT/DELETE/WebDAV)
+category: web
+subcategory: misconfiguration
+mitre_technique: T1190
+mitre_tactic: initial_access
+severity: medium
+confidence: medium
+enabled: true
+description: >
+  Detects abuse of dangerous HTTP methods in web server access logs. TRACE/TRACK methods
+  enable Cross-Site Tracing (XST) attacks to steal session cookies. HTTP PUT to arbitrary
+  paths may allow webshell upload if not restricted. DELETE can destroy server content.
+  WebDAV methods (PROPFIND, MKCOL, COPY, MOVE, LOCK) may expose directory structure or
+  allow unauthorized file operations. OPTIONS requests are used by attackers to discover
+  enabled methods before exploitation. Unexpected methods to web application paths
+  indicate misconfiguration or active exploitation.
+service: "*"
+detection:
+  type: pattern
+  patterns:
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:TRACE|TRACK) (?P<uri>[^\"]+)\" (?:200|405)"
+    - regex: "(?P<src_ip>[\\d.]+).*\"PUT (?P<uri>/(?!api/|v\\d/)[^\"]*\\.(?:php|jsp|aspx|sh|py|rb|pl|cgi|shtml))[^\"]*\" (?:200|201|204)"
+    - regex: "(?P<src_ip>[\\d.]+).*\"(?:PROPFIND|MKCOL|COPY|MOVE|LOCK|UNLOCK) (?P<uri>[^\"]+)\" (?:200|201|207|403|405)"
+    - regex: "(?P<src_ip>[\\d.]+).*\"DELETE (?P<uri>/(?!api/|v\\d/)[^\"]*)[^\"]*\" (?:200|204|404)"
+    - regex: "(?P<src_ip>[\\d.]+).*\"OPTIONS (?P<uri>[^\"]+)\" 200 .*(?:Allow:.*(?:PUT|DELETE|TRACE|CONNECT))"
+false_positives:
+  - REST APIs legitimately using PUT and DELETE methods
+  - WebDAV-enabled file sharing services (SharePoint, OwnCloud, Nextcloud)
+  - CORS preflight OPTIONS requests in web applications
+recommendation: >
+  1. Disable TRACE and TRACK methods in web server configuration (always — no legitimate use).
+  2. Restrict PUT/DELETE to authenticated API endpoints only; deny on static file paths.
+  3. Disable WebDAV if not explicitly required.
+  4. Limit OPTIONS responses to methods actually in use on each route.
+  5. Verify that PUT to script extensions returns 403/405 and does not save files.
+references:
+  - "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/06-Test_HTTP_Methods"
+  - "https://attack.mitre.org/techniques/T1190/"
+  - "https://portswigger.net/kb/issues/00500a00_http-trace-method-is-enabled"
+tags:
+  - http-methods
+  - trace
+  - webdav
+  - put-upload
+  - misconfiguration
