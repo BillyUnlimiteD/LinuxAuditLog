@@ -1,8 +1,8 @@
-# LinuxAuditLog v1.4.0
+# LinuxAuditLog v1.5.0
 
 **Agente forense de adquisición remota y análisis de seguridad Linux**
 
-Herramienta de adquisición forense remota sobre SSH con análisis local determinístico, generación de informe pericial en español, exportación PDF automática y generación de prompts listos para consultar a una IA por cada hallazgo. Sin credenciales en disco. Sin dependencias de servicios en la nube.
+Herramienta de adquisición forense remota sobre SSH con análisis local determinístico, generación de informe pericial en español o inglés, exportación PDF automática y generación de prompts listos para consultar a una IA por cada hallazgo. Sin credenciales en disco. Sin dependencias de servicios en la nube.
 
 ---
 
@@ -468,6 +468,26 @@ Sin nuevas reglas YAML en esta version. Los cambios son de infraestructura:
 | Stage B — IOC engine | Filtro de servicio ahora case-insensitive (solucionaba falsos negativos con `NetworkManager`, `CROND`) |
 | Reporting — PDF | Tablas corregidas: nombres de artefacto sin prefijo `var_log_`, timestamps en formato `YYYY-MM-DD HH:MM` en lugar de ISO completo |
 
+### Nuevas reglas (v1.5.0)
+
+| ID | Titulo | MITRE | Severidad |
+|---|---|---|---|
+| WEB-GIT-001 | Git Repository Theft via Web | T1213 | high |
+| WEB-CONFIG-001 | Configuration File Disclosure via Web | T1552.001 | high |
+| WEB-BACKUP-001 | Backup File Enumeration via Web | T1083 | medium |
+| WEB-VCS-001 | VCS Metadata Exposure (SVN/HG/BZR/CVS) | T1213 | high |
+| WEB-ETC-001 | /etc/ File Access via Web (LFI/Path Traversal) | T1083 | critical |
+
+### Novedades de plataforma (v1.5.0)
+
+| Componente | Mejora |
+|---|---|
+| Multi-idioma | Informes en español (`LANGUAGE=ES`) o inglés (`LANGUAGE=EN`) seleccionable desde `.env` |
+| Templates | Plantillas separadas por idioma: `report.es.md.j2`, `report.en.md.j2`, `prompts.es.md.j2`, `prompts.en.md.j2` |
+| Documentacion | `README.en.md` añadido — documentacion completa en ingles |
+| Reglas web | 5 nuevas reglas para deteccion de ataques web: robo de repositorios .git, divulgacion de archivos de configuracion, enumeracion de backups, metadata VCS y acceso a /etc/ via LFI |
+| Config | Variable `LANGUAGE` añadida a `config.py` y `.env.example` |
+
 ---
 
 ## 10. Añadir reglas personalizadas
@@ -517,7 +537,7 @@ En re-ejecuciones (Stage B sin cambios en los logs), el normalizador detecta que
 
 ### Referencia de tiempos
 
-| Etapa | v1.0.0 (109K entradas) | v1.1.0 (109K entradas) | v1.4.0 (375K entradas) |
+| Etapa | v1.0.0 (109K entradas) | v1.1.0 (109K entradas) | v1.4.0+ (375K entradas) |
 |---|---|---|---|
 | Normalizacion (primera vez) | ~0.8 s | ~0.8 s | ~3 s |
 | Normalizacion (cache hit) | ~0.8 s | ~0.7 s | ~0.5 s |
@@ -525,7 +545,7 @@ En re-ejecuciones (Stage B sin cambios en los logs), el normalizador detecta que
 | Total (primer analisis) | ~181 s | ~3 s | ~10 s |
 | Total (re-analisis con cache) | ~181 s | ~2.9 s | ~7.5 s |
 
-> Los datos de v1.4.0 corresponden a una adquisicion real de 60 dias (1440h) sobre CentOS 7 con 54 artefactos y 375.928 entradas normalizadas.
+> Los datos de v1.4.0+ corresponden a una adquisicion real de 60 dias (1440h) sobre CentOS 7 con 54 artefactos y 375.928 entradas normalizadas.
 
 ---
 
@@ -727,6 +747,6 @@ Todas las dependencias son de codigo abierto (MIT, Apache 2.0 o BSD). No se requ
 
 ---
 
-*LinuxAuditLog v1.4.0 — Herramienta forense de adquisicion remota Linux*
+*LinuxAuditLog v1.5.0 — Herramienta forense de adquisicion remota Linux*
 
 *Desarrollado por Gonzalo Serrano en colaboracion con [Claude Code](https://claude.ai/code) (Anthropic).*

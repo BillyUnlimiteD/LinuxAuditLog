@@ -1,4 +1,4 @@
-# LinuxAuditLog v1.4.0
+# LinuxAuditLog v1.5.0
 
 **Remote forensic acquisition and Linux security analysis agent**
 
@@ -482,7 +482,26 @@ rules/
 | Stage B — Normalizer | Dedicated parser for Stage A JSONL format; Linux audit log parser (`type=SYSCALL`, `USER_LOGIN`, `AVC`, etc.) with service mapping |
 | Stage B — IOC engine | Service filter now case-insensitive (fixed false negatives with `NetworkManager`, `CROND`) |
 | Reporting — PDF | Fixed tables: artifact names without `var_log_` prefix, timestamps in `YYYY-MM-DD HH:MM` format instead of full ISO |
-| Multi-language | Reports generated in Spanish (`LANGUAGE=ES`) or English (`LANGUAGE=EN`) via `.env` |
+
+### New rules (v1.5.0)
+
+| ID | Title | MITRE | Severity |
+|---|---|---|---|
+| WEB-GIT-001 | Git Repository Theft via Web | T1213 | high |
+| WEB-CONFIG-001 | Configuration File Disclosure via Web | T1552.001 | high |
+| WEB-BACKUP-001 | Backup File Enumeration via Web | T1083 | medium |
+| WEB-VCS-001 | VCS Metadata Exposure (SVN/HG/BZR/CVS) | T1213 | high |
+| WEB-ETC-001 | /etc/ File Access via Web (LFI/Path Traversal) | T1083 | critical |
+
+### Platform updates (v1.5.0)
+
+| Component | Improvement |
+|---|---|
+| Multi-language | Reports in Spanish (`LANGUAGE=ES`) or English (`LANGUAGE=EN`) selectable from `.env` |
+| Templates | Separate templates per language: `report.es.md.j2`, `report.en.md.j2`, `prompts.es.md.j2`, `prompts.en.md.j2` |
+| Documentation | `README.en.md` added — full English documentation |
+| Web rules | 5 new rules for web attack detection: .git repository theft, config file disclosure, backup enumeration, VCS metadata exposure, /etc/ access via LFI |
+| Config | `LANGUAGE` variable added to `config.py` and `.env.example` |
 
 ---
 
@@ -533,7 +552,7 @@ On re-runs (Stage B with no log changes), the normalizer detects that `all_entri
 
 ### Timing reference
 
-| Stage | v1.0.0 (109K entries) | v1.1.0 (109K entries) | v1.4.0 (375K entries) |
+| Stage | v1.0.0 (109K entries) | v1.1.0 (109K entries) | v1.4.0+ (375K entries) |
 |---|---|---|---|
 | Normalization (first time) | ~0.8 s | ~0.8 s | ~3 s |
 | Normalization (cache hit) | ~0.8 s | ~0.7 s | ~0.5 s |
@@ -541,7 +560,7 @@ On re-runs (Stage B with no log changes), the normalizer detects that `all_entri
 | Total (first analysis) | ~181 s | ~3 s | ~10 s |
 | Total (re-analysis with cache) | ~181 s | ~2.9 s | ~7.5 s |
 
-> v1.4.0 data corresponds to a real 60-day acquisition (1440h) on CentOS 7 with 54 artifacts and 375,928 normalized entries.
+> v1.4.0+ data corresponds to a real 60-day acquisition (1440h) on CentOS 7 with 54 artifacts and 375,928 normalized entries.
 
 ---
 
@@ -745,6 +764,6 @@ All dependencies are open source (MIT, Apache 2.0 or BSD). No commercial license
 
 ---
 
-*LinuxAuditLog v1.4.0 — Linux remote forensic acquisition tool*
+*LinuxAuditLog v1.5.0 — Linux remote forensic acquisition tool*
 
 *Developed by Gonzalo Serrano in collaboration with [Claude Code](https://claude.ai/code) (Anthropic).*
