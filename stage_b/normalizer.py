@@ -254,7 +254,7 @@ class LogNormalizer:
             svc = (
                 obj.get("SYSLOG_IDENTIFIER")
                 or (obj.get("_SYSTEMD_UNIT", "").replace(".service", ""))
-                or "unknown"
+                or service_key
             )[:64]
 
             message = obj.get("MESSAGE", "")

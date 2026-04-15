@@ -393,11 +393,25 @@ Los siguientes eventos de nivel warn o superior se presentan en orden cronologic
 Para la timeline completa, consultar `02_analysis/timeline_unified.csv`.
 
 {% if timeline_events %}
-| Timestamp | Servicio | Nivel | Origen | Mensaje |
-|:----------|:---------|:------|:-------|:--------|
+<table style="border-collapse:collapse;width:100%;font-size:8pt;table-layout:fixed;margin-bottom:1em;">
+<thead><tr style="background:#1a1a2e;color:#fff;">
+<th style="padding:4px 6px;border:1px solid #bbb;width:15%;">Timestamp</th>
+<th style="padding:4px 6px;border:1px solid #bbb;width:14%;">Servicio</th>
+<th style="padding:4px 6px;border:1px solid #bbb;width:7%;">Nivel</th>
+<th style="padding:4px 6px;border:1px solid #bbb;width:13%;">IP Origen</th>
+<th style="padding:4px 6px;border:1px solid #bbb;width:51%;">Mensaje</th>
+</tr></thead>
+<tbody>
 {% for event in timeline_events %}
-| {{ event.timestamp | short_ts }} | {{ event.service }} | {{ event.level | upper }} | {{ event.src_ip or "" }} | {{ event.message[:120] }} |
+<tr style="background:{% if loop.index is odd %}#ffffff{% else %}#f5f5f5{% endif %};">
+<td style="padding:3px 6px;border:1px solid #bbb;font-family:Courier,monospace;font-size:7.5pt;">{{ event.timestamp | short_ts }}</td>
+<td style="padding:3px 6px;border:1px solid #bbb;word-break:break-all;">{{ (event.service or "—") | e }}</td>
+<td style="padding:3px 6px;border:1px solid #bbb;text-align:center;">{{ (event.level or "") | upper | e }}</td>
+<td style="padding:3px 6px;border:1px solid #bbb;font-family:Courier,monospace;font-size:7.5pt;">{{ (event.src_ip or "") | e }}</td>
+<td style="padding:3px 6px;border:1px solid #bbb;word-break:break-all;">{{ event.message[:150] | e }}</td>
+</tr>
 {% endfor %}
+</tbody></table>
 {% else %}
 No se encontraron eventos de nivel warn o superior en la ventana analizada.
 {% endif %}
