@@ -1,0 +1,78 @@
+id: WEB-BACKUP-001
+title: Enumeración y Descarga de Archivos de Respaldo Expuestos
+category: web
+subcategory: backup_exposure
+mitre_technique: T1083
+mitre_tactic: discovery
+severity: medium
+confidence: medium
+enabled: true
+
+description: >
+  Detecta intentos de localizar y descargar archivos de respaldo y copias de
+  seguridad expuestos en el servidor web. Los atacantes buscan sistemáticamente
+  archivos con extensiones .bak, .old, .backup, .orig dejados por administradores
+  al editar configuraciones, copias temporales del editor de texto (.php~, .swp),
+  comprimidos del sitio completo (www.zip, public_html.tar.gz, backup.tar.gz)
+  y dumps de base de datos (.sql, .sql.gz). Estos archivos frecuentemente contienen:
+  código fuente PHP/Python con credenciales embebidas, dumps de tablas de usuarios,
+  contraseñas hasheadas, datos de tarjetas de crédito y PII. La presencia de un
+  archivo .sql accesible en el web root es una fuga de datos masiva potencial.
+
+service: "*"
+
+detection:
+  type: pattern
+  patterns:
+    # Extensiones de backup de archivos individuales
+    - regex: "\"(?:GET|HEAD) (?P<uri>[^\"]+\\.(?:bak|old|backup|orig|save|copy|bk|bck)(?:\\.[a-z]+)?)[^\"]* (?P<status>\\d{3})"
+      _note: "Copias de seguridad de archivos individuales — frecuentes en scripts PHP con credenciales"
+    # Archivos temporales de editores de texto (vim, emacs, nano)
+    - regex: "\"(?:GET|HEAD) (?P<uri>[^\"]*(?:\\.php~|\\.py~|\\.rb~|\\.conf~|\\.html~|\\.js~|\\.css~|\\.sh~|\\.inc~|#[^\"#]+#|4913))[^\"]* (?P<status>\\d{3})"
+      _note: "Archivos temporales de vim (~) y emacs (#) — contienen la versión sin guardar del archivo original"
+    # Archivos swap de vim (.swp, .swo, .swn)
+    - regex: "\"(?:GET|HEAD) (?P<uri>[^\"]*\\.sw[op])[^\"]* (?P<status>\\d{3})"
+      _note: "Archivos swap de vim — permiten recuperar el contenido del buffer de edición"
+    # Archivos comprimidos del sitio completo
+    - regex: "\"(?:GET|HEAD) (?P<uri>[^\"]*(?:(?:www|public_html|htdocs|web|html|site|root|app|application|portal|backup|dump|full|complete|website|project)\\d*\\.(?:zip|tar\\.gz|tar\\.bz2|tgz|gz|7z|rar|tar)))[^\"]* (?P<status>\\d{3})"
+      _note: "Comprimidos del sitio completo — código fuente, configuraciones y assets en un solo archivo"
+    # Dumps de base de datos
+    - regex: "\"(?:GET|HEAD) (?P<uri>[^\"]*(?:[^\"]*\\.sql(?:\\.gz|\\.bz2|\\.zip|\\.tar\\.gz)?|/(?:dump|export|backup|db|database|datos|full_backup)\\d*\\.(?:sql|gz|zip)))[^\"]* (?P<status>\\d{3})"
+      _note: "Dumps SQL — contienen datos completos de la base de datos incluyendo usuarios y credenciales hasheadas"
+    # Archivos de log con datos sensibles
+    - regex: "\"(?:GET|HEAD) (?P<uri>[^\"]*(?:/(?:error|access|debug|app|application|laravel|django|rails|wordpress)\\.log(?:\\.[0-9]+|\\.gz)?)[^\"]*)\" (?P<status>\\d{3})"
+      _note: "Archivos de log de aplicación — pueden contener stack traces con credenciales, tokens y rutas internas"
+
+false_positives:
+  - Descarga de exports SQL autorizados con autenticación previa (área privada)
+  - Archivos de backup explícitamente publicados en CDNs para distribución
+  - Archivos de log de aplicación servidos intencionalmente (panel de administración)
+
+recommendation: >
+  1. Nunca dejar archivos .bak/.old/.sql en el document root del servidor web
+  2. Configurar bloqueo de extensiones de backup en nginx:
+       location ~* \.(bak|old|backup|orig|save|sql|swp|swo|~)$ { deny all; return 403; }
+  3. En Apache/httpd:
+       <FilesMatch "\.(bak|old|backup|orig|save|sql|swp|swo)$"> Require all denied </FilesMatch>
+  4. Si un dump .sql fue descargado exitosamente (HTTP 200):
+       - Evaluar como fuga de datos masiva — escalar al DPO y equipo legal
+       - Identificar qué datos contenía la tabla (usuarios, tarjetas, PII)
+       - Cumplir con obligaciones de notificación (GDPR, Ley 19.628 en Chile)
+       - Rotar TODAS las contraseñas de la base de datos
+       - Forzar cambio de contraseña a todos los usuarios afectados
+  5. Implementar script de limpieza periódica del web root para extensiones de backup:
+       find /var/www/html -name "*.bak" -o -name "*.old" -o -name "*.sql" | xargs ls -la
+  6. Mover backups a almacenamiento no público: bucket S3 privado, NAS fuera del web root
+
+references:
+  - "https://attack.mitre.org/techniques/T1083/"
+  - "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/04-Review_Old_Backup_and_Unreferenced_Files_for_Sensitive_Information"
+  - "https://portswigger.net/web-security/information-disclosure/exploiting"
+
+tags:
+  - backup_exposure
+  - sql_dump
+  - file_enumeration
+  - web
+  - data_exposure
+  - t1083

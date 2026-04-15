@@ -1,46 +1,75 @@
 id: SVC-APACHE-001
-title: Apache2 Anomalous Activity
+title: Apache2 — Actividad Anómala y Descarga de Archivos Sensibles
 category: web
 subcategory: apache2
 mitre_technique: T1190
 mitre_tactic: initial_access
-severity: medium
+severity: high
 confidence: medium
 enabled: true
 description: >
-  Detects suspicious patterns in Apache2 access and error logs including:
-  access to sensitive Apache internals (server-status, server-info), mod_cgi
-  exploitation, .htaccess bypass attempts, Apache Struts and Log4j exploitation
-  patterns, directory listing abuse, and anomalous HTTP method usage (TRACE, PUT,
-  DELETE). Also covers Apache-specific CVEs.
+  Detecta patrones sospechosos en los logs de acceso y error de Apache2, con énfasis
+  en la descarga exitosa (HTTP 200) de recursos sensibles: repositorios Git (.git/),
+  archivos de configuración (.env, wp-config.php), archivos de respaldo (.bak, .sql),
+  metadata de VCS (.svn/, .hg/) y archivos de credenciales (.htpasswd). También cubre
+  métodos HTTP anómalos (TRACE, TRACK), internals de Apache (server-status, server-info),
+  explotación de mod_cgi, patrones de Apache Struts y Log4j, y herramientas de escaneo.
+  Complementa las reglas genéricas WEB-GIT-001, WEB-CONFIG-001 y WEB-BACKUP-001 con
+  patrones específicos del formato de log de Apache2.
 service: apache2
 detection:
   type: pattern
   patterns:
-    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>/(?:server-status|server-info|balancer-manager|manager/html|jkstatus)[^\"]*)\""
-    - regex: "(?P<src_ip>[\\d.]+).*\"(?P<method>TRACE|TRACK|CONNECT|DELETE|PUT) (?P<uri>[^\"]+)\""
-    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>[^\"]*(?:struts2?|strutsAction|action\\.do|\\?actionErrors|\\?debug=browser)[^\"]*)\""
-    - regex: "\\[error\\].*(?P<msg>attempt to invoke directory as script|malformed header from script|suexec policy violation|access to \\S+ denied)"
-    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>[^\"]*cgi-bin/[^\"]*(?:\\?|%3F)(?:[^\"]*(?:;|%3B|\\|)))\""
-    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|HEAD) (?P<uri>[^\"]*(?:/\\.htaccess|/\\.htpasswd|/\\.svn/|/\\.git/config)[^\"]*)\""
-    - regex: "(?P<src_ip>[\\d.]+).*(?:ApacheBench|ab/\\d|peach|apachebench).*\" (?P<status>[245]\\d{2}) "
+    # Descarga EXITOSA (200) de recursos Git en Apache
+    - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"(?:GET|HEAD) (?P<uri>[^\"]*\\.git/[^\"]*)\" 200 (?P<size>\\d+)"
+      _note: "HTTP 200 en .git/ en Apache = código fuente expuesto"
+    # Descarga EXITOSA (200) de archivos de configuración sensibles
+    - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"(?:GET|HEAD) (?P<uri>[^\"]*(?:/\\.env(?:\\.[a-z]+)?|/wp-config\\.php|/database\\.yml|/config\\.php|/settings\\.php|/\\.htpasswd))\" 200 (?P<size>\\d+)"
+      _note: "HTTP 200 en archivo de configuración = credenciales expuestas en Apache"
+    # Descarga EXITOSA (200) de archivos de backup y SQL
+    - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"(?:GET|HEAD) (?P<uri>[^\"]*\\.(?:bak|old|backup|sql|swp)[^\"]*)\" 200 (?P<size>\\d+)"
+      _note: "HTTP 200 en archivo de respaldo en Apache"
+    # INTENTO (cualquier código) a recursos VCS y configuración
+    - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"(?:GET|HEAD) (?P<uri>[^\"]*(?:/\\.git/|/\\.svn/|/\\.hg/|/CVS/|/\\.env|/\\.htpasswd|/wp-config\\.php))[^\"]*\" (?P<status>[245]\\d{2})"
+    # Internals de Apache expuestos
+    - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"(?:GET|POST) (?P<uri>/(?:server-status|server-info|balancer-manager|manager/html|jkstatus)[^\"]*)\" (?P<status>\\d{3})"
+    # Métodos HTTP anómalos (TRACE puede usarse para robo de credenciales via XST)
+    - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"(?P<method>TRACE|TRACK|CONNECT) (?P<uri>[^\"]+)\" (?P<status>\\d{3})"
+    # Explotación Apache Struts
+    - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"(?:GET|POST) (?P<uri>[^\"]*(?:struts2?|strutsAction|action\\.do|\\?actionErrors|\\?debug=browser)[^\"]*)\" (?P<status>\\d{3})"
+    # Explotación mod_cgi con inyección de comandos
+    - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"(?:GET|POST) (?P<uri>[^\"]*cgi-bin/[^\"]*(?:\\?|%3F)[^\"]*(?:;|%3B|\\|))[^\"]* (?P<status>\\d{3})"
+    # Errores críticos de Apache
+    - regex: "\\[error\\].*(?P<msg>attempt to invoke directory as script|malformed header from script|suexec policy violation|Premature end of script headers)"
+    # Herramientas de escaneo web en User-Agent
+    - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"[^\"]+\" (?P<status>\\d{3}) \\d+ \"[^\"]*\" \"(?P<ua>[^\"]*(?:nikto|sqlmap|dirbuster|gobuster|nuclei|wfuzz|feroxbuster|git.dumper|dvcs.ripper)[^\"]*)\""
 false_positives:
-  - Authorized security teams accessing server-status for monitoring
-  - Legitimate REST APIs using DELETE/PUT methods
-  - Apache Bench load testing by authorized staff
+  - Equipos de seguridad autorizados accediendo a server-status con restricción de IP
+  - APIs REST legítimas usando métodos DELETE/PUT
+  - Apache Bench para pruebas de carga autorizadas
 recommendation: >
-  1. Disable server-status and server-info in production (or restrict by IP).
-  2. Disable TRACE and TRACK methods: TraceEnable Off
-  3. Ensure mod_cgi scripts are reviewed and cannot be injected.
-  4. Set Options -Indexes to prevent directory listing.
-  5. Keep Apache updated — check for CVEs affecting your version (apache2 -v).
-  6. Implement ModSecurity WAF for pattern-based blocking.
+  SI SE DETECTAN RESPUESTAS HTTP 200 EN RECURSOS SENSIBLES — PRIORIDAD ALTA:
+  1. Confirmar accesos exitosos:
+       grep -E '\.git/|\.env|\.bak|\.sql|\.svn/' /var/log/apache2/access.log | grep ' 200 '
+  2. Bloquear en Apache con .htaccess o httpd.conf:
+       <DirectoryMatch "\.(git|svn|hg|bzr)"> Require all denied </DirectoryMatch>
+       <FilesMatch "\.(env|bak|old|backup|sql|swp|orig)$"> Require all denied </FilesMatch>
+  3. Deshabilitar TRACE: TraceEnable Off
+  4. Deshabilitar server-status o restringir por IP:
+       <Location /server-status> Require ip 127.0.0.1 192.168.0.0/24 </Location>
+  5. Rotar credenciales expuestas e investigar accesos posteriores a la fuga.
+  6. Instalar ModSecurity con ruleset OWASP CRS para bloqueo automático.
 references:
   - "https://attack.mitre.org/techniques/T1190/"
+  - "https://attack.mitre.org/techniques/T1552/001/"
   - "https://httpd.apache.org/docs/2.4/misc/security_tips.html"
   - "https://modsecurity.org/"
+  - "https://owasp.org/www-project-modsecurity-core-rule-set/"
 tags:
   - apache2
   - web
+  - git_exposure
+  - config_disclosure
+  - backup_exposure
   - cgi
   - configuration_exposure

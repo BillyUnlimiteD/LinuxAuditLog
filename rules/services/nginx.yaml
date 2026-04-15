@@ -1,44 +1,73 @@
 id: SVC-NGINX-001
-title: Nginx Anomalous Activity
+title: Nginx — Actividad Anómala y Descarga de Archivos Sensibles
 category: web
 subcategory: nginx
 mitre_technique: T1190
 mitre_tactic: initial_access
-severity: medium
+severity: high
 confidence: medium
 enabled: true
 description: >
-  Detects anomalous patterns in Nginx access and error logs including:
-  unusually large response bodies (potential data exfiltration), 4xx/5xx spikes,
-  access to sensitive Nginx internals, configuration file exposure, and
-  buffer overflow attempts via oversized headers or request bodies.
-  Also covers Nginx-specific misconfigurations being exploited.
+  Detecta patrones anómalos en los logs de acceso y error de Nginx, con énfasis en
+  la descarga exitosa (HTTP 200) de archivos sensibles: repositorios Git expuestos
+  (.git/), archivos de configuración (.env, wp-config.php, database.yml), archivos
+  de respaldo (.bak, .sql, .zip del sitio) y metadata de otros VCS (.svn/, .hg/).
+  También cubre respuestas 5xx masivas (posible ataque), peticiones con URIs
+  anormalmente largas (buffer overflow) y acceso a internals de Nginx (nginx_status).
+  La distinción clave: una respuesta 200 a cualquiera de estos recursos confirma
+  una fuga de información activa, no un intento bloqueado.
 service: nginx
 detection:
   type: pattern
   patterns:
-    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>/(?:nginx_status|server-status|\\.nginx|\\.htpasswd|nginx\\.conf)[^\"]*)\""
-    - regex: "(?P<src_ip>[\\d.]+).*\" (?P<status>5\\d{2}) (?P<size>\\d{6,})"
-    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST|PUT) (?P<uri>[^\"]{2048,})\""
-    - regex: "\\[error\\].*(?P<msg>open\\(\\) failed.*No such file|upstream timed out|upstream sent invalid header|failed \\(104: Connection reset\\))"
-    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>[^\"]*(?:/\\.git/|/\\.env|/\\.htaccess|/config\\.php|/wp-config\\.php|/database\\.yml)[^\"]*)\""
-    - regex: "(?P<src_ip>[\\d.]+).*\" (?P<status>40[034]) .* (?P<size>\\d+) .* (?:nikto|sqlmap|dirbuster|gobuster|nuclei|masscan|zgrab|scanner)"
+    # Descarga EXITOSA (200) de recursos Git — exposición confirmada
+    - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"(?:GET|HEAD) (?P<uri>[^\"]*\\.git/[^\"]*)\" 200 (?P<size>\\d+)"
+      _note: "HTTP 200 en .git/ = código fuente y posibles credenciales descargados"
+    # Descarga EXITOSA (200) de archivos de configuración y .env
+    - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"(?:GET|HEAD) (?P<uri>[^\"]*(?:/\\.env(?:\\.[a-z]+)?|/wp-config\\.php|/database\\.yml|/config\\.php|/appsettings\\.json|/application\\.properties))\" 200 (?P<size>\\d+)"
+      _note: "HTTP 200 en archivo de configuración = credenciales expuestas"
+    # Descarga EXITOSA (200) de archivos de backup y dumps SQL
+    - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"(?:GET|HEAD) (?P<uri>[^\"]*\\.(?:bak|old|backup|sql|sql\\.gz|swp)[^\"]*)\" 200 (?P<size>\\d+)"
+      _note: "HTTP 200 en backup/dump = código fuente o datos de BD expuestos"
+    # INTENTO (cualquier código) a recursos VCS, config o backup — para alertar también si está bloqueado
+    - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"(?:GET|HEAD) (?P<uri>[^\"]*(?:/\\.git/|/\\.svn/|/\\.hg/|/CVS/|/\\.env|/\\.htpasswd|/wp-config\\.php|/database\\.yml))[^\"]*\" (?P<status>[245]\\d{2})"
+      _note: "Cualquier intento de acceso a recursos sensibles — revisar status para confirmar exposición"
+    # Internals de Nginx expuestos
+    - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"(?:GET|POST) (?P<uri>/(?:nginx_status|server-status|\\.nginx|\\.htpasswd|nginx\\.conf)[^\"]*)\" (?P<status>\\d{3})"
+    # Respuestas 5xx con cuerpo grande (posible exfiltración o error de aplicación con datos)
+    - regex: "(?P<src_ip>[\\d.]+)[^\"]*\" (?P<status>5\\d{2}) (?P<size>\\d{6,})"
+    # URIs anormalmente largas (buffer overflow / path traversal profundo)
+    - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"(?:GET|POST|PUT) (?P<uri>[^\"]{2048,})\""
+    # Errores de upstream y protocolo (posible backend attack)
+    - regex: "\\[error\\].*(?P<msg>open\\(\\) failed.*No such file|upstream timed out|upstream sent invalid header|failed \\(104: Connection reset\\)|SSL_do_handshake\\(\\) failed)"
+    # Herramientas de escaneo conocidas en User-Agent o path
+    - regex: "(?P<src_ip>[\\d.]+)[^\"]*\" (?P<status>40[034]) [^\"]*\"(?:nikto|sqlmap|dirbuster|gobuster|nuclei|masscan|zgrab|nmap|wfuzz|feroxbuster|ffuf|git.dumper|dvcs.ripper)"
 false_positives:
-  - Legitimate large file downloads (videos, backups)
-  - Monitoring agents accessing /nginx_status with proper access control
-  - Developers accessing config files from trusted IPs
+  - Descargas legítimas de archivos grandes (vídeos, backups autorizados con autenticación)
+  - Agentes de monitoreo accediendo a /nginx_status desde IPs de gestión restringidas
+  - Desarrolladores accediendo a archivos de configuración desde IPs de confianza conocidas
 recommendation: >
-  1. Restrict access to /nginx_status with IP allowlisting in Nginx config.
-  2. Return 444 (close connection) for sensitive path patterns.
-  3. Set client_max_body_size and client_header_buffer_size to reasonable limits.
-  4. Enable rate limiting (limit_req_zone) for sensitive endpoints.
-  5. Review error log for repeated upstream failures (may indicate backend attacks).
-  6. Ensure .git, .env, .htaccess are blocked: location ~ /\. { deny all; }
+  SI SE DETECTAN RESPUESTAS HTTP 200 EN RECURSOS SENSIBLES — PRIORIDAD ALTA:
+  1. Confirmar el alcance revisando el access.log:
+       grep -E '\.git/|\.env|\.bak|\.sql|\.svn/' /var/log/nginx/access.log | grep ' 200 '
+  2. Bloquear INMEDIATAMENTE con location blocks en nginx.conf:
+       location ~ /\.(git|svn|hg|bzr|env|htpasswd|htaccess) { deny all; return 403; }
+       location ~* \.(bak|old|backup|sql|swp|orig)$ { deny all; return 403; }
+  3. Rotar todas las credenciales que pudieran haber sido expuestas.
+  4. Revisar el historial Git para credenciales embebidas:
+       git log --all -p | grep -iE '(password|token|secret|api.key)' | head -50
+  5. Configurar rate limiting para endpoints sensibles:
+       limit_req_zone $binary_remote_addr zone=sensitive:10m rate=5r/m;
+  6. Implementar fail2ban con filtro para accesos a .git/.env y bloqueo de IP.
 references:
   - "https://nginx.org/en/docs/http/ngx_http_limit_req_module.html"
   - "https://attack.mitre.org/techniques/T1190/"
+  - "https://attack.mitre.org/techniques/T1552/001/"
   - "https://www.nginx.com/blog/mitigating-ddos-attacks-with-nginx-and-nginx-plus/"
 tags:
   - nginx
   - web
+  - git_exposure
+  - config_disclosure
+  - backup_exposure
   - configuration_exposure

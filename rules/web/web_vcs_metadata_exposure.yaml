@@ -1,0 +1,82 @@
+id: WEB-VCS-001
+title: Exposición de Metadata de Control de Versiones (SVN/Mercurial/CVS/Bazaar)
+category: web
+subcategory: vcs_exposure
+mitre_technique: T1552.001
+mitre_tactic: credential_access
+severity: high
+confidence: high
+enabled: true
+
+description: >
+  Detecta intentos de acceder a metadata de sistemas de control de versiones
+  distintos de Git expuestos en el servidor web. Los vectores cubiertos incluyen:
+  Subversion (.svn/), Mercurial (.hg/), Bazaar (.bzr/) y CVS (CVS/). El ataque
+  es análogo al .git/ exposure: los archivos de metadata de estos VCS permiten
+  reconstruir el código fuente completo, auditar el historial de cambios y extraer
+  credenciales históricamente embebidas. Subversion es especialmente crítico porque
+  sus archivos de metadata (.svn/entries, wc.db) incluyen URLs de servidor con
+  posibles credenciales en el formato svn+ssh://user:password@host. La herramienta
+  dvcs-ripper automatiza la extracción de SVN, Git, HG y CVS en un solo paso.
+
+service: "*"
+
+detection:
+  type: pattern
+  patterns:
+    # Subversion (SVN) — archivos de trabajo del cliente svn
+    - regex: "\"(?:GET|HEAD) (?P<uri>[^\"]*\\.svn/(?:entries|wc\\.db|all-wcprops|format|README\\.txt|pristine/[^\"]+|props/[^\"]+|tmp/[^\"]+))[^\"]* (?P<status>\\d{3})"
+      _note: "wc.db es SQLite con historial completo; entries contiene URLs del repositorio remoto"
+    # Mercurial (HG)
+    - regex: "\"(?:GET|HEAD) (?P<uri>[^\"]*\\.hg/(?:manifest|store/[^\"]+|requires|branch|dirstate|hgrc|bookmarks|tags|phases\\.cache|cache/[^\"]+))[^\"]* (?P<status>\\d{3})"
+      _note: "hgrc puede contener credenciales de repositorio remoto; store/ contiene los datos del repo"
+    # Bazaar (BZR)
+    - regex: "\"(?:GET|HEAD) (?P<uri>[^\"]*\\.bzr/(?:branch-format|branch/format|branch/last-revision|repository/format|repository/pack-names|checkout/format))[^\"]* (?P<status>\\d{3})"
+      _note: "Bazaar es menos común pero el patrón de exposición es el mismo"
+    # CVS — legacy pero aún presente en sistemas antiguos
+    - regex: "\"(?:GET|HEAD) (?P<uri>[^\"]*CVS/(?:Root|Repository|Entries|Entries\\.Log|Tag|Checkin\\.prog|Update\\.prog))[^\"]* (?P<status>\\d{3})"
+      _note: "CVS/Root contiene la ruta y credenciales del servidor CVS central"
+    # Herramientas de extracción de VCS conocidas
+    - regex: "(?P<tool>dvcs.ripper|svn.ripper|hg.ripper|svnrob|svn-extractor|svndumper|CyberChef.*svn)"
+      _note: "User-agent o parámetros de herramientas de extracción de VCS"
+    # Acceso genérico a directorios de VCS (incluye escáneres automáticos)
+    - regex: "\"(?:GET|HEAD) (?P<uri>[^\"]*(?:/\\.svn/|/\\.hg/|/\\.bzr/|/CVS/))[^\"]* (?P<status>[245]\\d{2})"
+      _note: "Acceso genérico al directorio VCS — cualquier código de respuesta indica intento"
+
+false_positives:
+  - Repositorios SVN/HG públicos servidos intencionalmente vía WebDAV o HTTP
+  - Servidores ViewVC o Trac que sirven metadata SVN de forma controlada
+  - Sistemas de CI/CD que acceden al repositorio desde la misma red interna
+
+recommendation: >
+  ACCIÓN INMEDIATA SI SE DETECTAN RESPUESTAS HTTP 200:
+  1. Bloquear todos los directorios VCS en nginx:
+       location ~ /\.(svn|hg|bzr|git) { deny all; return 403; }
+       location ~ /CVS/ { deny all; return 403; }
+  2. En Apache/httpd:
+       <DirectoryMatch "\.(svn|hg|bzr|git|CVS)"> Require all denied </DirectoryMatch>
+  3. Verificar accesos exitosos en los logs:
+       grep -E '/\.(svn|hg|bzr)/|/CVS/' /var/log/nginx/access.log | grep ' 200 '
+  4. Si svn/wc.db fue descargado:
+       - Usar sqlite3 wc.db para auditar qué archivos y historial están expuestos
+       - Buscar credenciales en URLs de remote: grep -i 'svn+ssh\|svn://' wc.db
+       - Rotar credenciales encontradas en URLs de repositorio SVN
+  5. Migrar de SVN/CVS a Git si es posible — herramientas modernas tienen mejor gestión de secretos
+  6. Usar Vault, AWS Secrets Manager o similar para credenciales en lugar de archivos de VCS
+
+references:
+  - "https://attack.mitre.org/techniques/T1552/001/"
+  - "https://github.com/kost/dvcs-ripper"
+  - "https://blog.hboeck.de/archives/868-subversion-on-webservers.html"
+  - "https://owasp.org/www-project-web-security-testing-guide/"
+
+tags:
+  - svn
+  - mercurial
+  - cvs
+  - bazaar
+  - vcs_exposure
+  - source_code
+  - credential_theft
+  - web
+  - t1552.001

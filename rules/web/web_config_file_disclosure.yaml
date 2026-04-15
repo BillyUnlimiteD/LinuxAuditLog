@@ -1,0 +1,84 @@
+id: WEB-CONFIG-001
+title: Intento de Descarga de Archivos de Configuración Sensibles
+category: web
+subcategory: config_disclosure
+mitre_technique: T1552.001
+mitre_tactic: credential_access
+severity: high
+confidence: high
+enabled: true
+
+description: >
+  Detecta intentos de acceso y descarga de archivos de configuración sensibles
+  expuestos en el servidor web. Los atacantes enumeran rutas comunes de configuración
+  buscando archivos que contengan credenciales de base de datos, tokens API, claves
+  de cifrado y parámetros de conexión a servicios. Los vectores más críticos incluyen:
+  archivos .env (Laravel, Django, Node.js, Docker Compose), configuraciones de CMS
+  (wp-config.php, configuration.php de Joomla), configuraciones de frameworks
+  (database.yml de Rails, settings.py de Django, appsettings.json de .NET),
+  archivos de credenciales de servidor (.htpasswd) y configuraciones de servicios
+  (redis.conf, my.cnf, pg_hba.conf). Un solo archivo .env comprometido puede dar
+  acceso completo a la base de datos, servicios en la nube y sistemas de pago.
+
+service: "*"
+
+detection:
+  type: pattern
+  patterns:
+    # Archivos .env y variantes (Laravel, Django, Node, Docker, React, Vue, etc.)
+    - regex: "\"(?:GET|HEAD) (?P<uri>[^\"]*(?:/\\.env(?:\\.[a-zA-Z0-9._-]+)?|/env\\.(?:local|prod|production|development|staging|test|backup|example|sample)))[^\"]*\" (?P<status>\\d{3})"
+      _note: ".env es el vector de exposición más frecuente — contiene credenciales de BD, APIs, servicios cloud"
+    # Configuraciones de CMS
+    - regex: "\"(?:GET|HEAD) (?P<uri>[^\"]*(?:/wp-config\\.php|/wp-config-sample\\.php|/configuration\\.php|/config\\.php|/LocalSettings\\.php|/settings\\.php))[^\"]*\" (?P<status>\\d{3})"
+      _note: "Configuraciones WordPress, Joomla, MediaWiki, Drupal — credenciales de BD"
+    # Configuraciones de frameworks y aplicaciones
+    - regex: "\"(?:GET|HEAD) (?P<uri>[^\"]*(?:/(?:database|db|config|settings|local_settings|production|staging|development)\\.(?:php|yml|yaml|py|rb|json|xml|ini|conf)))[^\"]*\" (?P<status>\\d{3})"
+      _note: "Rails database.yml, Django settings.py, PHP config.php — credenciales de BD y servicios"
+    # Spring Boot / Java / .NET / Node
+    - regex: "\"(?:GET|HEAD) (?P<uri>[^\"]*(?:/application\\.(?:properties|yml|yaml)|/bootstrap\\.(?:properties|yml)|/appsettings(?:\\.[A-Za-z]+)?\\.json|/web\\.config|/app\\.config))[^\"]*\" (?P<status>\\d{3})"
+      _note: "Configuraciones Spring Boot, .NET — connection strings y secretos de la aplicación"
+    # Credenciales de servidor web y acceso
+    - regex: "\"(?:GET|HEAD) (?P<uri>[^\"]*(?:/\\.htpasswd|/\\.htaccess|/passwd|/\\.pgpass|/\\.mylogin\\.cnf|/\\.netrc|/\\.ftpconfig))[^\"]*\" (?P<status>\\d{3})"
+      _note: "Archivos de credenciales de servidor — autenticación básica HTTP, PostgreSQL, MySQL"
+    # Configuraciones de servicios de infraestructura
+    - regex: "\"(?:GET|HEAD) (?P<uri>[^\"]*(?:/(?:redis|memcached|rabbitmq|mongodb|elasticsearch)\\.conf|/my\\.cnf|/pg_hba\\.conf|/nginx\\.conf|/httpd\\.conf|/php\\.ini))[^\"]*\" (?P<status>\\d{3})"
+      _note: "Configuraciones de servicios de BD e infraestructura — credenciales y configuración interna"
+    # Docker y orquestación
+    - regex: "\"(?:GET|HEAD) (?P<uri>[^\"]*(?:/docker-compose(?:\\.[a-z]+)?\\.yml|/\\.dockerenv|/Dockerfile(?:\\.[a-z]+)?|/kubernetes\\.yml|/k8s\\.yml))[^\"]*\" (?P<status>\\d{3})"
+      _note: "Configuraciones Docker/K8s — exponen variables de entorno, imágenes privadas y secretos"
+
+false_positives:
+  - Herramientas de monitoreo accediendo a endpoints de health-check con autenticación
+  - Acceso interno legítimo a configuraciones desde IPs de administración conocidas
+  - Frameworks que sirven archivos de configuración públicos intencionalmente (poco común)
+
+recommendation: >
+  ACCIÓN INMEDIATA SI SE DETECTAN RESPUESTAS HTTP 200:
+  1. Mover TODOS los archivos de configuración fuera del document root del servidor web
+  2. Bloquear en nginx acceso a extensiones y archivos sensibles:
+       location ~* \.(env|yml|yaml|ini|conf|json|xml|bak|old|backup)$ { deny all; return 403; }
+       location ~ /\. { deny all; return 403; }
+  3. En Apache/httpd:
+       <FilesMatch "\.(env|yml|yaml|ini|conf|bak)$"> Require all denied </FilesMatch>
+       <DirectoryMatch "^\.|/\."> Require all denied </DirectoryMatch>
+  4. Si .env u otro archivo de credenciales fue descargado exitosamente:
+       - Rotar INMEDIATAMENTE todas las credenciales contenidas
+       - Revocar tokens API y regenerar claves secretas de aplicación
+       - Cambiar contraseñas de base de datos y forzar reconexión de la aplicación
+       - Revisar logs de base de datos para accesos no autorizados posteriores a la exposición
+  5. Usar variables de entorno del sistema (systemd EnvironmentFile, AWS SSM, Vault)
+     en lugar de archivos de configuración en el directorio web
+
+references:
+  - "https://attack.mitre.org/techniques/T1552/001/"
+  - "https://owasp.org/www-project-top-ten/2021/A05_2021-Security_Misconfiguration"
+  - "https://www.hackerone.com/top-ten-vulnerabilities"
+  - "https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Insecure%20Direct%20Object%20References"
+
+tags:
+  - config_disclosure
+  - env_file
+  - credential_theft
+  - web
+  - t1552.001
+  - owasp_a05

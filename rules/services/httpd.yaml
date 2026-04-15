@@ -8,32 +8,57 @@ severity: medium
 confidence: medium
 enabled: true
 description: >
-  Detects suspicious patterns specific to httpd deployments on Red Hat, CentOS,
-  Rocky Linux, and AlmaLinux systems. Covers httpd-specific paths (/var/log/httpd/),
-  SELinux denial patterns for httpd, suspicious httpd child process crashes,
-  PHP-FPM communication errors, and common CMS exploit patterns (WordPress, Joomla,
-  Drupal) often seen on httpd-based deployments.
+  Detecta patrones sospechosos en httpd (Apache) sobre Red Hat, CentOS, Rocky Linux
+  y AlmaLinux, con énfasis en la descarga exitosa (HTTP 200) de archivos sensibles:
+  repositorios Git (.git/), archivos de configuración (.env, wp-config.php), archivos
+  de respaldo (.bak, .sql) y metadata de VCS (.svn/, .hg/). Los despliegues manuales
+  en CentOS son especialmente propensos a dejar el directorio .git en el web root.
+  También cubre: denegaciones SELinux de httpd, crashes de workers, patrones de
+  explotación de CMS (WordPress xmlrpc, Joomla RCE), webshells PHP y RFI.
 service: httpd
 detection:
   type: pattern
   patterns:
-    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>/(?:server-status|server-info|cgi-bin/)[^\"]*)\""
+    # Descarga EXITOSA (200) de recursos Git en httpd/CentOS
+    - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"(?:GET|HEAD) (?P<uri>[^\"]*\\.git/[^\"]*)\" 200 (?P<size>\\d+)"
+      _note: "HTTP 200 en .git/ en httpd = código fuente expuesto (frecuente en deploys manuales CentOS)"
+    # Descarga EXITOSA (200) de archivos de configuración
+    - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"(?:GET|HEAD) (?P<uri>[^\"]*(?:/\\.env(?:\\.[a-z]+)?|/wp-config\\.php|/database\\.yml|/config\\.php|/\\.htpasswd))\" 200 (?P<size>\\d+)"
+      _note: "HTTP 200 en archivo de configuración en httpd = credenciales expuestas"
+    # Descarga EXITOSA (200) de archivos de backup y SQL
+    - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"(?:GET|HEAD) (?P<uri>[^\"]*\\.(?:bak|old|backup|sql|swp)[^\"]*)\" 200 (?P<size>\\d+)"
+      _note: "HTTP 200 en archivo de respaldo en httpd"
+    # INTENTO a recursos VCS y configuración (cualquier código de respuesta)
+    - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"(?:GET|HEAD) (?P<uri>[^\"]*(?:/\\.git/|/\\.svn/|/\\.hg/|/CVS/|/\\.env|/\\.htpasswd|/wp-config\\.php))[^\"]*\" (?P<status>[245]\\d{2})"
+    # Internals de Apache/httpd expuestos
+    - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"(?:GET|POST) (?P<uri>/(?:server-status|server-info|cgi-bin/)[^\"]*)\" (?P<status>\\d{3})"
+    # Errores PHP que revelan rutas y estructura interna
     - regex: "\\[error\\].*(?P<msg>PHP Fatal error|PHP Parse error|Call to undefined function|Allowed memory size)"
+    # Sobrecarga de workers (posible DoS o carga excesiva por ataque)
     - regex: "\\[warn\\].*(?P<msg>child process.*exited with status|server reached MaxRequestWorkers|worker threads remaining)"
-    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>[^\"]*(?:wp-login\\.php|xmlrpc\\.php|wp-admin/|administrator/|index\\.php\\?option=com_)[^\"]*)\""
+    # CMS — fuerza bruta y explotación de plugins
+    - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"(?:GET|POST) (?P<uri>[^\"]*(?:wp-login\\.php|xmlrpc\\.php|wp-admin/|administrator/|index\\.php\\?option=com_)[^\"]*)\" (?P<status>\\d{3})"
+    # SELinux AVC denial para httpd (acceso a rutas no autorizadas)
     - regex: "AVC.*denied.*\\{.*\\}.*comm=\"httpd\".*path=\"(?P<path>[^\"]+)\""
-    - regex: "(?P<src_ip>[\\d.]+).*\"(?:GET|POST) (?P<uri>[^\"]*(?:\\.php\\?.*=(?:https?|ftp)://|\\bshell\\.php|\\bwebshell|\\beval\\.php|\\bcmd\\.php)[^\"]*)\""
+    # Webshells y RFI en parámetros PHP
+    - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"(?:GET|POST) (?P<uri>[^\"]*(?:\\.php\\?.*=(?:https?|ftp)://|\\bshell\\.php|\\bwebshell|\\beval\\.php|\\bcmd\\.php)[^\"]*)\" (?P<status>\\d{3})"
 false_positives:
   - Legitimate WordPress/Joomla/Drupal administration
   - SELinux denials from legitimate httpd operations (may need policy adjustment)
   - PHP errors from legitimate application bugs
 recommendation: >
-  1. Restrict access to /server-status and /server-info by source IP.
-  2. Review SELinux AVC denials — httpd should only access its designated directories.
-  3. Limit PHP execution via .htaccess to specific directories.
-  4. Monitor for PHP webshell patterns (eval, base64_decode, system, exec in POST).
-  5. Keep CMS plugins and themes updated.
-  6. Consider using php-fpm with separate pools per application for isolation.
+  SI SE DETECTAN RESPUESTAS HTTP 200 EN RECURSOS SENSIBLES — PRIORIDAD ALTA:
+  1. Verificar accesos exitosos en los logs de httpd:
+       grep -E '\.git/|\.env|\.bak|\.sql|\.svn/' /var/log/httpd/access_log | grep ' 200 '
+  2. Bloquear directorios VCS y extensiones de backup en httpd.conf o .htaccess:
+       <DirectoryMatch "\.(git|svn|hg|bzr)"> Require all denied </DirectoryMatch>
+       <FilesMatch "\.(env|bak|old|backup|sql|swp|orig)$"> Require all denied </FilesMatch>
+  3. Restringir server-status a IPs de gestión:
+       <Location /server-status> Require ip 127.0.0.1 </Location>
+  4. Revisar denegaciones SELinux: austenctl -l | grep httpd_t
+  5. Configurar PHP con open_basedir y disable_functions para limitar webshells.
+  6. Mantener plugins/temas de CMS actualizados y eliminar los no utilizados.
+  7. Considerar php-fpm con pools separados por aplicación para aislar compromisos.
 references:
   - "https://attack.mitre.org/techniques/T1190/"
   - "https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/deploying_web_servers_and_reverse_proxies/setting-up-and-configuring-apache-http-server_deploying-web-servers-and-reverse-proxies"
@@ -45,3 +70,6 @@ tags:
   - php
   - selinux
   - web
+  - git_exposure
+  - config_disclosure
+  - backup_exposure

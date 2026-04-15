@@ -1,0 +1,76 @@
+id: WEB-GIT-001
+title: Intento de Descarga/Extracción de Repositorio Git Expuesto
+category: web
+subcategory: source_code_exposure
+mitre_technique: T1552.001
+mitre_tactic: credential_access
+severity: high
+confidence: high
+enabled: true
+
+description: >
+  Detecta intentos de extraer el repositorio Git expuesto vía HTTP (.git/).
+  Herramientas como git-dumper, GitTools o Raven recorren los archivos de metadata
+  Git accesibles para reconstruir el código fuente completo, el historial de commits
+  y secretos embebidos (tokens, contraseñas, llaves API, certificados). Un directorio
+  .git expuesto en el document root del servidor web es una de las vulnerabilidades
+  más críticas: compromiso total del código fuente, credenciales en el historial,
+  y posible movimiento lateral si las credenciales dan acceso a infraestructura.
+  La regla cubre accesos directos a archivos críticos de Git, herramientas conocidas
+  de extracción y descarga de objetos empaquetados.
+
+service: "*"
+
+detection:
+  type: pattern
+  patterns:
+    # Archivos críticos de metadata Git directamente descargables
+    - regex: "\"(?:GET|HEAD) (?P<uri>[^\"]*\\.git/(?:HEAD|ORIG_HEAD|FETCH_HEAD|MERGE_HEAD|config|index|COMMIT_EDITMSG|packed-refs|description|info/refs|info/exclude|shallow))[^\"]* (?P<status>\\d{3})"
+      _note: "Archivos de control de Git — config contiene remote URLs con posibles credenciales"
+    # Objetos Git empaquetados (pack files contienen el código fuente completo)
+    - regex: "\"(?:GET|HEAD) (?P<uri>[^\"]*\\.git/objects/(?:pack/[^\"]+\\.(?:idx|pack)|info/packs|[0-9a-f]{2}/[0-9a-f]{38}))[^\"]* (?P<status>\\d{3})"
+      _note: "Pack files y objetos sueltos — contienen el código fuente binario completo"
+    # Refs de ramas, tags y remotos
+    - regex: "\"(?:GET|HEAD) (?P<uri>[^\"]*\\.git/refs/(?:heads|tags|remotes)/[^\"]*)\" (?P<status>\\d{3})"
+      _note: "Referencias a ramas y tags — permiten reconstruir el historial completo"
+    # Herramientas conocidas de extracción Git
+    - regex: "(?P<tool>git.dumper|GitTools|gitdumper|git-rob|dvcs-ripper|gitjacker|git-extract|gitscanner|trufflehog)"
+      _note: "User-agent o URL con nombre de herramienta de extracción Git"
+    # Acceso genérico al directorio .git (incluye escáners)
+    - regex: "\"(?:GET|HEAD|POST) (?P<uri>[^\"]*\\.git/?)[^\"]*\" (?P<status>[245]\\d{2})"
+      _note: "Cualquier acceso al directorio .git — 200 confirma exposición"
+
+false_positives:
+  - Repositorios Git públicos servidos intencionalmente vía HTTP (cgit, Gitea, Gitiles)
+  - Sistemas de despliegue que clonan desde la misma máquina (localhost solo)
+  - Pipelines CI/CD con acceso interno al repositorio
+
+recommendation: >
+  ACCIÓN INMEDIATA SI SE DETECTAN RESPUESTAS HTTP 200:
+  1. Bloquear .git/ en nginx:
+       location ~ /\.git { deny all; return 403; }
+  2. Bloquear .git/ en Apache/httpd:
+       <DirectoryMatch "\.git"> Require all denied </DirectoryMatch>
+  3. Auditar el access.log para confirmar si archivos fueron descargados exitosamente:
+       grep '\.git/' /var/log/nginx/access.log | grep ' 200 '
+  4. Si hubo descarga exitosa (HTTP 200):
+       - Considerar el código fuente como comprometido
+       - Rotar TODOS los secretos encontrables en el historial git:
+           git log -p | grep -iE '(password|passwd|secret|token|api.key|credential)' | head -100
+       - Rotar claves SSH, tokens API, contraseñas de base de datos que aparezcan en el código
+       - Notificar a los propietarios de los sistemas a los que dan acceso esas credenciales
+  5. Para limpiar el historial: usar 'git filter-branch' o 'git-filter-repo' + force push
+
+references:
+  - "https://attack.mitre.org/techniques/T1552/001/"
+  - "https://pentester.land/tutorials/2018/10/25/source-code-disclosure-via-exposed-git-folder.html"
+  - "https://github.com/internetwache/GitTools"
+  - "https://trufflesecurity.com/trufflehog"
+  - "https://owasp.org/www-project-web-security-testing-guide/"
+
+tags:
+  - git
+  - source_code_exposure
+  - credential_theft
+  - web
+  - t1552.001
