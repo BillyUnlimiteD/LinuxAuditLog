@@ -299,6 +299,7 @@ class _RootChannel:
                 "su root",
                 request_pty=True,
                 term_type="dumb",
+                encoding="latin-1",
             )
 
             # Wait for the su password prompt.
@@ -830,6 +831,7 @@ class RemoteCollector:
                 su_cmd,
                 request_pty=True,
                 term_type="dumb",
+                encoding="latin-1",
             ) as proc:
                 # Wait for su's "Password:" prompt then send the root password.
                 buf = ""
@@ -895,7 +897,7 @@ class RemoteCollector:
 
         try:
             result = await asyncio.wait_for(
-                self.conn.run(cmd, check=False),
+                self.conn.run(cmd, check=False, encoding="latin-1"),
                 timeout=timeout,
             )
             return result.stdout or ""
