@@ -1,0 +1,37 @@
+id: SVC-NTPD-001
+title: ntpd Security Monitoring (Auto-generated stub)
+category: service
+subcategory: ntpd
+mitre_technique: T1190
+mitre_tactic: initial_access
+severity: medium
+confidence: low
+enabled: false
+description: Auto-generated stub rule for 'ntpd' service detected on the target host.
+  This rule was created because no existing rules cover this service. Add detection
+  patterns based on your knowledge of the application's log format. Run 'python scripts/update_rules.py'
+  to check for community Sigma rules.
+service: ntpd
+detection:
+  type: pattern
+  patterns:
+  - regex: PLACEHOLDER_PATTERN
+    _note: 'Replace with actual regex patterns for ntpd log anomalies. Check SigmaHQ
+      for community rules: https://github.com/SigmaHQ/sigma/search?q=ntpd'
+false_positives:
+- Review before enabling
+recommendation: '1. Review ntpd log format and common attack patterns.
+
+  2. Add appropriate regex patterns to the ''detection.patterns'' section.
+
+  3. Set ''enabled: true'' once patterns are validated.
+
+  4. Run ''python scripts/update_rules.py'' for community rule updates.'
+references:
+- https://github.com/SigmaHQ/sigma/search?q=ntpd
+tags:
+- service:ntpd
+- stub
+- needs_review
+_auto_generated: true
+_generated_at: '2026-04-15T02:22:43.982938+00:00'
