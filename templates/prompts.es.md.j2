@@ -1,0 +1,110 @@
+# PROMPTS PARA ASISTENCIA IA — {{ report_metadata.tool_name }} v{{ report_metadata.tool_version }}
+
+**Caso:** `{{ job.job_id }}`
+**Host:** {{ job.host }} ({{ system_info.hostname }})
+**Generado:** {{ report_metadata.generated_at_readable }}
+
+---
+
+Este documento contiene un prompt listo para copiar y pegar en cualquier IA (Claude, ChatGPT, Gemini, etc.) por cada hallazgo identificado en el analisis forense. Cada prompt incluye el contexto del sistema, los eventos detectados y una solicitud de ayuda estructurada.
+
+**Total de hallazgos:** {{ findings | length }}
+
+{% if not findings %}
+No se identificaron hallazgos en este analisis. No se generaron prompts.
+{% endif %}
+
+{% for finding in findings %}
+---
+
+## Prompt {{ loop.index }} — [{{ finding.rule_id }}] {{ finding.title }}
+
+**Severidad:** {{ finding.severity | upper }} | **Confianza:** {{ finding.confidence | upper }} | **MITRE:** {{ finding.mitre_technique }} ({{ finding.mitre_tactic }})
+
+Copia y pega el bloque siguiente directamente en la IA:
+
+---
+
+```
+CONTEXTO DEL SISTEMA
+====================
+Sistema operativo : {{ system_info.distro_name }}{% if system_info.version_id %} {{ system_info.version_id }}{% endif %}
+
+Hostname          : {{ system_info.hostname }}
+Kernel            : {{ system_info.kernel }}
+Arquitectura      : {{ system_info.architecture }}
+Init system       : {{ system_info.init_system }}
+Host analizado    : {{ job.host }}
+
+ALERTA DE SEGURIDAD DETECTADA
+==============================
+Regla             : {{ finding.rule_id }} — {{ finding.title }}
+Categoria         : {{ finding.category }} / {{ finding.subcategory }}
+Severidad         : {{ finding.severity | upper }}
+Confianza         : {{ finding.confidence | upper }}
+Tecnica MITRE     : {{ finding.mitre_technique }}
+Tactica MITRE     : {{ finding.mitre_tactic }}
+Total de eventos  : {{ finding.match_count }}
+Primera vez visto : {{ finding.first_seen | short_ts }}
+Ultima vez visto  : {{ finding.last_seen | short_ts }}
+
+DESCRIPCION DE LA ALERTA
+=========================
+{{ finding.description | trim }}
+
+{% if finding.affected_entities %}
+ENTIDADES AFECTADAS
+===================
+{% for field, values in finding.affected_entities.items() %}{{ field }}:
+{% for val, count in values.items() %}  - {{ val }} ({{ count }} evento(s))
+{% endfor %}{% endfor %}
+{% endif %}
+EVENTOS DETECTADOS EN LOS LOGS (muestra)
+=========================================
+{% for sample in finding.sample_matches %}[{{ loop.index }}] {{ sample.timestamp | short_ts }} | {{ sample.service }}
+    {{ sample.message[:400] }}
+{% if sample.captured %}    Campos extraidos: {{ sample.captured }}
+{% endif %}
+{% endfor %}
+RECOMENDACION INICIAL DE LA HERRAMIENTA
+========================================
+{{ finding.recommendation | trim }}
+
+{% if finding.false_positives %}
+POSIBLES FALSOS POSITIVOS SEGUN LA REGLA
+==========================================
+{% for fp in finding.false_positives %}- {{ fp }}
+{% endfor %}
+{% endif %}
+SOLICITUD DE AYUDA
+==================
+Actua como experto en seguridad Linux y analisis forense. Basandote en la informacion anterior:
+
+1. EVALUACION: ¿Es este hallazgo un indicador real de compromiso, actividad sospechosa o
+   un falso positivo? Justifica tu respuesta considerando el contexto del sistema y los
+   eventos mostrados.
+
+2. INVESTIGACION FORENSE: ¿Que comandos o archivos adicionales deberia revisar en el
+   sistema para confirmar o descartar este hallazgo? Dame comandos concretos y listos
+   para ejecutar.
+
+3. IMPACTO: Si el hallazgo es real, ¿que pudo haber ocurrido o estar ocurriendo en el
+   sistema? Describe el escenario de ataque mas probable.
+
+4. REMEDIACION INMEDIATA: ¿Que acciones debo tomar de inmediato para contener o
+   remediar este problema? Prioriza por urgencia.
+
+5. PREVENCION: ¿Como evito que este tipo de incidente se repita? Dame configuraciones
+   o controles especificos para este tipo de sistema.
+```
+
+{% endfor %}
+
+---
+
+*Generado automaticamente por {{ report_metadata.tool_name }} v{{ report_metadata.tool_version }}*
+*Fecha: {{ report_metadata.generated_at_readable }}*
+
+---
+
+*Desarrollado por Gonzalo Serrano en colaboracion con [Claude Code](https://claude.ai/code) (Anthropic).*

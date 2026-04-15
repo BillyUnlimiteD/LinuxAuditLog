@@ -1,0 +1,433 @@
+# FORENSIC SECURITY TECHNICAL REPORT
+**Classification:** {{ report_metadata.classification }}
+**Case reference:** `{{ job.job_id }}`
+
+---
+
+| Field | Value |
+|:------|:------|
+| **Target host** | `{{ job.host }}` |
+| **Detected hostname** | `{{ system_info.hostname }}` |
+| **Distribution** | {{ system_info.distro_name }} {% if system_info.version_id %}(v{{ system_info.version_id }}){% endif %} |
+| **Kernel** | `{{ system_info.kernel }}` |
+| **Architecture** | {{ system_info.architecture }} |
+| **Init system** | {{ system_info.init_system }} |
+| **Host time (UTC)** | {{ system_info.host_datetime_utc }} |
+| **Timezone** | {{ system_info.timezone }} |
+| **Acquisition start** | {{ acquisition.start_utc | short_ts }} |
+| **Acquisition end** | {{ acquisition.end_utc | short_ts }} |
+| **Acquisition duration** | {{ acquisition.duration }} |
+| **Report date** | {{ report_metadata.generated_at_readable }} |
+| **Tool** | {{ report_metadata.tool_name }} v{{ report_metadata.tool_version }} |
+| **Rules evaluated** | {{ report_metadata.rules_evaluated }} |
+| **Time window** | Last {{ report_metadata.time_window_hours }}h |
+| **Manifest hash** | See MANIFEST.json / MANIFEST.sig.json |
+
+---
+
+> CHAIN OF CUSTODY NOTICE: This report was generated through remote forensic acquisition with
+> low impact on the indicated host. The SSH connection was closed before initiating any
+> analysis. All analysis was performed exclusively on local copies of the evidence.
+> Log content was treated as untrusted data at all times.
+> No configurations, files or services were modified on the remote host.
+
+---
+
+## SECTION 1 — EXECUTIVE SUMMARY
+
+| Parameter | Value |
+|:----------|:------|
+| **Analyzed host** | {{ job.host }} ({{ system_info.hostname }}) |
+| **Detected distribution** | {{ system_info.distro_name }} |
+| **Collected time window** | Last {{ report_metadata.time_window_hours }} hours |
+| **Inventoried services** | {{ services | length }} |
+| **Exported files** | {{ manifest.total_count }} ({{ manifest.total_size_bytes | fmt_bytes }}) |
+| **Hash verification** | {% if manifest.all_verified %}SUCCESSFUL — all artifacts verified{% else %}FAILURES DETECTED — see limitations section{% endif %} |
+| **Total log entries** | {{ log_stats.total_entries | default(0) }} |
+| **Identified findings** | {{ findings_count }} |
+| **Overall risk level** | **{{ risk.overall }}** |
+
+### Findings summary by severity
+
+| Severity | Count |
+|:---------|:------|
+| Critical | {{ risk.critical }} |
+| High | {{ risk.high }} |
+| Medium | {{ risk.medium }} |
+| Low | {{ risk.low }} |
+| Informational | {{ risk.info }} |
+
+### Conclusion
+
+{% if risk.overall == "CRITICO" %}
+CRITICAL severity findings were identified requiring immediate attention.
+There is evidence or high probability of active compromise or exploitable critical vulnerabilities.
+It is recommended to escalate to the incident response team urgently.
+{% elif risk.overall == "ALTO" %}
+HIGH severity findings were identified. There are indicators of suspicious activity
+requiring priority investigation and possible containment actions.
+{% elif risk.overall == "MEDIO" %}
+MEDIUM severity findings were identified. The system presents anomalies that must
+be investigated and corrected, although there is no immediate evidence of active compromise.
+{% elif risk.overall == "BAJO" %}
+Identified findings are of low severity. It is recommended to review hardening
+best practices and maintain active monitoring.
+{% else %}
+No findings with sufficient evidence of malicious activity were identified
+in the analyzed time window. It is recommended to maintain active monitoring.
+{% endif %}
+
+---
+
+## SECTION 2 — REMOTE ACQUISITION
+
+### 2.1 Connection parameters
+
+| Parameter | Value |
+|:----------|:------|
+| **Host** | `{{ job.host }}` |
+| **Protocol** | SSH |
+| **Credentials** | Provided by operator — not stored |
+| **Host key verification** | OMITTED (documented as limitation) |
+| **Access mode** | Read-only |
+
+### 2.2 Executed phases
+
+| Phase | Description | Status |
+|:------|:------------|:-------|
+| Phase 1 | System identification | Completed |
+| Phase 2 | Active services inventory | Completed |
+| Phase 3 | Ports, processes and context | Completed |
+| Phase 4 | Log export | Completed |
+| Phase 5 | Hashes and integrity | Completed |
+| Phase 6 | Remote session close | {% if acquisition.connection_closed %}Confirmed{% else %}ERROR — see limitations{% endif %} |
+
+### 2.3 Acquired artifacts
+
+- Registered artifacts: **{{ acquisition.artifacts_acquired }}**
+- Documented commands: **{{ acquisition.commands_logged }}**
+- Errors during acquisition: **{{ acquisition.errors | length }}**
+
+{% if acquisition.errors %}
+### 2.4 Errors during acquisition
+
+The following commands could not be executed (documented as limitations):
+
+{% for err in acquisition.errors %}
+- Phase {{ err.phase }}: `{{ err.cmd }}` — {{ err.error }}
+{% endfor %}
+{% endif %}
+
+### 2.5 Session close confirmation
+
+{% if acquisition.connection_closed %}
+The SSH connection to the remote host was successfully closed at the end of acquisition.
+From that point, all processing was performed exclusively on local evidence.
+{% else %}
+WARNING: Explicit connection closure could not be confirmed. Verify manually.
+{% endif %}
+
+{% if acquisition.known_hosts_warning %}
+> DOCUMENTED LIMITATION: SSH host key verification was disabled for this
+> acquisition. In high-criticality environments, verify the server fingerprint
+> before performing acquisition to rule out MITM attacks.
+{% endif %}
+
+---
+
+## SECTION 3 — EVIDENCE MANIFEST
+
+All exported artifacts were SHA-256 hashed before and after transfer.
+The manifest signature is in `MANIFEST.sig.json`.
+
+| File | Size | SHA-256 (first 32 chars) | Verified |
+|:-----|:-----|:--------------------------|:---------|
+{% for artifact in manifest.artifacts %}
+| `{{ artifact.filename | strip_log_prefix }}` | {{ artifact.size_bytes | fmt_bytes }} | `{{ artifact.sha256 | short_hash }}` | {% if artifact.verified_locally %}Yes{% else %}NO{% endif %} |
+{% endfor %}
+
+**Total:** {{ manifest.total_count }} files / {{ manifest.total_size_bytes | fmt_bytes }}
+**Verification status:** {% if manifest.all_verified %}ALL VERIFIED{% else %}PARTIAL VERIFICATION{% endif %}
+
+---
+
+## SECTION 4 — SERVICES INVENTORY
+
+{% if services %}
+| Unit | Status | Description |
+|:-----|:-------|:------------|
+{% for svc in services %}
+| `{{ svc.unit }}` | {{ svc.active }}/{{ svc.sub }} | {{ svc.description[:80] }} |
+{% endfor %}
+{% else %}
+Service inventory not available (host without systemd or command not executed).
+
+Process information available in `01_evidence/raw/services_inventory.json`.
+{% endif %}
+
+### Log event distribution by service
+
+| Service | Events |
+|:--------|:-------|
+{% for service, count in (log_stats.by_service | default({})).items() %}
+| {{ service }} | {{ count }} |
+{% endfor %}
+
+---
+
+## SECTION 5 — SECURITY FINDINGS
+
+{% if findings %}
+{% for finding in findings %}
+---
+
+### [{{ finding.rule_id }}] {{ finding.title }}
+
+| Field | Value |
+|:------|:------|
+| **ID** | `{{ finding.rule_id }}` |
+| **Category** | {{ finding.category }} / {{ finding.subcategory }} |
+| **Severity** | {{ finding.severity | severity_badge }} |
+| **Confidence** | {{ finding.confidence | upper }} |
+| **Status** | {{ finding.status }} |
+| **Affected service** | {{ finding.service }} |
+| **MITRE Technique** | {{ finding.mitre_technique }} |
+| **MITRE Tactic** | {{ finding.mitre_tactic }} |
+| **Total matches** | {{ finding.match_count }} |
+| **First observed** | {{ finding.first_seen | short_ts }} |
+| **Last observed** | {{ finding.last_seen | short_ts }} |
+
+**Description:**
+{{ finding.description }}
+
+{% if finding.affected_entities %}
+**Affected entities:**
+
+{% for field, values in finding.affected_entities.items() %}
+- **{{ field }}:**
+{% for val, count in values.items() %}
+  - `{{ val }}` — {{ count }} event(s)
+{% endfor %}
+{% endfor %}
+{% endif %}
+
+**Associated local evidence:** `01_evidence/raw/logs/`
+
+**Event sample (up to 5):**
+
+{% for sample in finding.sample_matches %}
+<table style="border-collapse:collapse;width:100%;font-size:8pt;margin-bottom:0;table-layout:fixed;"><thead><tr style="background:#1a1a2e;color:#fff;"><th style="padding:3px 5px;border:1px solid #bbb;width:4%;">N°</th><th style="padding:3px 5px;border:1px solid #bbb;width:30%;">Timestamp</th><th style="padding:3px 5px;border:1px solid #bbb;width:18%;">Service</th><th style="padding:3px 5px;border:1px solid #bbb;width:48%;">Extracted fields</th></tr></thead><tbody><tr><td style="padding:3px 5px;border:1px solid #bbb;">{{ loop.index }}</td><td style="padding:3px 5px;border:1px solid #bbb;">{{ sample.timestamp | short_ts }}</td><td style="padding:3px 5px;border:1px solid #bbb;">{{ sample.service | e }}</td><td style="padding:3px 5px;border:1px solid #bbb;">{{ sample.captured | string | e if sample.captured else "—" }}</td></tr></tbody></table>
+<table style="border-collapse:collapse;width:100%;font-size:7.5pt;margin-top:0;margin-bottom:0.5em;table-layout:fixed;"><tbody><tr><td style="padding:4px 6px;border:1px solid #bbb;font-family:Courier,monospace;word-break:break-all;background:#f8f8f8;">{{ sample.message[:300] | e }}</td></tr></tbody></table>
+{% endfor %}
+
+**Recommendation:**
+{{ finding.recommendation }}
+
+{% if finding.false_positives %}
+**Possible false positives:**
+{% for fp in finding.false_positives %}
+- {{ fp }}
+{% endfor %}
+{% endif %}
+
+{% if finding.references %}
+**References:**
+{% for ref in finding.references %}
+- {{ ref }}
+{% endfor %}
+{% endif %}
+
+{% endfor %}
+{% else %}
+No findings with sufficient evidence were identified in the analyzed time window.
+
+This may be due to:
+- Real absence of malicious activity
+- Insufficient time window to cover the incident
+- Rotated or unavailable logs (see Section 8 — Limitations)
+- Evasion techniques leaving no traces in available logs
+{% endif %}
+
+---
+
+## SECTION 6 — PRIORITIZATION
+
+{% if findings %}
+| Priority | ID | Title | Severity | Priority reason | Immediate containment |
+|:---------|:---|:------|:---------|:----------------|:----------------------|
+{% set ns = namespace(priority=1) %}
+{% for finding in findings %}
+{% if finding.severity in ("critical", "high") %}
+| {{ ns.priority }} | `{{ finding.rule_id }}` | {{ finding.title }} | {{ finding.severity | upper }} | Severity and {{ finding.confidence }} confidence | See Section 7 |
+{% set ns.priority = ns.priority + 1 %}
+{% endif %}
+{% endfor %}
+{% for finding in findings %}
+{% if finding.severity == "medium" %}
+| {{ ns.priority }} | `{{ finding.rule_id }}` | {{ finding.title }} | MEDIUM | Requires investigation | See Section 7 |
+{% set ns.priority = ns.priority + 1 %}
+{% endif %}
+{% endfor %}
+{% for finding in findings %}
+{% if finding.severity in ("low", "info") %}
+| {{ ns.priority }} | `{{ finding.rule_id }}` | {{ finding.title }} | {{ finding.severity | upper }} | Preventive hardening | See Section 7 |
+{% set ns.priority = ns.priority + 1 %}
+{% endif %}
+{% endfor %}
+{% else %}
+No findings to prioritize in this analysis.
+{% endif %}
+
+---
+
+## SECTION 7 — REMEDIATION
+
+### 7.1 Immediate actions
+
+{% if risk.overall in ("CRITICO", "ALTO") %}
+1. Isolate the system from the network if there is confirmed evidence of active compromise.
+2. Revoke and rotate all credentials that had access to the system.
+3. Notify the incident response team with this report.
+4. Preserve additional evidence before any changes to the system.
+5. Review other systems in the same network segment.
+{% else %}
+1. Review identified findings and initiate remediation process.
+2. Increase logging level and log retention.
+3. Review SSH access policy and authentication controls.
+{% endif %}
+
+### 7.2 Corrective actions per finding
+
+{% for finding in findings %}
+{% if finding.severity in ("critical", "high", "medium") %}
+**[{{ finding.rule_id }}] {{ finding.title }}:**
+{{ finding.recommendation }}
+
+{% endif %}
+{% endfor %}
+
+### 7.3 Preventive hardening
+
+- Enable SSH key authentication and disable password authentication.
+- Configure fail2ban or equivalent for automatic IP blocking on multiple failures.
+- Restrict SSH access by source IP at the firewall.
+- Review and minimize sudo privileges (principle of least privilege).
+- Configure logrotate with at least 90 days retention.
+- Enable auditd for monitoring critical system calls.
+- Review and clean user and system crontabs.
+- Update the operating system and all installed packages.
+
+### 7.4 Recommended monitoring
+
+- Implement SIEM or log centralization (rsyslog/syslog-ng to central server).
+- Alerts on: multiple authentication failures, off-hours access, sudo usage.
+- File integrity monitoring (AIDE, Tripwire) on critical paths.
+- Periodic review of user accounts and authorized SSH keys.
+
+---
+
+## SECTION 8 — LIMITATIONS AND WARNINGS
+
+### 8.1 Technical limitations
+
+- **Host key verification omitted:** Server authenticity was not verified
+  cryptographically. In high-criticality contexts, verify via alternative channel.
+
+- **Limited time window:** This analysis covers exclusively the last
+  {{ report_metadata.time_window_hours }}h of available log activity.
+  Earlier activity may not be covered.
+
+- **Compressed or rotated logs:** Logs rotated by logrotate were collected
+  when accessible (see manifest for complete list of acquired artifacts).
+
+- **Access without elevated privileges:** If the operator connected with a non-root user,
+  some system logs may not have been accessible (journalctl may require
+  membership in the systemd-journal group).
+
+{% if acquisition.errors %}
+- **Commands failed during acquisition:** {{ acquisition.errors | length }} command(s)
+  could not be executed. See Section 2.4 for details.
+{% endif %}
+
+### 8.2 Possible false positives
+
+- Legitimate monitoring tools can generate patterns similar to scans.
+- Automation scripts (Ansible, Puppet, Chef) can generate multiple
+  authentications in a short time.
+- Users with dynamic IPs can generate authentication alerts due to IP changes.
+
+### 8.3 Analytical uncertainties
+
+- Findings with MEDIUM or LOW confidence require manual validation before
+  taking containment actions.
+- Absence of findings does not guarantee absence of compromise; a sophisticated
+  attacker may have cleaned logs or acted outside the analyzed time window.
+- Correlation between services may be incomplete if some logs were not available.
+
+---
+
+## SECTION 9 — CHAIN OF CUSTODY
+
+| Step | Description | Timestamp | Status |
+|:-----|:------------|:----------|:-------|
+| 1 | SSH login with authorized credentials | {{ acquisition.start_utc | short_ts }} | Completed |
+| 2 | System identification (Phase 1) | {{ acquisition.start_utc | short_ts }} | Completed |
+| 3 | Services and processes inventory (Phase 2-3) | {{ acquisition.start_utc | short_ts }} | Completed |
+| 4 | Log export (Phase 4) | {{ acquisition.start_utc | short_ts }} | Completed |
+| 5 | SHA-256 hash generation | {{ acquisition.end_utc | short_ts }} | Completed |
+| 6 | Remote session close (Phase 6) | {{ acquisition.end_utc | short_ts }} | {% if acquisition.connection_closed %}Confirmed{% else %}ERROR{% endif %} |
+| 7 | Local normalization and analysis (Stage B) | {{ report_metadata.generated_at | short_ts }} | Completed |
+| 8 | Report generation | {{ report_metadata.generated_at | short_ts }} | Completed |
+
+**Credentials:** Not stored. Provided by the operator exclusively for
+the duration of the SSH session. Destroyed from memory upon connection close.
+
+**Integrity:** All artifacts were hashed with SHA-256.
+See `01_evidence/MANIFEST.json` and `01_evidence/MANIFEST.sig.json`.
+
+---
+
+## APPENDIX — HIGHLIGHTED EVENTS (Timeline)
+
+The following warn-or-above level events are presented in chronological order.
+For the complete timeline, see `02_analysis/timeline_unified.csv`.
+
+{% if timeline_events %}
+| Timestamp | Service | Level | Source | Message |
+|:----------|:--------|:------|:-------|:--------|
+{% for event in timeline_events %}
+| {{ event.timestamp | short_ts }} | {{ event.service }} | {{ event.level | upper }} | {{ event.src_ip or "" }} | {{ event.message[:120] }} |
+{% endfor %}
+{% else %}
+No warn-or-above level events found in the analyzed window.
+{% endif %}
+
+---
+
+## APPENDIX — LOG STATISTICS
+
+| Metric | Value |
+|:-------|:------|
+| **Total normalized entries** | {{ log_stats.total_entries | default(0) }} |
+| **Time range (earliest)** | {{ log_stats.time_range.earliest | default("N/A") | short_ts }} |
+| **Time range (latest)** | {{ log_stats.time_range.latest | default("N/A") | short_ts }} |
+| **Parsing errors** | {{ log_stats.parse_errors | default(0) }} |
+
+### Severity level distribution
+
+| Level | Count |
+|:------|:------|
+{% for level, count in (log_stats.by_level | default({})).items() %}
+| {{ level | upper }} | {{ count }} |
+{% endfor %}
+
+---
+
+*Report automatically generated by {{ report_metadata.tool_name }} v{{ report_metadata.tool_version }}*
+*Date: {{ report_metadata.generated_at_readable }}*
+*This document must be treated as {{ report_metadata.classification }}*
+*To convert to PDF: run `convert_to_pdf.sh` (Linux/Mac) or `convert_to_pdf.bat` (Windows)*
+
+---
+
+*Developed by Gonzalo Serrano in collaboration with [Claude Code](https://claude.ai/code) (Anthropic).*

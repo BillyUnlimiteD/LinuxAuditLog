@@ -41,6 +41,9 @@ class ReportBuilder:
         self._env.filters["short_hash"] = lambda h: h[:16] + "..." if h and len(h) > 16 else h
         self._env.filters["short_ts"] = _short_ts
         self._env.filters["strip_log_prefix"] = lambda f: re.sub(r"^var_log_", "", str(f))
+        self._env.filters["es_confidence"] = _es_confidence
+        self._env.filters["es_status"] = _es_status
+        self._env.filters["es_tactic"] = _es_tactic
 
     def build(
         self,
@@ -110,7 +113,13 @@ class ReportBuilder:
         except Exception:
             pass
 
-        template = self._env.get_template("report.md.j2")
+        lang = config.LANGUAGE.lower()
+        tpl_name = f"report.{lang}.md.j2"
+        # Fallback to Spanish if the requested language template doesn't exist
+        try:
+            template = self._env.get_template(tpl_name)
+        except Exception:
+            template = self._env.get_template("report.es.md.j2")
         rendered = template.render(**context)
 
         report_path = self.job.report_md_path()
@@ -123,6 +132,34 @@ class ReportBuilder:
 # ------------------------------------------------------------------
 # Template filters
 # ------------------------------------------------------------------
+
+def _es_confidence(v: str) -> str:
+    return {"high": "Alta", "medium": "Media", "low": "Baja"}.get(str(v).lower(), str(v).capitalize())
+
+
+def _es_status(v: str) -> str:
+    return {"open": "Abierto", "closed": "Cerrado", "false_positive": "Falso positivo",
+            "reviewing": "En revisión", "mitigated": "Mitigado"}.get(str(v).lower(), str(v))
+
+
+def _es_tactic(v: str) -> str:
+    return {
+        "initial_access": "Acceso inicial",
+        "execution": "Ejecución",
+        "persistence": "Persistencia",
+        "privilege_escalation": "Escalada de privilegios",
+        "defense_evasion": "Evasión de defensas",
+        "credential_access": "Acceso a credenciales",
+        "discovery": "Descubrimiento",
+        "lateral_movement": "Movimiento lateral",
+        "collection": "Recolección",
+        "command_and_control": "Mando y control",
+        "exfiltration": "Exfiltración",
+        "impact": "Impacto",
+        "reconnaissance": "Reconocimiento",
+        "resource_development": "Desarrollo de recursos",
+    }.get(str(v).lower(), str(v).replace("_", " ").capitalize())
+
 
 def _short_ts(ts) -> str:
     """Return YYYY-MM-DD HH:MM from an ISO timestamp; pass through None/empty as N/A."""

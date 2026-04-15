@@ -36,6 +36,11 @@ TOOL_VERSION = "1.0.0"
 TOOL_NAME = "LinuxAuditLog"
 REPORT_CLASSIFICATION = "CONFIDENCIAL — USO RESTRINGIDO"
 
+# Language — ES (español) or EN (English).  Override via LANGUAGE env var or .env.
+LANGUAGE = os.environ.get("LANGUAGE", "ES").upper()
+if LANGUAGE not in ("ES", "EN"):
+    LANGUAGE = "ES"
+
 # Log source priorities (order matters for deduplication)
 PREFERRED_LOG_SOURCES = ["journalctl_json", "journalctl_export", "file_log"]
 

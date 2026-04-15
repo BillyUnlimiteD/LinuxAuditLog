@@ -32,6 +32,20 @@ class PromptReportBuilder:
         self._env.filters["short_hash"] = lambda h: (h[:16] + "...") if h and len(h) > 16 else h
         self._env.filters["short_ts"] = lambda ts: (str(ts)[:16].replace("T", " ") if ts and len(str(ts)) >= 16 else (ts or "N/A"))
         self._env.filters["strip_log_prefix"] = lambda f: re.sub(r"^var_log_", "", str(f))
+        _conf = {"high": "Alta", "medium": "Media", "low": "Baja"}
+        _stat = {"open": "Abierto", "closed": "Cerrado", "false_positive": "Falso positivo"}
+        _tact = {
+            "initial_access": "Acceso inicial", "execution": "Ejecución",
+            "persistence": "Persistencia", "privilege_escalation": "Escalada de privilegios",
+            "defense_evasion": "Evasión de defensas", "credential_access": "Acceso a credenciales",
+            "discovery": "Descubrimiento", "lateral_movement": "Movimiento lateral",
+            "collection": "Recolección", "command_and_control": "Mando y control",
+            "exfiltration": "Exfiltración", "impact": "Impacto",
+            "reconnaissance": "Reconocimiento",
+        }
+        self._env.filters["es_confidence"] = lambda v: _conf.get(str(v).lower(), str(v).capitalize())
+        self._env.filters["es_status"] = lambda v: _stat.get(str(v).lower(), str(v))
+        self._env.filters["es_tactic"] = lambda v: _tact.get(str(v).lower(), str(v).replace("_", " ").capitalize())
 
     def build(
         self,
@@ -46,7 +60,12 @@ class PromptReportBuilder:
             "report_metadata": report_metadata,
         }
 
-        template = self._env.get_template("prompts.md.j2")
+        lang = config.LANGUAGE.lower()
+        tpl_name = f"prompts.{lang}.md.j2"
+        try:
+            template = self._env.get_template(tpl_name)
+        except Exception:
+            template = self._env.get_template("prompts.es.md.j2")
         rendered = template.render(**context)
 
         out_path = self.job.report(f"ai_prompts_{self.job.job_id}.md")
