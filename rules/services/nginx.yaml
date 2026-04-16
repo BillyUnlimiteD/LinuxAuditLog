@@ -35,7 +35,7 @@ detection:
     # Internals de Nginx expuestos
     - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"(?:GET|POST) (?P<uri>/(?:nginx_status|server-status|\\.nginx|\\.htpasswd|nginx\\.conf)[^\"]*)\" (?P<status>\\d{3})"
     # Respuestas 5xx con cuerpo grande (posible exfiltración o error de aplicación con datos)
-    - regex: "(?P<src_ip>[\\d.]+)[^\"]*\" (?P<status>5\\d{2}) (?P<size>\\d{6,})"
+    - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"[^\"]+\" (?P<status>5\\d{2}) (?P<size>\\d{6,})"
     # URIs anormalmente largas (buffer overflow / path traversal profundo)
     - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"(?:GET|POST|PUT) (?P<uri>[^\"]{2048,})\""
     # Errores de upstream y protocolo (posible backend attack)
@@ -43,8 +43,8 @@ detection:
     # Acceso a /etc/ — path traversal o servidor mal configurado
     - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"(?:GET|HEAD|POST) (?P<uri>[^\"]*(?:/etc/(?:passwd|shadow|sudoers|ssh/[^\"]+|ssl/private/[^\"]+|mysql/[^\"]+|nginx/[^\"]+)|(?:\\.\\./|%2e%2e%2f|%252e%252e){2,}etc/))[^\"]*\" (?P<status>\\d{3})"
       _note: "Acceso a /etc/ vía web — si es HTTP 200 es crítico: credenciales del sistema expuestas"
-    # Herramientas de escaneo conocidas en User-Agent o path
-    - regex: "(?P<src_ip>[\\d.]+)[^\"]*\" (?P<status>40[034]) [^\"]*\"(?:nikto|sqlmap|dirbuster|gobuster|nuclei|masscan|zgrab|nmap|wfuzz|feroxbuster|ffuf|git.dumper|dvcs.ripper)"
+    # Herramientas de escaneo conocidas en User-Agent
+    - regex: "(?P<src_ip>[\\d.]+)[^\"]*\"[^\"]+\" (?P<status>40[034]) \\d+ \"[^\"]*\" \"(?P<ua>[^\"]*(?:nikto|sqlmap|dirbuster|gobuster|nuclei|masscan|zgrab|nmap|wfuzz|feroxbuster|ffuf|git\\.dumper|dvcs\\.ripper)[^\"]*)\""
 false_positives:
   - Descargas legítimas de archivos grandes (vídeos, backups autorizados con autenticación)
   - Agentes de monitoreo accediendo a /nginx_status desde IPs de gestión restringidas

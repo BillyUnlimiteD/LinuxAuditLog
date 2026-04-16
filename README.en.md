@@ -1,4 +1,4 @@
-# LinuxAuditLog v1.6.0
+# LinuxAuditLog v1.6.1
 
 **Remote forensic acquisition and Linux security analysis agent**
 
@@ -540,6 +540,18 @@ rules/
 | SVC-POSTFIX-001 | Postfix Mail Relay Abuse / SMTP Brute Force | T1071.003 | high |
 | SVC-FTP-001 | FTP Brute Force / Anonymous Login Abuse | T1110.001 | high |
 
+### Engine and rule fixes (v1.6.1)
+
+| Component | Fix |
+|---|---|
+| Stage B — Normalizer | **Critical bug:** Apache and Nginx logs converted to JSONL by Stage A (`.jsonl.gz` files) were silently dropped. The dispatcher detected `"access"` or `"error"` in the filename and called the wrong parser, causing all lines to fail. Stage A JSONL content detection now takes priority over filename-based checks. |
+| Stage B — Normalizer | **Service bug:** Stage A assigned `service: "unknown"` to log formats it didn't recognise (Apache combined access log, Nginx error log). Rules with `service: apache2` or `service: nginx` were never evaluated. New `_infer_service_from_path` function deduces the correct service from the file path. |
+| `rules/services/nginx.yaml` | **Regex bug:** The 5xx large-body pattern captured `src_ip=1.1` (from the `HTTP/1.1` version field) instead of the real client IP. Fixed by explicitly consuming the quoted request field. |
+| `rules/services/nginx.yaml` | **Regex bug:** The scanner User-Agent pattern never matched any log line. It was missing explicit traversal of the referer field (present between the status code and the UA in combined log format). Rewritten using the same structure as `apache2.yaml`. |
+| `README.en.md` | `LANGUAGE` variable documented in quick start, report language, and environment variable reference sections. |
+
+> **Note:** For existing jobs, delete `02_analysis/all_entries.jsonl` to force a full re-parse with the fixes applied.
+
 ### OWASP Top 10 (2021) Coverage — v1.6.0
 
 | # | Category | Key rules | Status |
@@ -816,6 +828,6 @@ All dependencies are open source (MIT, Apache 2.0 or BSD). No commercial license
 
 ---
 
-*LinuxAuditLog v1.6.0 — Linux remote forensic acquisition tool*
+*LinuxAuditLog v1.6.1 — Linux remote forensic acquisition tool*
 
 *Developed by Gonzalo Serrano in collaboration with [Claude Code](https://claude.ai/code) (Anthropic).*

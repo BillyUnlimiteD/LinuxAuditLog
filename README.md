@@ -1,4 +1,4 @@
-# LinuxAuditLog v1.6.0
+# LinuxAuditLog v1.6.1
 
 **Agente forense de adquisición remota y análisis de seguridad Linux**
 
@@ -67,7 +67,8 @@ SSH_HOST=192.168.1.100
 SSH_USER=admin
 SSH_PASS=tu_contrasena
 SSH_PORT=22
-# Opcional: contraseña de root para acceder a logs protegidos (ver sección 11)
+LANGUAGE=ES   # ES = informe en español, EN = informe en inglés
+# Opcional: contraseña de root para acceder a logs protegidos (ver sección 12)
 # SSH_ROOT_PASS=contrasena_root
 ```
 
@@ -97,6 +98,10 @@ bash run.sh
 Al finalizar, el directorio de trabajo se encuentra en `jobs/<YYYYMMDD_HHMMSS_host>/`. El informe Markdown **y su PDF** se generan automáticamente — no se requiere ningún paso adicional.
 
 > Las variables de entorno del sistema tienen **prioridad** sobre el `.env`. Si una variable ya está definida en el entorno, el valor del `.env` se ignora.
+
+### Idioma del informe
+
+Establece `LANGUAGE=ES` para un informe en español o `LANGUAGE=EN` para un informe en inglés en tu `.env`. Si no se define, el valor por defecto es `ES`.
 
 ---
 
@@ -525,6 +530,18 @@ Sin nuevas reglas YAML en esta version. Los cambios son de infraestructura:
 | SVC-POSTFIX-001 | Postfix Mail Relay Abuse / SMTP Brute Force | T1071.003 | high |
 | SVC-FTP-001 | FTP Brute Force / Anonymous Login Abuse | T1110.001 | high |
 
+### Correcciones de motor y reglas (v1.6.1)
+
+| Componente | Corrección |
+|---|---|
+| Stage B — Normalizador | **Bug crítico:** Los logs de Apache y Nginx convertidos a JSONL por Stage A (archivos `.jsonl.gz`) se descartaban silenciosamente. El dispatcher detectaba `"access"` o `"error"` en el nombre y llamaba al parser incorrecto, fallando todas las líneas. El check de contenido Stage A JSONL ahora tiene prioridad sobre los checks por nombre de archivo. |
+| Stage B — Normalizador | **Bug de servicio:** Stage A asignaba `service: "unknown"` a logs que no reconocía (Apache combined log, error log de Nginx). Las reglas con `service: apache2` o `service: nginx` nunca se ejecutaban. Nueva función `_infer_service_from_path` deduce el servicio correcto desde el path del archivo. |
+| `rules/services/nginx.yaml` | **Bug de regex:** El patrón de respuestas 5xx capturaba `src_ip=1.1` (del campo `HTTP/1.1`) en lugar de la IP real del cliente. Corregido añadiendo el consumo explícito del campo request entrecomillado. |
+| `rules/services/nginx.yaml` | **Bug de regex:** El patrón de scanner User-Agent no matcheaba ninguna línea de log. Faltaba el traversal explícito del campo referer (presente entre el status code y el UA en el formato combined log). Reescrito con la misma estructura que `apache2.yaml`. |
+| `README.md` | Documentacion de la variable `LANGUAGE` añadida en secciones de uso rapido, idioma del informe y referencia de variables de entorno. |
+
+> **Nota:** Si tienes jobs anteriores, elimina `02_analysis/all_entries.jsonl` para forzar un re-parse completo con las correcciones aplicadas.
+
 ### Cobertura OWASP Top 10 (2021) — v1.6.0
 
 | # | Categoria | Reglas principales | Estado |
@@ -674,6 +691,7 @@ Las variables pueden definirse en el archivo `.env` o como variables de entorno 
 | `SSH_PASS` | Si | — | Contrasena SSH |
 | `SSH_PORT` | No | `22` | Puerto SSH |
 | `SSH_ROOT_PASS` | No | — | Contrasena de root para canal raiz persistente (todos los comandos como root) |
+| `LANGUAGE` | No | `ES` | Idioma del informe: `ES` (español) o `EN` (inglés) |
 | `TIME_WINDOW_HOURS` | No | `72` | Ventana temporal de logs a exportar (horas). Ej: 1440 = 60 dias |
 | `LOG_MAX_LINES` | No | `50000` | Maximo de lineas por fuente de log |
 | `MAX_LOG_FILES` | No | `0` | Maximo de archivos `*.log` en el barrido (0 = sin limite) |
@@ -690,6 +708,7 @@ SSH_HOST=192.168.1.100
 SSH_USER=admin
 SSH_PASS=tu_contrasena
 SSH_PORT=22
+LANGUAGE=ES   # ES = informe en español
 # SSH_ROOT_PASS=contrasena_root   # Opcional: para leer logs de root
 ```
 
@@ -799,6 +818,6 @@ Todas las dependencias son de codigo abierto (MIT, Apache 2.0 o BSD). No se requ
 
 ---
 
-*LinuxAuditLog v1.6.0 — Herramienta forense de adquisicion remota Linux*
+*LinuxAuditLog v1.6.1 — Herramienta forense de adquisicion remota Linux*
 
 *Desarrollado por Gonzalo Serrano en colaboracion con [Claude Code](https://claude.ai/code) (Anthropic).*

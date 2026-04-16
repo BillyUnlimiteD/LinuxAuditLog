@@ -196,10 +196,25 @@ class LogNormalizer:
             return []
 
         name = path.name.lower()
+        sample = content[:2000]
 
-        if "journal" in name and name.endswith(".json.gz") or (
+        # ── Stage A pre-converted JSONL must be checked FIRST ──────────
+        # Stage A converts every plain-text log (access, error, syslog…)
+        # to JSONL and renames it with .jsonl/.jsonl.gz.  The resulting
+        # filename still contains keywords like "access" or "error", so
+        # the filename-based checks below would dispatch it to the wrong
+        # parser and drop all entries.  Content detection wins over name.
+        if sample.strip().startswith("{") and '"ts_epoch"' in sample and '"source_file"' in sample:
+            return self._parse_stage_a_jsonl(content, str(path))
+
+        # journalctl JSON (highest fidelity, always named consistently)
+        if ("journal" in name and name.endswith(".json.gz")) or (
             "journal" in name and name.endswith(".json")
         ):
+            return self._parse_journalctl_json(content, str(path))
+
+        # journalctl JSON by content (inconsistently-named files)
+        if sample.strip().startswith("{") and "__REALTIME_TIMESTAMP" in sample:
             return self._parse_journalctl_json(content, str(path))
 
         if "access" in name or name.endswith("access_log") or "access_log" in name:
@@ -207,15 +222,6 @@ class LogNormalizer:
 
         if "error" in name and ("nginx" in name or "apache" in name or "httpd" in name):
             return self._parse_apache_error(content, str(path))
-
-        # Try journalctl JSON first (files may not be named consistently)
-        sample = content[:2000]
-        if sample.strip().startswith("{") and "__REALTIME_TIMESTAMP" in sample:
-            return self._parse_journalctl_json(content, str(path))
-
-        # Stage A pre-converted JSONL — our own schema (ts_epoch + source_file keys)
-        if sample.strip().startswith("{") and '"ts_epoch"' in sample and '"source_file"' in sample:
-            return self._parse_stage_a_jsonl(content, str(path))
 
         # Linux audit log format: type=XXXX msg=audit(...)
         first_line = sample.splitlines()[0] if sample.splitlines() else ""
@@ -437,7 +443,12 @@ class LogNormalizer:
         hostname, service, pid, level, message, source_file, raw, extracted).
         We deserialise each line and pass values directly through _make_entry
         so stats are updated and the cache format stays consistent.
+
+        When Stage A couldn't identify the service (stored as "unknown"), we
+        infer it from the source file path so that service-scoped IOC rules
+        (service: apache2, service: nginx, …) can evaluate these entries.
         """
+        inferred_svc = _infer_service_from_path(source)
         entries = []
         for line in content.splitlines():
             line = line.strip()
@@ -450,6 +461,8 @@ class LogNormalizer:
                 continue
 
             svc = str(obj.get("service", "unknown"))[:64]
+            if svc == "unknown" and inferred_svc:
+                svc = inferred_svc
             lvl = str(obj.get("level", "info"))
             entry = _make_entry(
                 timestamp=obj.get("timestamp"),
@@ -539,6 +552,38 @@ class LogNormalizer:
 # ------------------------------------------------------------------
 # Module-level helpers
 # ------------------------------------------------------------------
+
+def _infer_service_from_path(source: str) -> str:
+    """Infer a service label from a log file path.
+
+    Stage A's generic converter assigns service='unknown' to log formats it
+    doesn't recognise (e.g. Apache combined access log, nginx error log).
+    This function maps the file path back to the expected service label so
+    that IOC rules with a service filter can evaluate those entries.
+
+    Returns an empty string when no inference is possible (caller keeps the
+    original value in that case).
+    """
+    s = source.lower()
+    # Apache / httpd
+    if "apache2" in s or "httpd" in s or "apache" in s:
+        if "error" in s:
+            return "apache2_error"
+        return "apache2"
+    # Nginx
+    if "nginx" in s:
+        if "error" in s:
+            return "nginx_error"
+        return "nginx"
+    # Common auth / system logs
+    if "auth.log" in s or "var_log_auth" in s:
+        return "sshd"
+    if "secure" in s and "var_log" in s:
+        return "sshd"
+    if "syslog" in s or "messages" in s:
+        return "syslog"
+    return ""
+
 
 def _make_entry(
     timestamp: Optional[str],
